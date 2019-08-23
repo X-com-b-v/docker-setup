@@ -1,0 +1,91 @@
+#!/bin/bash
+
+devctl_download() {
+    DOWNLOADLIST=$(curl -s http://devbuilder.o.xotap.nl:8095/list.txt)
+    if [ ! -d ".images" ]; then mkdir .images; fi
+    for image in $DOWNLOADLIST; do
+        if [ "$image" != "" ]; then
+            curl -s "http://devbuilder.o.xotap.nl:8095/$image.tar" | docker load
+        fi
+    done
+}
+
+devctl_removeall() {
+    docker kill $(docker ps -q -f name=docker)
+    docker rm $(docker ps -a -q -f name=docker)
+    docker rmi $(docker images "docker*" -q)
+}
+
+
+
+devctl_up() {
+    docker-compose up -d
+}
+
+case "$1" in
+    devfullbuild)
+	devctl_removeall
+        docker-compose build
+        ;;
+    devexport)
+        rm -Rf images
+        mkdir images
+        : > images/list.txt
+        for name in `docker images --format='{{.Repository}}' | grep docker`; do
+            echo "Exporting: $name"
+            docker save "$name" > images/$name.tar
+            printf "$name\n" >> images/list.txt
+        done
+        ;;
+    devserver)
+	docker kill devhost
+	docker rm devhost
+	docker run -d -p 0.0.0.0:8095:80 --restart=always --name devhost -v `pwd`/images:/www fnichol/uhttpd
+	;;
+    removeall)
+        devctl_removeall
+        ;;
+    download)
+        devctl_download
+        ;;
+    fastupdate)
+        git pull
+        devctl_removeall
+        devctl_download
+        devctl_up
+        ;;
+    update)
+        devctl_removeall
+        sudo ./install
+        devctl_download
+        devctl_up
+        ;;
+    updatesingle)
+        if [ ! -z "$2" ]; then
+            curl -s "http://devbuilder.o.xotap.nl:8095/$2.tar" | docker load
+        fi
+        ;;
+    nginxrestart)
+        docker-compose kill nginx
+        docker-compose start nginx
+        ;;
+    apacherestart)
+        docker-compose kill apache24 apachephp56 apachephp70 apachephp71 apachephp72 apachephp73 nginx
+        docker-compose start apache24 apachephp56 apachephp70 apachephp71 apachephp72 apachephp73 nginx
+        ;;
+    up)
+        devctl_up
+        ;;
+    restart)
+        docker-compose kill
+        docker-compose start
+        ;;
+    kill)
+        docker-compose kill
+        ;;
+    *)
+        echo "Usage: ./devctl {up|restart|kill|update|fastupdate|nginxrestart|apacherestart|removeall|download|devfullbuild|devexport|devserver}"
+        exit 1
+esac
+
+exit 0

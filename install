@@ -1,0 +1,97 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root, use sudo"
+  exit
+fi
+
+if [ ! -f "/etc/xcomuser" ]; then
+  echo "Creating /etc/xcomuser file"
+  echo $SUDO_USER > /etc/xcomuser
+  #echo "Please create /etc/xcomuser file"
+  #exit
+fi
+
+echo "Please enter the directory you want to install base to (without trailing slash)"
+read installdir
+echo "Installdir set to $installdir"
+
+if [ ! -d $installdir ]; then
+  mkdir -p $installdir
+fi
+
+apt update
+apt -y upgrade
+# install docker dependencies
+DEBIAN_FRONTEND=noninteractive apt -y -q install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates
+# removed parted, xfsprogs, ntpdate
+# exim does not come with ubuntu default install
+#apt -y purge exim4 exim4-base exim4-config exim4-daemon-light && apt-get -y autoremove
+
+if [ ! -f /usr/bin/docker ] && [ ! -f /usr/local/bin/docker-compose ]; then
+  echo "If you have not downloaded docker and docker-compose yet, please do so first."
+  echo "https://docs.docker.com/install/"
+  exit
+fi
+
+#if [ -f /usr/bin/docker ]; then
+#  docker -v | grep '\-ce'
+#  if [ $? != 0 ]; then
+#    /etc/init.d/docker stop
+#    rm -Rf /home/$USER/data/docker
+#    apt-get -y remove docker.io && apt-get -y purge docker.io && apt-get autoremove
+#  fi
+#fi
+
+
+#if ! grep -q '^web:' /etc/passwd; then
+  # Set  the  gecos field for the new entry generated. adduser will not ask for finger information if this option is given.
+  # adduser --disabled-password --gecos "" web
+  #useradd -r -s /bin/false web
+#fi
+
+if [ ! -d "$installdir/data/shared/sites" ]; then
+  mkdir -p $installdir/data/shared/sites
+  #chown -R web.web $installdir/data/shared/sites
+fi
+
+if [ ! -d "$installdir/data/shared/sockets" ]; then
+  mkdir -p $installdir/data/shared/sockets
+fi
+
+if [ ! -d "$installdir/data/home" ]; then
+  mkdir -p $installdir/data/home
+fi
+
+paths=( "php54" "php56" "php70" "php71" "php72" "php73")
+for path in "${paths[@]}"
+do : 
+  if [ ! -d "$installdir/data/home/$path" ]; then
+    cp -R /etc/skel $installdir/data/home/$path
+  fi 
+  if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
+    echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
+  fi
+  if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
+    echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
+  fi
+done
+
+# chown -R web.web $installdir/data/home/*
+
+
+# TODO if this git clone does not work then just use the files in this folder
+if [ ! -d "$installdir/docker" ]; then
+  mkdir -p $installdir/docker
+  echo "Setting up correct values for docker compose based on your given installdir"
+  sed -i -e 's:installdirectory:'"$installdir"':g' docker-compose.yml
+  cp -r . $installdir/docker/
+  # git clone https://xcom-ro:xco5991@bitbucket.org/X-com/devserver.git $installdir/docker
+fi
+
+chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
+# rm $installdir/data/shared/sites/*/.siteconfig/*example*
+
+echo "Changing directory to $installdir/docker"
+cd $installdir/docker
+echo "Installation prepared, please run docker-compose up -d"
