@@ -36,6 +36,10 @@ Open a web browser and browse to `magento2.mycha.o.xotap.nl`. This can of course
 
 ## Run commands
 In order to run commands, you could access the docker containers directly and use `php` commands there. I like to have all php software on my local machine so I don't have to run all commands from docker. To do this, you will need all [Magento's required php dependencies](https://devdocs.magento.com/guides/v2.3/install-gde/system-requirements-tech.html#required-php-extensions) on your machine.
+Or copy paste the following:
+```bash
+$ sudo apt install php7.2 php7.2-common php7.2-gd php7.2-mysql php7.2-curl php7.2-intl php7.2-xsl php7.2-mbstring php7.2-zip php7.2-bcmath php7.2-iconv php7.2-soap phpunit
+```
 
 
 ### Run commands in container

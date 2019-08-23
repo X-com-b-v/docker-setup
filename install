@@ -31,24 +31,9 @@ DEBIAN_FRONTEND=noninteractive apt -y -q install curl git software-properties-co
 if [ ! -f /usr/bin/docker ] && [ ! -f /usr/local/bin/docker-compose ]; then
   echo "If you have not downloaded docker and docker-compose yet, please do so first."
   echo "https://docs.docker.com/install/"
+  echo "https://docs.docker.com/compose/install/"
   exit
 fi
-
-#if [ -f /usr/bin/docker ]; then
-#  docker -v | grep '\-ce'
-#  if [ $? != 0 ]; then
-#    /etc/init.d/docker stop
-#    rm -Rf /home/$USER/data/docker
-#    apt-get -y remove docker.io && apt-get -y purge docker.io && apt-get autoremove
-#  fi
-#fi
-
-
-#if ! grep -q '^web:' /etc/passwd; then
-  # Set  the  gecos field for the new entry generated. adduser will not ask for finger information if this option is given.
-  # adduser --disabled-password --gecos "" web
-  #useradd -r -s /bin/false web
-#fi
 
 if [ ! -d "$installdir/data/shared/sites" ]; then
   mkdir -p $installdir/data/shared/sites
@@ -65,10 +50,10 @@ fi
 
 paths=( "php54" "php56" "php70" "php71" "php72" "php73")
 for path in "${paths[@]}"
-do : 
+do :
   if [ ! -d "$installdir/data/home/$path" ]; then
     cp -R /etc/skel $installdir/data/home/$path
-  fi 
+  fi
   if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
     echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
   fi
@@ -77,10 +62,6 @@ do :
   fi
 done
 
-# chown -R web.web $installdir/data/home/*
-
-
-# TODO if this git clone does not work then just use the files in this folder
 if [ ! -d "$installdir/docker" ]; then
   mkdir -p $installdir/docker
   echo "Setting up correct values for docker compose based on your given installdir"
@@ -90,7 +71,6 @@ if [ ! -d "$installdir/docker" ]; then
 fi
 
 chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
-# rm $installdir/data/shared/sites/*/.siteconfig/*example*
 
 echo "Changing directory to $installdir/docker"
 cd $installdir/docker
