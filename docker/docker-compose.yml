@@ -10,8 +10,8 @@ services:
     network_mode: "host"
     volumes:
       - ./nginx/site-templates:/etc/nginx/site-templates:ro
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/projects/xcom2/data/shared/sites:/data/shared/sites
+      - /home/mycha/projects/xcom2/data/shared/sockets:/data/shared/sockets
       - /etc/xcomuser:/etc/xcomuser:ro
   #  links:
   #    - apache24:apache
@@ -21,10 +21,10 @@ services:
     restart: always
     network_mode: "host"
     volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
+      - /home/mycha/projects/xcom2/data/shared/sites:/data/shared/sites
       - ./php56/php.pool.d:/etc/php/5.6/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/home/php56:/home/web
+      - /home/mycha/projects/xcom2/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/projects/xcom2/data/home/php56:/home/web
       - /etc/xcomuser:/etc/xcomuser:ro
     entrypoint: /run.sh
     environment:
@@ -35,10 +35,10 @@ services:
     restart: always
     network_mode: "host"
     volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
+      - /home/mycha/projects/xcom2/data/shared/sites:/data/shared/sites
       - ./php70/php.pool.d:/etc/php/7.0/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/home/php70:/home/web
+      - /home/mycha/projects/xcom2/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/projects/xcom2/data/home/php70:/home/web
       - /etc/xcomuser:/etc/xcomuser:ro
     user: web
     working_dir: /data/shared/sites
@@ -59,10 +59,10 @@ services:
     restart: always
     network_mode: "host"
     volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
+      - /home/mycha/projects/xcom2/data/shared/sites:/data/shared/sites
       - ./php71/php.pool.d:/etc/php/7.1/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/home/php71:/home/web
+      - /home/mycha/projects/xcom2/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/projects/xcom2/data/home/php71:/home/web
       - /etc/xcomuser:/etc/xcomuser:ro
     user: web
     working_dir: /data/shared/sites
@@ -77,10 +77,10 @@ services:
     restart: always
     network_mode: "host"
     volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
+      - /home/mycha/projects/xcom2/data/shared/sites:/data/shared/sites
       - ./php72/php.pool.d:/etc/php/7.2/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/home/php72:/home/web
+      - /home/mycha/projects/xcom2/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/projects/xcom2/data/home/php72:/home/web
       - /etc/xcomuser:/etc/xcomuser:ro
     user: web
     working_dir: /data/shared/sites
@@ -91,10 +91,10 @@ services:
     restart: always
     network_mode: "host"
     volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
+      - /home/mycha/projects/xcom2/data/shared/sites:/data/shared/sites
       - ./php73/php.pool.d:/etc/php/7.3/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/home/php73:/home/web
+      - /home/mycha/projects/xcom2/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/projects/xcom2/data/home/php73:/home/web
       - /etc/xcomuser:/etc/xcomuser:ro
     user: web
     working_dir: /data/shared/sites
@@ -109,7 +109,7 @@ services:
   #  ports:
   #    - 3306:3306
     volumes:
-      - installdirectory/data/mysql57:/var/lib/mysql
+      - /home/mycha/projects/xcom2/data/mysql57:/var/lib/mysql
       - ./mysql57/conf.d:/etc/mysql/conf.d:ro
 
   mysql80:
@@ -119,7 +119,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=xcom
     volumes:
-      - installdirectory/data/mysql80:/var/lib/mysql
+      - /home/mycha/projects/xcom2/data/mysql80:/var/lib/mysql
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
 
   redis28:
@@ -129,7 +129,7 @@ services:
   #  ports:
   #    - 6379:6379      
     volumes:
-      - installdirectory/data/redis28:/data
+      - /home/mycha/projects/xcom2/data/redis28:/data
 
   samba:
     build: samba
@@ -141,7 +141,7 @@ services:
   #    - 445:445
   #    - "445:445/udp"
     volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
+      - /home/mycha/projects/xcom2/data/shared/sites:/data/shared/sites
 
   mongo:
     image: mongo:3.4-jessie
@@ -150,7 +150,7 @@ services:
   #  ports:
   #    - "27017:27017"
     volumes:
-      - installdirectory/data/mongo:/data/db
+      - /home/mycha/projects/xcom2/data/mongo:/data/db
 
   mailtrap:
     build: mailtrap
