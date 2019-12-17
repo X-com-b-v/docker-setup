@@ -64,9 +64,9 @@ done
 
 if [ ! -d "$installdir/docker" ]; then
   mkdir -p $installdir/docker
-  echo "Setting up correct values for docker compose based on your given installdir"
-  sed -i -e 's:installdirectory:'"$installdir"':g' docker/docker-compose.yml
   cp -r ./docker/* $installdir/docker/
+  echo "Setting up correct values for docker compose based on your given installdir"
+  sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
 
 chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
