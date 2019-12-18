@@ -18,6 +18,13 @@ if [ ! -d $installdir ]; then
   mkdir -p $installdir
 fi
 
+if [ ! -f /usr/local/bin/enter ]; then
+  cp dep/enter /usr/local/bin/enter
+  chmod +x /usr/local/bin/enter
+fi
+
+## updates
+
 echo "Running updates"
 apt -qq update 
 # apt -qq -y upgrade // a bit heavy, especially if there are packages you don't want to upgrade
@@ -27,6 +34,10 @@ DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-c
 # exim does not come with ubuntu default install
 #apt -y purge exim4 exim4-base exim4-config exim4-daemon-light && apt-get -y autoremove
 
+## end updates
+
+## docker and docker-compose
+
 if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
   echo "You have not downloaded docker or docker-compose."
   read -p "Do you want me to install both for you? [y/N] " -n 1 -r
@@ -34,6 +45,7 @@ if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     if [ ! -f /usr/bin/docker ]; then
+      # not sure if this will work, untested
       echo "Installing docker"
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
       apt-key fingerprint 0EBFCD88
@@ -64,10 +76,9 @@ if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
   fi
 fi
 
-if [ ! -f /usr/local/bin/enter ]; then
-  cp dep/enter /usr/local/bin/enter
-  chmod +x /usr/local/bin/enter
-fi
+## end docker and docker-compose
+
+## prepare paths
 
 if [ ! -d "$installdir/data/shared/sites" ]; then
   mkdir -p $installdir/data/shared/sites
@@ -101,6 +112,10 @@ if [ ! -d "$installdir/docker" ]; then
   cp -r ./docker/* $installdir/docker/
 fi
 
+## end prepare paths
+
+## gitconfig
+
 if [ ! -d "$installdir/docker/dependencies" ]; then
   mkdir -p $installdir/docker/dependencies
   cp ./dep/gitconfig $installdir/docker/dependencies/
@@ -119,6 +134,15 @@ do :
   cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
 done
 
+# cleanup as there's no need for this anymore
+if [ -d "$installdir/docker/dependencies" ]; then
+  rm -r $installdir/docker/dependencies
+fi
+
+## end gitconfig
+
+## ssh
+
 if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
   read -p "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this? [y/N] " -n 1 -r
   echo    # (optional) move to a new line
@@ -129,6 +153,10 @@ if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
       if [ ! -d $installdir/data/home/$path/.ssh ]; then
         mkdir $installdir/data/home/$path/.ssh
       fi
+      # also use ssh config if found
+      if [ -f "/home/$SUDO_USER/.ssh/config" ]; then
+        cp /home/$SUDO_USER/.ssh/config $installdir/data/home/$path/.ssh/
+      fi
       cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
       cp /home/$SUDO_USER/.ssh/id_rsa.pub $installdir/data/home/$path/.ssh/
       chmod 400 $installdir/data/home/$path/.ssh/*
@@ -136,10 +164,9 @@ if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
   fi
 fi
 
-# cleanup as there's no need for this anymore
-if [ -d "$installdir/docker/dependencies" ]; then
-  rm -r $installdir/docker/dependencies
-fi
+## end ssh
+
+## docker compose
 
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
@@ -155,6 +182,8 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
   echo "Setting up correct values for docker-compose based on your given installdir"
   sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
+
+## end docker compose
 
 chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
 chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
