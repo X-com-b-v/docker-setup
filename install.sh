@@ -29,33 +29,35 @@ DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-c
 # exim does not come with ubuntu default install
 #apt -y purge exim4 exim4-base exim4-config exim4-daemon-light && apt-get -y autoremove
 
-if [ ! -f /usr/bin/docker ] && [ ! -f /usr/local/bin/docker-compose ]; then
-
-  echo "If you have not downloaded docker and docker-compose."
+if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
+  echo "You have not downloaded docker or docker-compose."
   read -p "Do you want me to install both for you? [y/N] " -n 1 -r
   echo    # (optional) move to a new line
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
-    echo "Installing docker"
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    apt-key fingerprint 0EBFCD88
+    if [ ! -f /usr/bin/docker ]; then
+      echo "Installing docker"
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+      apt-key fingerprint 0EBFCD88
 
-    # eoan isn't supported yet
-    if [ "$(lsb_release -cs)" = "eoan" ]; then
-      RELEASE="disco"
-    else
-      RELEASE=$(lsb_release -cs)
+      # eoan isn't supported yet
+      if [ "$(lsb_release -cs)" = "eoan" ]; then
+        RELEASE="disco"
+      else
+        RELEASE=$(lsb_release -cs)
+      fi
+
+      add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+      $RELEASE \
+      stable"
+      apt -qq update
+      apt -y install docker-ce
     fi
-
-    add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-    $RELEASE \
-    stable"
-    apt -qq update
-    apt -y install docker-ce
-
-    echo "Installing docker-compose"
-    curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    if [ ! -f /usr/local/bin/docker-compose ]; then
+      echo "Installing docker-compose"
+      curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    fi
   else
     echo "You can download both at:"
     echo "https://docs.docker.com/install/"
