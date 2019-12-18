@@ -88,9 +88,9 @@ do :
 done
 
 # cleanup as there's no need for this anymore
-if [ -d $installdir/docker/dependencies ]; then
+if [ -d "$installdir/docker/dependencies" ]; then
   rm -r $installdir/docker/dependencies
-]
+fi
 
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
@@ -102,7 +102,7 @@ then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
 fi
 
-if [ -f $installdir/docker/docker-compose.yml ]; then
+if [ -f "$installdir/docker/docker-compose.yml" ]; then
   echo "Setting up correct values for docker-compose based on your given installdir"
   sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
