@@ -69,6 +69,13 @@ if [ ! -d "$installdir/docker" ]; then
   sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
 
+read -p "Do you want docker containers to restart automatically? [y/N] " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
+fi
+
 chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
 
 # set max_map_count for sonarqube

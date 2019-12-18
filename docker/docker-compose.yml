@@ -3,7 +3,7 @@ version: "2"
 services:
   nginx:
     build: nginx
-    restart: always
+    # restart: always
   #  ports:
   #    - 80:80
   #    - 443:443
@@ -18,7 +18,7 @@ services:
 
   php56:
     build: php56
-    restart: always
+    # restart: always
     network_mode: "host"
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
@@ -32,7 +32,7 @@ services:
 
   php70:
     build: php70
-    restart: always
+    # restart: always
     network_mode: "host"
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
@@ -56,7 +56,7 @@ services:
 
   php71:
     build: php71
-    restart: always
+    # restart: always
     network_mode: "host"
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
@@ -74,7 +74,7 @@ services:
 
   php72:
     build: php72
-    restart: always
+    # restart: always
     network_mode: "host"
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
@@ -88,7 +88,7 @@ services:
 
   php73:
     build: php73
-    restart: always
+    # restart: always
     network_mode: "host"
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
@@ -102,7 +102,7 @@ services:
 
   mysql57:
     image: mysql:5.7
-    restart: always
+    # restart: always
     network_mode: "host"
     environment:
       - MYSQL_ROOT_PASSWORD=xcom
@@ -114,7 +114,7 @@ services:
 
   mysql80:
     image: mysql:8.0
-    restart: always
+    # restart: always
     network_mode: "host"
     environment:
       - MYSQL_ROOT_PASSWORD=xcom
@@ -133,7 +133,7 @@ services:
 
   samba:
     build: samba
-    restart: always
+    # restart: always
     network_mode: "host"
   #  ports:
   #    - "138:138/udp"
@@ -145,7 +145,7 @@ services:
 
   mongo:
     image: mongo:3.4-jessie
-    restart: always
+    # restart: always
     network_mode: "host"
   #  ports:
   #    - "27017:27017"
@@ -154,7 +154,7 @@ services:
 
   mailtrap:
     build: mailtrap
-    restart: always
+    # restart: always
     network_mode: "host"
   #  ports:
   #    - 8085:8085
@@ -162,7 +162,7 @@ services:
 
   elasticsearch:
     image: elasticsearch:6.8.2
-    restart: always
+    # restart: always
     network_mode: "host"
     ports:
       - 9200:9200
@@ -172,6 +172,7 @@ services:
 
   sonarqube:
     image: sonarqube
+    # restart: always
     ports:
       - 9000:9000
     networks:
@@ -187,6 +188,7 @@ services:
 
   db:
     image: postgres
+    # restart: always
     ports:
       - 5432:5432
     networks:
