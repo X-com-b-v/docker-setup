@@ -1,0 +1,39 @@
+[user]
+	email = user@email.com
+	name = username
+[alias]
+  bw = blame -w -M
+  c = commit
+  b = rev-parse --abbrev-ref HEAD
+  commend = commit --amend --no-edit
+  cc = commit --all --amend --no-edit
+  ca = commit --all
+  co = checkout
+  cb = "!f() { git checkout `git log --until=\"$*\" -1 --format=%h`; } ; f"
+  s = status --short
+  d = diff
+  dc = diff --cached
+  dw = diff --word-diff=color
+  l = log
+  a = add
+  af = add -f
+  au = add -u # stages modified and deleted, without new
+  p = push
+  pf = push -f # force push, useful after using rebase
+  ss = show -1 --format=%B--stat
+  sw = show -1 --format=%B--stat --word-diff=color
+  whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+  lg = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s [%N] %Cgreen(%ar)%Creset' --date=relative
+  lgd = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s [%N] %Cgreen(%ar)%Creset' --date=default
+  lgm = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s [%N] %Cgreen(%ar)%Creset' --date=relative --author=user@email.com
+  abbr = "!sh -c 'git rev-list --all | grep ^$1 | while read commit; do git --no-pager log -n1 --pretty=format:\"%H %ci %an %s%n\" $commit; done' -"
+	paul = pull
+[color]
+  # ui always will result in colors being in patch (git diff > diff.patch) and then when using git apply it will throw errors.
+  # ui auto will show colors in terminal but not when written to file
+  # ui = always
+  ui = auto
+[branch]
+  autosetuprebase = remote
+[push]
+  default = simple

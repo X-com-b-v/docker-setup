@@ -54,7 +54,7 @@ if [ ! -d "$installdir/data/home" ]; then
   mkdir -p $installdir/data/home
 fi
 
-paths=( "php54" "php56" "php70" "php71" "php72" "php73")
+paths=( "php56" "php70" "php71" "php72" "php73")
 for path in "${paths[@]}"
 do :
   if [ ! -d "$installdir/data/home/$path" ]; then
@@ -72,6 +72,25 @@ if [ ! -d "$installdir/docker" ]; then
   mkdir -p $installdir/docker
   cp -r ./docker/* $installdir/docker/
 fi
+
+
+echo "Please enter your name"
+read name
+sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
+
+echo "Please enter your e-mail address"
+read email
+sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
+
+for path in "${paths[@]}"
+do :
+  cp $installdir/docker/dependencies/gitconfig $installdir/docker/$path/gitconfig
+done
+
+# cleanup as there's no need for this anymore
+if [ -d $installdir/docker/dependencies ]; then
+  rm -r $installdir/docker/dependencies
+]
 
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml

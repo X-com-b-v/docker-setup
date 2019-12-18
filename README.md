@@ -45,6 +45,11 @@ $ sudo apt install php7.2 php7.2-common php7.2-gd php7.2-mysql php7.2-curl php7.
 ### Run commands in container
 To execute commands on the commandline you need to login a specific PHP container. Otherwise no php executable will be available. Here you can also use/install npm, bower, grunt, gulp composer e.t.c.
 
+Easiest is to use the `enter` script which is placed in `/usr/local/bin`:
+```bash
+enter php72
+```
+
 From within the installdir/docker directory:
 
 ```bash
