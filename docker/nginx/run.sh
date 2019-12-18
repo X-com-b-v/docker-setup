@@ -28,7 +28,7 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json"
     elif [ -f "/data/shared/sites/$SITEBASENAME/bin/magento" ]; then
         # Lijkt op magento 2
-        echo '{"template":"magento2","webserver":"nginx","php_version":"7.1"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        echo '{"template":"magento2","webserver":"nginx","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
         cat << EOF > "/data/shared/sites/$SITEBASENAME/.siteconfig/params.conf.example"
 fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://magento2.customer.com.$XCOMUSER.o.xotap.nl/;
 fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://magento2.customer.com.$XCOMUSER.o.xotap.nl/;
@@ -42,8 +42,8 @@ fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL http
 fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN magento2.customer.be.$XCOMUSER.o.xotap.nl;
 EOF
 
-    elif [ -d "/data/shared/sites/$SITEBASENAME/app/etc" ]; then
-        # Lijkt op magento
+    elif [ -f "/data/shared/sites/$SITEBASENAME/app/etc/local.xml" ]; then
+        # Lijkt op magento1
         echo '{"template":"magento","webserver":"nginx","php_version":"7.0"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
     elif [ -f "/data/shared/sites/$SITEBASENAME/src/Kernel.php" ]; then
         # Lijkt symfony 4

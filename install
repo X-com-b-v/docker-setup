@@ -20,10 +20,11 @@ if [ ! -d $installdir ]; then
   mkdir -p $installdir
 fi
 
-apt update
-apt -y upgrade
+echo "Running updates"
+apt -qq update 
+# apt -qq -y upgrade // a bit heavy, especially if there are packages you don't want to upgrade
 # install docker dependencies
-DEBIAN_FRONTEND=noninteractive apt -y -q install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates
+DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates
 # removed parted, xfsprogs, ntpdate
 # exim does not come with ubuntu default install
 #apt -y purge exim4 exim4-base exim4-config exim4-daemon-light && apt-get -y autoremove
@@ -70,9 +71,10 @@ done
 if [ ! -d "$installdir/docker" ]; then
   mkdir -p $installdir/docker
   cp -r ./docker/* $installdir/docker/
-  echo "Setting up correct values for docker compose based on your given installdir"
-  sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
+
+# replace existing docker compose with new to update settings after a second install
+cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 
 read -p "Do you want docker containers to restart automatically? [y/N] " -n 1 -r
 echo    # (optional) move to a new line
@@ -81,7 +83,13 @@ then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
 fi
 
+if [ -f $installdir/docker/docker-compose.yml ]; then
+  echo "Setting up correct values for docker-compose based on your given installdir"
+  sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
+fi
+
 chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
+chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
 
 # set max_map_count for sonarqube
 sysctl -w vm.max_map_count=262144
