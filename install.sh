@@ -73,6 +73,10 @@ if [ ! -d "$installdir/docker" ]; then
   cp -r ./docker/* $installdir/docker/
 fi
 
+if [ ! -d "$installdir/docker/dependencies" ]; then
+  mkdir -p $installdir/docker/dependencies
+  cp ./docker/dependencies/gitconfig $installdir/docker/dependencies/
+fi
 
 echo "Please enter your name"
 read name
@@ -84,8 +88,25 @@ sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitcon
 
 for path in "${paths[@]}"
 do :
-  cp $installdir/docker/dependencies/gitconfig $installdir/docker/$path/gitconfig
+  cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
 done
+
+if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
+  read -p "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this? [y/N] " -n 1 -r
+  echo    # (optional) move to a new line
+  if [[ $REPLY =~ ^[Yy]$ ]]
+  then
+    for path in "${paths[@]}"
+    do :
+      if [ ! -d $installdir/data/home/$path/.ssh ]; then
+        mkdir $installdir/data/home/$path/.ssh
+      fi
+      cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
+      cp /home/$SUDO_USER/.ssh/id_rsa.pub $installdir/data/home/$path/.ssh/
+      chmod 400 $installdir/data/home/$path/.ssh
+    done
+  fi
+fi
 
 # cleanup as there's no need for this anymore
 if [ -d "$installdir/docker/dependencies" ]; then

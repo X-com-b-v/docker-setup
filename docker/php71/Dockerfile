@@ -23,9 +23,6 @@ RUN echo 127.0.0.1 > /etc/nullmailer/remotes
 ADD run.sh /run.sh
 RUN chmod +x /run.sh
 
-# gitconfig will be copied to build folder via install.sh
-COPY gitconfig /home/web/.gitconfig
-
 RUN sed -i '/SCRIPTNAME.*$/aexport XCOM_SERVERUSER=`cat /etc/xcomuser`' /etc/init.d/php7.1-fpm && sed -i '/SCRIPTNAME.*$/aexport XCOM_SERVERTYPE=dev' /etc/init.d/php7.1-fpm
 RUN sed -i 's/^;user_ini.cache_ttl.*/user_ini.cache_ttl=5/g' /etc/php/*/*/php.ini
 
