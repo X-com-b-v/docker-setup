@@ -8,8 +8,6 @@ fi
 if [ ! -f "/etc/xcomuser" ]; then
   echo "Creating /etc/xcomuser file"
   echo $SUDO_USER > /etc/xcomuser
-  #echo "Please create /etc/xcomuser file"
-  #exit
 fi
 
 echo "Please enter the directory you want to install base to (without trailing slash)"
@@ -105,14 +103,14 @@ fi
 
 if [ ! -d "$installdir/docker/dependencies" ]; then
   mkdir -p $installdir/docker/dependencies
-  cp ./docker/dependencies/gitconfig $installdir/docker/dependencies/
+  cp ./dep/gitconfig $installdir/docker/dependencies/
 fi
 
-echo "Please enter your name"
+echo "[gitconfig] Please enter your name"
 read name
 sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
 
-echo "Please enter your e-mail address"
+echo "[gitconfig] Please enter your e-mail address"
 read email
 sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
 
@@ -133,7 +131,7 @@ if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
       fi
       cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
       cp /home/$SUDO_USER/.ssh/id_rsa.pub $installdir/data/home/$path/.ssh/
-      chmod 400 $installdir/data/home/$path/.ssh
+      chmod 400 $installdir/data/home/$path/.ssh/*
     done
   fi
 fi
