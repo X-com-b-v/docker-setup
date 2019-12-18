@@ -35,6 +35,11 @@ if [ ! -f /usr/bin/docker ] && [ ! -f /usr/local/bin/docker-compose ]; then
   exit
 fi
 
+if [ ! -f /usr/local/bin/enter ]; then
+  cp dep/enter /usr/local/bin/enter
+  chmod +x /usr/local/bin/enter
+fi
+
 if [ ! -d "$installdir/data/shared/sites" ]; then
   mkdir -p $installdir/data/shared/sites
   #chown -R web.web $installdir/data/shared/sites
