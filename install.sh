@@ -94,6 +94,13 @@ if [ ! -d "$installdir/data/home" ]; then
   mkdir -p $installdir/data/home
 fi
 
+read -p "[git hooks] Skip configurator versioning post-checkout / post-merge? [y/N] " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+  SKIP_CONFIGURATOR=1
+fi
+
 paths=( "php56" "php70" "php71" "php72" "php73")
 for path in "${paths[@]}"
 do :
@@ -105,6 +112,9 @@ do :
   fi
   if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
     echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
+  fi
+  if [ $SKIP_CONFIGURATOR = "1" ]; then
+    echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
   fi
 done
 

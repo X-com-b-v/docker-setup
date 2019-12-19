@@ -122,26 +122,26 @@ services:
       - installdirectory/data/mysql80:/var/lib/mysql
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
 
-  redis28:
-    image: redis:2.8
+  redis:
+    image: redis:5.0
     restart: always
     network_mode: "host"
   #  ports:
   #    - 6379:6379      
     volumes:
       - installdirectory/data/redis28:/data
-
-  samba:
-    build: samba
+      
+#  samba:
+#    build: samba
     # restart: always
-    network_mode: "host"
+#    network_mode: "host"
   #  ports:
   #    - "138:138/udp"
   #    - 139:139
   #    - 445:445
   #    - "445:445/udp"
-    volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
+#    volumes:
+#      - installdirectory/data/shared/sites:/data/shared/sites
 
   mongo:
     image: mongo:3.4-jessie

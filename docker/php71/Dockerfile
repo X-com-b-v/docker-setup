@@ -26,6 +26,8 @@ RUN chmod +x /run.sh
 RUN sed -i '/SCRIPTNAME.*$/aexport XCOM_SERVERUSER=`cat /etc/xcomuser`' /etc/init.d/php7.1-fpm && sed -i '/SCRIPTNAME.*$/aexport XCOM_SERVERTYPE=dev' /etc/init.d/php7.1-fpm
 RUN sed -i 's/^;user_ini.cache_ttl.*/user_ini.cache_ttl=5/g' /etc/php/*/*/php.ini
 
+COPY conf.d/xdebug.ini /etc/php/7.1/mods-available/
+
 USER web
 WORKDIR /data/sites
 
