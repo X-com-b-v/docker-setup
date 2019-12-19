@@ -38,13 +38,14 @@ DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-c
 
 ## docker and docker-compose
 
+
 if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
   echo "You have not downloaded docker or docker-compose."
   read -p "Do you want me to install both for you? [y/N] " -n 1 -r
   echo    # (optional) move to a new line
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
-    if [ ! -f /usr/bin/docker ]; then
+    if [ ! -f /usr/bin/docker && -n "$(uname -v | grep Ubuntu)" ]; then
       # not sure if this will work, untested
       echo "Installing docker"
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -

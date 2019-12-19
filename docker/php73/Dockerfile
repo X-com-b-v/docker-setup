@@ -2,7 +2,7 @@
 FROM debian:stretch
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
-RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget
+RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget unzip
 RUN sed -i '/nl_NL/ s/^# //g' /etc/locale.gen && sed -i '/en_US/ s/^# //g' /etc/locale.gen && /usr/sbin/locale-gen
 RUN useradd -u 1000 -s /bin/bash web
 RUN echo 'web ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
