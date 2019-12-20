@@ -17,6 +17,9 @@ if ! grep -q "export XCOM_SERVERUSER" /home/web/.bashrc; then
   echo "export XCOM_SERVERUSER=`cat /etc/xcomuser`" >> /home/web/.bashrc
 fi
 
+if [ ! -f "/home/web/.git-completion.bash" ]; then
+  bash /home/web/git-autocomplete.sh
+fi
 
 if [ ! -d "/home/web/bin" ]; then
   mkdir -p /home/web/bin

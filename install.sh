@@ -122,6 +122,10 @@ do :
   if [ $SKIP_CONFIGURATOR = "1" ]; then
     echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
   fi
+  if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
+    cp dep/git-autocomplete.sh $installdir/data/home/$path/
+    chmod +x $installdir/data/home/$path/git-autocomplete.sh
+  fi
 done
 
 if [ ! -d "$installdir/docker" ]; then
