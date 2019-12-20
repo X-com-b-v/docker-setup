@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 
-if ! groups $USER | grep &>/dev/null '\bdocker\b'; then
-    if [ "$EUID" -ne 0 ]; then
-        echo "Please run as root, use sudo"
-        exit
-    fi
-fi
-
 if [ $# -eq 0 ]; then
     echo "No arguments provided"
     docker ps --format '{{.Names}}'
     exit 1
 fi
 
-docker exec -it "docker_$@_1" /bin/bash
+if ! groups $USER | grep &>/dev/null '\bdocker\b'; then
+    if [ "$EUID" -ne 0 ]; then
+        sudo docker exec -it "docker_$@_1" /bin/bash
+    else
+        docker exec -it "docker_$@_1" /bin/bash
+    fi
+fi
