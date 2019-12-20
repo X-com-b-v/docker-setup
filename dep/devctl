@@ -16,11 +16,15 @@ devctl_removeall() {
     docker rmi $(docker images "docker*" -q)
 }
 
-
+command_exists () {
+    type "$1" &> /dev/null ;
+}
 
 devctl_up() {
     docker-compose up -d
 }
+
+INSTALLPATH=installdirectory/data/shared/sites
 
 cd installdirectory/docker
 case "$1" in
@@ -83,6 +87,23 @@ case "$1" in
         ;;
     kill)
         docker-compose kill
+        ;;
+    hostversions)
+        for path in $INSTALLPATH/* ; do
+            if ! command_exists jq ; then
+                echo "Need jq to run this, please use sudo apt install jq"
+                exit 1
+            fi
+            if [ -d $path/.siteconfig ]; then
+                VHOST=$(basename $path)
+                if [ -f $path/.siteconfig/config.json ] ; then
+                    PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json")
+                elif [ -f $path/.siteconfig/config.json.example ]; then
+                    PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json.example")
+                fi
+                echo "$VHOST -> PHP $PHPVERSION"
+            fi
+        done
         ;;
     *)
         echo "Usage: ./devctl {up|restart|kill|update|fastupdate|nginxrestart|apacherestart|removeall|download|devfullbuild|devexport|devserver}"

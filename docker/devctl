@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# depr
+echo "Deprecated, please use /usr/local/bin/devctl"
+exit 1
+
 devctl_download() {
     DOWNLOADLIST=$(curl -s http://devbuilder.o.xotap.nl:8095/list.txt)
     if [ ! -d ".images" ]; then mkdir .images; fi
