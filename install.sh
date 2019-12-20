@@ -23,6 +23,12 @@ if [ ! -f /usr/local/bin/enter ]; then
   chmod +x /usr/local/bin/enter
 fi
 
+if [ ! -f /usr/local/bin/devctl]; then
+  cp dep/devctl /usr/local/bin/enter
+  sed -i -e sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
+  chmod +x /usr/local/bin/devctl
+fi
+
 ## updates
 
 echo "Running updates"
