@@ -24,7 +24,7 @@ if [ ! -f /usr/local/bin/enter ]; then
 fi
 
 if [ ! -f /usr/local/bin/devctl]; then
-  cp dep/devctl /usr/local/bin/enter
+  cp dep/devctl /usr/local/bin/devctl
   sed -i -e sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
   chmod +x /usr/local/bin/devctl
 fi
