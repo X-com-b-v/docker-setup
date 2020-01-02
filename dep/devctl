@@ -106,7 +106,7 @@ case "$1" in
         done
         ;;
     *)
-        echo "Usage: ./devctl {up|restart|kill|update|fastupdate|nginxrestart|apacherestart|removeall|download|devfullbuild|devexport|devserver}"
+        echo "Usage: ./devctl {up|restart|kill|update|fastupdate|nginxrestart|apacherestart|removeall|download|devfullbuild|devexport|devserver|hostversions}"
         exit 1
 esac
 
