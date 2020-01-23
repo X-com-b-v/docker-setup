@@ -56,14 +56,7 @@ if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
       echo "Installing docker"
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
       apt-key fingerprint 0EBFCD88
-
-      # eoan isn't supported yet
-      if [ "$(lsb_release -cs)" = "eoan" ]; then
-        RELEASE="disco"
-      else
-        RELEASE=$(lsb_release -cs)
-      fi
-
+      RELEASE=$(lsb_release -cs)
       add-apt-repository \
       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
       $RELEASE \
@@ -73,7 +66,7 @@ if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
     fi
     if [ ! -f /usr/local/bin/docker-compose ]; then
       echo "Installing docker-compose"
-      curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      curl -L "https://github.com/docker/compose/releases/download/1.25.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     fi
   else
     echo "You can download both at:"
