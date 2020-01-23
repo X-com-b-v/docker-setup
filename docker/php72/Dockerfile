@@ -16,7 +16,7 @@ RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php7.2-fpm php7.2-cli php7.2-mysql php7.2-gd php7.2-intl php7.2-curl php7.2-xsl php7.2-xdebug php7.2-mbstring php7.2-zip php7.2-soap php7.2-ssh2 php7.2-mongodb php7.2-bcmath php-imagick \
-    build-essential git git-flow subversion bzip2 mysql-client nullmailer python
+    build-essential git git-flow subversion bzip2 mysql-client nullmailer python toilet
 
 RUN echo 127.0.0.1 > /etc/nullmailer/remotes
 
