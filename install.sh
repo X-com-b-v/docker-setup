@@ -204,7 +204,11 @@ chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
 chown -R $SUDO_USER:$SUDO_USER $installdir/docker
 
 # set max_map_count for sonarqube
-sysctl -w vm.max_map_count=262144
+# sysctl -w vm.max_map_count=262144
+# make it permanent
+echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+sysctl -p
+
 
 echo "Installation prepared"
 echo "1: Change directory to $installdir/docker"
