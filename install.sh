@@ -206,8 +206,9 @@ chown -R $SUDO_USER:$SUDO_USER $installdir/docker
 # set max_map_count for sonarqube
 # sysctl -w vm.max_map_count=262144
 # make it permanent
-echo "vm.max_map_count=262144" >> /etc/sysctl.conf
-sysctl -p
+echo "vm.max_map_count=262144" >> /etc/sysctl.d/sonarqube.conf
+echo "fs.inotify.max_user_watches = 524288" >> /etc/sysctl.d/inotify.conf
+sysctl -p --system
 
 
 echo "Installation prepared"
