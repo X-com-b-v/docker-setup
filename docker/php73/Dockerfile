@@ -13,10 +13,14 @@ RUN apt-get update && apt-get -y install apt-transport-https lsb-release ca-cert
 RUN wget -q https://packages.sury.org/php/apt.gpg -O- | apt-key add -
 RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
 
+#yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php7.3-fpm php7.3-cli php7.3-mysql php7.3-gd php7.3-intl php7.3-curl php7.3-xsl php7.3-xdebug php7.3-mbstring php7.3-zip php7.3-soap php7.3-mongodb php7.3-bcmath php-imagick \
-    build-essential git git-flow subversion bzip2 mysql-client nullmailer python
+    build-essential git git-flow subversion bzip2 mysql-client nullmailer python yarn openjdk-8-jre
 
 RUN echo 127.0.0.1 > /etc/nullmailer/remotes
 
