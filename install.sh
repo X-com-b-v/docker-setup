@@ -119,6 +119,9 @@ do :
     cp dep/git-autocomplete.sh $installdir/data/home/$path/
     chmod +x $installdir/data/home/$path/git-autocomplete.sh
   fi
+  if [ ! -f "$installdir/data/home/$path/bin/redis-cli" ]; then
+    cp dep/redis-cli $installdir/data/home/$path/
+  fi
 done
 
 if [ ! -d "$installdir/docker" ]; then
