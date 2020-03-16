@@ -88,6 +88,12 @@ case "$1" in
     kill)
         docker-compose kill
         ;;
+    stop)
+        docker-compose stop ${@:2}
+        ;;
+    start)
+        docker-compose start ${@:2}
+        ;;
     hostversions)
         for path in $INSTALLPATH/* ; do
             if ! command_exists jq ; then
