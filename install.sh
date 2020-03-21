@@ -23,19 +23,19 @@ if [ ! -f /usr/local/bin/enter ]; then
   chmod +x /usr/local/bin/enter
 fi
 
-if [ ! -f /usr/local/bin/devctl]; then
+if [ ! -f /usr/local/bin/devctl ]; then
   cp dep/devctl /usr/local/bin/devctl
-  sed -i -e sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
+  sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
   chmod +x /usr/local/bin/devctl
 fi
 
 ## updates
 
-echo "Running updates"
-apt -qq update 
+#echo "Running updates"
+#apt -qq update 
 # apt -qq -y upgrade // a bit heavy, especially if there are packages you don't want to upgrade
 # install docker dependencies
-DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates
+#DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates
 # removed parted, xfsprogs, ntpdate
 # exim does not come with ubuntu default install
 #apt -y purge exim4 exim4-base exim4-config exim4-daemon-light && apt-get -y autoremove
@@ -45,7 +45,7 @@ DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-c
 ## docker and docker-compose
 
 
-if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
+if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ] || [ ! -f /usr/local/docker-compose ]; then
   echo "You have not downloaded docker or docker-compose."
   read -p "Do you want me to install both for you? [y/N] " -n 1 -r
   echo    # (optional) move to a new line
@@ -72,7 +72,8 @@ if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ]; then
     echo "You can download both at:"
     echo "https://docs.docker.com/install/"
     echo "https://docs.docker.com/compose/install/"
-    exit
+    echo "Continuing installation..."
+    # exit 1
   fi
 fi
 
