@@ -125,7 +125,7 @@ services:
 
   redis:
     image: redis:5.0
-    restart: always
+    # restart: always
     network_mode: "host"
   #  ports:
   #    - 6379:6379      
