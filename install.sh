@@ -175,9 +175,12 @@ if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
       if [ -f "/home/$SUDO_USER/.ssh/config" ]; then
         cp /home/$SUDO_USER/.ssh/config $installdir/data/home/$path/.ssh/
       fi
+      if [ -d "home/$SUDO_USER/.ssh/X-com" ]; then
+        cp -r /home/$SUDO_USER/.ssh/X-com $installdir/data/home/$path/.ssh/
+      fi
       cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
       cp /home/$SUDO_USER/.ssh/id_rsa.pub $installdir/data/home/$path/.ssh/
-      chmod 400 $installdir/data/home/$path/.ssh/*
+      # chmod -r 400 $installdir/data/home/$path/.ssh/*
     done
   fi
 fi
