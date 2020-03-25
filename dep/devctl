@@ -82,8 +82,7 @@ case "$1" in
         devctl_up
         ;;
     restart)
-        docker-compose kill
-        docker-compose start
+        docker-compose restart ${@:2}
         ;;
     kill)
         docker-compose kill
