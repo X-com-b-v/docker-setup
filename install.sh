@@ -104,6 +104,9 @@ fi
 paths=( "php56" "php70" "php71" "php72" "php73" "php74" )
 for path in "${paths[@]}"
 do :
+  if [ -d "$installdir/data/home/$path" ]; then
+    mkdir -p "$installdir/data/home/$path"
+  fi
   if [ ! -d "$installdir/data/home/$path" ]; then
     cp -R /etc/skel $installdir/data/home/$path
   fi
@@ -119,6 +122,9 @@ do :
   if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
     cp dep/git-autocomplete.sh $installdir/data/home/$path/
     chmod +x $installdir/data/home/$path/git-autocomplete.sh
+  fi
+  if [ ! -d "$installdir/data/home/$path/bin" ]; then
+    mkdir -p "$installdir/data/home/$path/bin"
   fi
   if [ ! -f "$installdir/data/home/$path/bin/redis-cli" ]; then
     cp dep/redis-cli $installdir/data/home/$path/bin/
@@ -175,7 +181,7 @@ if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
       if [ -f "/home/$SUDO_USER/.ssh/config" ]; then
         cp /home/$SUDO_USER/.ssh/config $installdir/data/home/$path/.ssh/
       fi
-      if [ -d "home/$SUDO_USER/.ssh/X-com" ]; then
+      if [ -d "/home/$SUDO_USER/.ssh/X-com" ]; then
         cp -r /home/$SUDO_USER/.ssh/X-com $installdir/data/home/$path/.ssh/
       fi
       cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
