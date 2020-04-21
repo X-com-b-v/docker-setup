@@ -45,7 +45,7 @@ fi
 ## docker and docker-compose
 
 
-if [ ! -f /usr/bin/docker ] || [ ! -f /usr/local/bin/docker-compose ] || [ ! -f /usr/local/docker-compose ]; then
+if [ ! -f /usr/bin/docker ] && [[ ! -f /usr/local/bin/docker-compose || ! -f /usr/local/docker-compose ]]; then
   echo "You have not downloaded docker or docker-compose."
   read -p "Do you want me to install both for you? [y/N] " -n 1 -r
   echo    # (optional) move to a new line
