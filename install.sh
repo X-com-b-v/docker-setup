@@ -51,7 +51,7 @@ if [ ! -f /usr/bin/docker ] && [[ ! -f /usr/local/bin/docker-compose || ! -f /us
   echo    # (optional) move to a new line
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
-    if [ ! -f /usr/bin/docker && -n "$(uname -v | grep Ubuntu)" ]; then
+    if [[ ! -f /usr/bin/docker && -n "$(uname -v | grep Ubuntu)" ]]; then
       # not sure if this will work, untested
       echo "Installing docker"
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
