@@ -24,6 +24,12 @@ devctl_up() {
     docker-compose up -d
 }
 
+usage="$(basename "$0") [-h] [-s n] -- program to calculate the answer to life, the universe and everything
+
+where:
+    -h  show this help text
+    -s  set the seed value (default: 42)"
+    
 INSTALLPATH=installdirectory/data/shared/sites
 
 cd installdirectory/docker
@@ -93,6 +99,9 @@ case "$1" in
     start)
         docker-compose start ${@:2}
         ;;
+    status)
+        docker-compose ps
+        ;;
     hostversions)
         for path in $INSTALLPATH/* ; do
             if ! command_exists jq ; then
@@ -111,7 +120,7 @@ case "$1" in
         done
         ;;
     *)
-        echo "Usage: ./devctl {up|restart|kill|update|fastupdate|nginxrestart|apacherestart|removeall|download|devfullbuild|devexport|devserver|hostversions}"
+        echo "Usage: ./devctl {up|restart|kill|update|fastupdate|nginxrestart|apacherestart|removeall|download|devfullbuild|devexport|devserver|hostversions|status}"
         exit 1
 esac
 
