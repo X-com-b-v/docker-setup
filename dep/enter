@@ -9,7 +9,7 @@ fi
 if ! groups $USER | grep &>/dev/null '\bdocker\b'; then
     if [ "$EUID" -ne 0 ]; then
         sudo docker exec -it "docker_$@_1" /bin/bash
-    else
-        docker exec -it "docker_$@_1" /bin/bash
     fi
+else
+    docker exec -it "docker_$@_1" /bin/bash
 fi
