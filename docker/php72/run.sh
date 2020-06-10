@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 XCOMUSER=`cat /etc/xcomuser`
 export XCOM_SERVERUSER=$XCOMUSER
@@ -8,7 +8,7 @@ sudo /etc/init.d/nullmailer start
 sudo /etc/init.d/php7.2-fpm start
 sudo /etc/init.d/php7.2-fpm status
 
-if [ $? -neq 0 ]; then
+if [ $? -ne 0 ]; then
   exit $?
 fi
 
