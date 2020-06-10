@@ -9,7 +9,7 @@ sudo /etc/init.d/postfix start
 sudo /etc/init.d/php7.1-fpm start
 sudo /etc/init.d/php7.1-fpm status
 
-if [ $? -neq 0 ];then
+if [ $? -neq 0 ]; then
   exit $?
 fi
 

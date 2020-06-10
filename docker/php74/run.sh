@@ -8,7 +8,7 @@ sudo /etc/init.d/nullmailer start
 sudo /etc/init.d/php7.4-fpm start
 sudo /etc/init.d/php7.4-fpm status
 
-if [ $? -neq 0 ];then
+if [ $? -neq 0 ]; then
   exit $?
 fi
 
