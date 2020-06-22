@@ -87,6 +87,11 @@ if [ ! -d "$installdir/data/shared/sites" ]; then
   #chown -R web.web $installdir/data/shared/sites
 fi
 
+if [ ! -d "$installdir/data/shared/media" ]; then
+  mkdir -p $installdir/data/shared/media
+  #chown -R web.web $installdir/data/shared/media
+fi
+
 if [ ! -d "$installdir/data/shared/sockets" ]; then
   mkdir -p $installdir/data/shared/sockets
 fi
