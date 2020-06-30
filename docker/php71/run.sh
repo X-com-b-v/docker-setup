@@ -66,7 +66,7 @@ if [ ! -f "/home/web/bin/deb" ]; then
 fi
 
 if [ ! -d "/home/web/.nvm" ]; then
-  curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.0/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 fi
 
 sudo tail -f /var/log/php7.1-fpm.log

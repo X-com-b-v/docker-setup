@@ -115,6 +115,7 @@ do :
   fi
   if [ ! -d "$installdir/data/home/$path" ]; then
     cp -R /etc/skel $installdir/data/home/$path
+    echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
   fi
   if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
     echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
