@@ -110,10 +110,8 @@ fi
 paths=( "php56" "php70" "php71" "php72" "php73" "php74" )
 for path in "${paths[@]}"
 do :
-  if [ -d "$installdir/data/home/$path" ]; then
-    mkdir -p "$installdir/data/home/$path"
-  fi
   if [ ! -d "$installdir/data/home/$path" ]; then
+    mkdir -p "$installdir/data/home/$path"
     cp -R /etc/skel $installdir/data/home/$path
     echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
   fi
@@ -226,8 +224,8 @@ chown -R $SUDO_USER:$SUDO_USER $installdir/docker
 # set max_map_count for sonarqube
 # sysctl -w vm.max_map_count=262144
 # make it permanent
-echo "vm.max_map_count=262144" >> /etc/sysctl.d/sonarqube.conf
-echo "fs.inotify.max_user_watches = 524288" >> /etc/sysctl.d/inotify.conf
+echo "vm.max_map_count=262144" > /etc/sysctl.d/sonarqube.conf
+echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
 sysctl -p --system
 
 
