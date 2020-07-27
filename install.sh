@@ -112,7 +112,7 @@ for path in "${paths[@]}"
 do :
   if [ ! -d "$installdir/data/home/$path" ]; then
     mkdir -p "$installdir/data/home/$path"
-    cp -R /etc/skel $installdir/data/home/$path
+    cp -R /etc/skel/. $installdir/data/home/$path
     echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
   fi
   if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
