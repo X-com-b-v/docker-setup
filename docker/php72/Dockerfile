@@ -17,15 +17,24 @@ RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
+#mssql stuff
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/debian/9/prod.list | tee /etc/apt/sources.list.d/microsoft.list
+
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php7.2-fpm php7.2-cli php7.2-mysql php7.2-gd php7.2-intl php7.2-curl php7.2-xsl php7.2-xdebug php7.2-mbstring php7.2-zip php7.2-soap php7.2-ssh2 php7.2-mongodb php7.2-bcmath php-imagick \
-    build-essential git git-flow subversion bzip2 mysql-client nullmailer python toilet openjdk-8-jre yarn dialog apt-utils
+    build-essential git git-flow subversion bzip2 mysql-client nullmailer python toilet openjdk-8-jre php7.2-dev yarn dialog apt-utils unixodbc-dev
 
 #install sqlsrv for mssql
+RUN ACCEPT_EULA=Y apt-get -y install msodbcsql17 mssql-tools
 RUN pecl install sqlsrv && pecl install pdo_sqlsrv
 
 RUN echo 127.0.0.1 > /etc/nullmailer/remotes
+
+RUN printf "; priority=20\nextension=sqlsrv.so\n" > /etc/php/7.2/mods-available/sqlsrv.ini
+RUN printf "; priority=30\nextension=pdo_sqlsrv.so\n" > /etc/php/7.2/mods-available/pdo_sqlsrv.ini
+RUN phpenmod -v 7.2 sqlsrv pdo_sqlsrv
 
 ADD run.sh /run.sh
 RUN chmod +x /run.sh
@@ -33,13 +42,7 @@ RUN chmod +x /run.sh
 RUN sed -i '/SCRIPTNAME.*$/aexport XCOM_SERVERUSER=`cat /etc/xcomuser`' /etc/init.d/php7.2-fpm && sed -i '/SCRIPTNAME.*$/aexport XCOM_SERVERTYPE=dev' /etc/init.d/php7.2-fpm
 RUN sed -i 's/^;user_ini.cache_ttl.*/user_ini.cache_ttl=5/g' /etc/php/*/*/php.ini
 
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-RUN curl https://packages.microsoft.com/config/debian/9/prod.list | tee /etc/apt/sources.list.d/microsoft.list
-
-RUN apt-get update
-RUN ACCEPT_EULA=Y apt-get -y install msodbcsql17 mssql-tools
-
-COPY conf.d/*.ini /etc/php/7.2/mods-available/
+COPY conf.d/xdebug.ini /etc/php/7.2/mods-available/
 
 USER web
 WORKDIR /data/sites
