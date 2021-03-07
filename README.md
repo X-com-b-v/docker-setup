@@ -19,6 +19,9 @@ The script will copy all files in this directory to your chosen installation pat
 ## Docker-compose
 After the installscript did its work, change directory to your installdir. All you have to do is run `sudo docker-compose up -d`. This will build and run your created containers. Take a cup of coffee, this might take a while.
 
+## Sonarqube
+There's a separate sonarqube.yml file which will download and give you a sonarqube instance linked to a postgres db. Run this by using `docker-compose -f sonarqube.yml up -d`
+
 ## Adding new hosts
 You can simply add new hosts by adding the project folder (or git clone the project) to the `installdir/data/shared/sites/` directory. After this, go back to the `installdir/docker` directory and run `sudo ./devctl nginxrestart` (or run `docker-compose restart nginx`) to restart the nginx container so new hosts are found and added. You can access the new host by using this url: `http://<host>.<xcomuser>.o.xotap.nl
 
