@@ -2,4 +2,6 @@
 port = 3306
 max_allowed_packet = 128M
 show_compatibility_56 = ON
+character-set-server=utf8
+collation-server=utf8_general_ci
 performance_schema
