@@ -39,7 +39,7 @@ if [ ! -f "/home/web/bin/dep" ]; then
   chmod +x /home/web/bin/dep
 fi
 
-if [ ! -d "/home/web/.oh-my-zsh"]; then
+if [ ! -d "/home/web/.oh-my-zsh" ]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 

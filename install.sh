@@ -115,6 +115,9 @@ do :
     cp -R /etc/skel/. $installdir/data/home/$path
     echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
   fi
+  if [ ! -f "$installdir/data/home/$path/.zshrc" ]; then
+    cp dep/zshrc $installdir/data/home/$path/.zshrc
+  fi
   if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
     echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
   fi
@@ -123,6 +126,7 @@ do :
   fi
   if [ $SKIP_CONFIGURATOR = "1" ]; then
     echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
+    echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.zshrc
   fi
   if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
     cp dep/git-autocomplete.sh $installdir/data/home/$path/

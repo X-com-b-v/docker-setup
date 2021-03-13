@@ -30,7 +30,7 @@ if [ ! -d "/home/web/bin" ]; then
   mkdir -p /home/web/bin
 fi
 
-if [ ! -d "/home/web/.oh-my-zsh"]; then
+if [ ! -d "/home/web/.oh-my-zsh" ]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
