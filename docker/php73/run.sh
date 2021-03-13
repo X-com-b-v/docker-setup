@@ -29,6 +29,10 @@ if [ ! -d "/home/web/bin" ]; then
   mkdir -p /home/web/bin
 fi
 
+if [ ! -d "/home/web/.oh-my-zsh"]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
 if [ ! -f "/home/web/bin/composer" ]; then
   curl https://getcomposer.org/composer.phar -o /home/web/bin/composer
   chmod +x /home/web/bin/composer
@@ -65,11 +69,7 @@ if [ ! -f "/home/web/bin/deb" ]; then
 fi
 
 if [ ! -d "/home/web/.nvm" ]; then
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-fi
-
-if [! -d "/home/web/.oh-my-zsh"]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | zsh
 fi
 
 sudo tail -f /var/log/php7.3-fpm.log

@@ -25,6 +25,10 @@ if [ ! -f "/home/web/.git-completion.bash" ]; then
   bash /home/web/git-autocomplete.sh
 fi
 
+if [ ! -d "/home/web/.oh-my-zsh"]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
 if [ ! -d "/home/web/bin" ]; then
   mkdir -p /home/web/bin
 fi
@@ -65,7 +69,7 @@ if [ ! -f "/home/web/bin/deb" ]; then
 fi
 
 if [ ! -d "/home/web/.nvm" ]; then
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | zsh
 fi
 
 sudo tail -f /var/log/php7.0-fpm.log

@@ -39,6 +39,10 @@ if [ ! -f "/home/web/bin/dep" ]; then
   chmod +x /home/web/bin/dep
 fi
 
+if [ ! -d "/home/web/.oh-my-zsh"]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
 if [ ! -f "/home/web/bin/magerun" ]; then
   curl https://files.magerun.net/n98-magerun.phar -o /home/web/bin/magerun
   chmod +x /home/web/bin/magerun
@@ -65,7 +69,7 @@ if [ ! -f "/home/web/bin/deb" ]; then
 fi
 
 if [ ! -d "/home/web/.nvm" ]; then
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | zsh
 fi
 
 sudo tail -f /var/log/php7.2-fpm.log

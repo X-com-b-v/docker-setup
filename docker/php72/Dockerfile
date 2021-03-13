@@ -26,9 +26,6 @@ RUN apt-get update && \
     php7.2-fpm php7.2-cli php7.2-mysql php7.2-gd php7.2-intl php7.2-curl php7.2-xsl php7.2-xdebug php7.2-mbstring php7.2-zip php7.2-soap php7.2-ssh2 php7.2-mongodb php7.2-bcmath php-imagick \
     build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python toilet openjdk-11-jre php7.2-dev yarn dialog apt-utils unixodbc-dev
 
-# oh-my-zsh
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-
 #install sqlsrv for mssql
 RUN ACCEPT_EULA=Y apt-get -y install msodbcsql17 mssql-tools && pecl install sqlsrv-5.8.1 && pecl install pdo_sqlsrv-5.8.1
 

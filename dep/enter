@@ -15,16 +15,16 @@ if ! groups $USER | grep &>/dev/null '\bdocker\b'; then
         if sudo docker exec -it "docker_$@_1" which zsh >&/dev/null; 
             then SHELL="$(sudo docker exec -it "docker_$@_1" which zsh)";
         fi
-        docker exec -it "docker_$@_1" ${SHELL//$'\r'/}
+        sudo docker exec -it "docker_$@_1" ${SHELL//$'\r'/}
     else
-        if sudo docker exec -it "docker_$@_1" which zsh >&/dev/null; 
-            then SHELL="$(sudo docker exec -it "docker_$@_1" which zsh)";
+        if docker exec -it "docker_$@_1" which zsh >&/dev/null; 
+            then SHELL="$(docker exec -it "docker_$@_1" which zsh)";
         fi
         docker exec -it "docker_$@_1" ${SHELL//$'\r'/}
     fi
 else
     if sudo docker exec -it "docker_$@_1" which zsh >&/dev/null; 
-        then SHELL="$(sudo docker exec -it "docker_$@_1" which zsh)";
+        then SHELL="$(docker exec -it "docker_$@_1" which zsh)";
     fi
     docker exec -it "docker_$@_1" ${SHELL//$'\r'/}
 fi
