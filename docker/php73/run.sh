@@ -68,4 +68,8 @@ if [ ! -d "/home/web/.nvm" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 fi
 
+if [! -d "/home/web/.oh-my-zsh"]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
 sudo tail -f /var/log/php7.3-fpm.log
