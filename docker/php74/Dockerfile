@@ -1,5 +1,5 @@
 # default
-FROM debian:stretch
+FROM debian:buster
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
 RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget unzip zsh
@@ -22,7 +22,7 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/so
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php7.4-fpm php7.4-cli php7.4-mysql php7.4-gd php7.4-intl php7.4-curl php7.4-xsl php7.4-xdebug php7.4-mbstring php7.4-zip php7.4-soap php7.4-mongodb php7.4-bcmath php-imagick \
-    build-essential git git-flow subversion bzip2 mysql-client nullmailer python yarn toilet openjdk-8-jre
+    build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python yarn toilet openjdk-11-jre
 
 # oh-my-zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

@@ -1,5 +1,5 @@
 # default
-FROM debian:stretch
+FROM debian:buster
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
 RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget unzip zsh
@@ -12,7 +12,7 @@ RUN echo 'Version 1.0.0' > /etc/xcom_docker_version
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php7.0-fpm php7.0-cli php7.0-mysql php7.0-gd php7.0-intl php7.0-curl php7.0-mcrypt php7.0-xsl php7.0-xdebug php7.0-mbstring php7.0-zip php7.0-soap php7.0-ssh2 php7.0-bcmath php7.0-mongodb php-imagick \
-    build-essential git git-flow subversion bzip2 mysql-client nullmailer python toilet
+    build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python toilet
 
 # oh-my-zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

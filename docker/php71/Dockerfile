@@ -1,5 +1,5 @@
 # default
-FROM debian:stretch
+FROM debian:buster
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
 RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget unzip zsh
@@ -16,7 +16,7 @@ RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php7.1-fpm php7.1-cli php7.1-mysql php7.1-gd php7.1-intl php7.1-curl php7.1-mcrypt php7.1-xsl php7.1-xdebug php7.1-mbstring php7.1-zip php7.1-soap php7.1-ssh2 php7.1-bcmath php7.1-mongodb php-imagick \
-    build-essential git git-flow subversion bzip2 mysql-client nullmailer python toilet
+    build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python toilet
 
 # oh-my-zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

@@ -1,5 +1,5 @@
 # default
-FROM debian:stretch
+FROM debian:buster
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
 RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget unzip
@@ -16,7 +16,7 @@ RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php5.6-fpm php5.6-cli php5.6-mysql php5.6-gd php5.6-intl php5.6-curl php5.6-xsl php5.6-mbstring php5.6-zip php5.6-soap php-imagick \
-    build-essential git git-flow subversion bzip2 mysql-client nullmailer python toilet
+    build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python toilet
 
 RUN echo 127.0.0.1 > /etc/nullmailer/remotes
 
