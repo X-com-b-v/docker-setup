@@ -107,7 +107,7 @@ then
   SKIP_CONFIGURATOR=1
 fi
 
-paths=( "php56" "php70" "php71" "php72" "php73" "php74" )
+paths=( "php56" "php70" "php71" "php72" "php73" "php74" "php80" )
 for path in "${paths[@]}"
 do :
   if [ ! -d "$installdir/data/home/$path" ]; then
