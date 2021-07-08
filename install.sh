@@ -10,12 +10,17 @@ if [ ! -f "/etc/xcomuser" ]; then
   echo $SUDO_USER > /etc/xcomuser
 fi
 
+FIRSTRUN=1
+
 echo "Please enter the directory you want to install base to (without trailing slash)"
 read installdir
 echo "Installdir set to $installdir"
 
 if [ ! -d $installdir ]; then
   mkdir -p $installdir
+else
+  echo "Existing installation found, continue setup to update docker-compose file and other dependencies"
+  FIRSTRUN=0
 fi
 
 if [ ! -f /usr/local/bin/enter ]; then
@@ -148,30 +153,31 @@ fi
 ## end prepare paths
 
 ## gitconfig
+read -p "[git config] Configure gitconfig options? [y/N] " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+  if [ ! -d "$installdir/docker/dependencies" ]; then
+    mkdir -p $installdir/docker/dependencies
+    cp ./dep/gitconfig $installdir/docker/dependencies/
+  fi
+  echo "[gitconfig] Please enter your name"
+  read name
+  sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
 
-if [ ! -d "$installdir/docker/dependencies" ]; then
-  mkdir -p $installdir/docker/dependencies
-  cp ./dep/gitconfig $installdir/docker/dependencies/
+  echo "[gitconfig] Please enter your e-mail address"
+  read email
+  sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
+  for path in "${paths[@]}"
+  do :
+    cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
+  done
+
+  # cleanup as there's no need for this anymore
+  if [ -d "$installdir/docker/dependencies" ]; then
+    rm -r $installdir/docker/dependencies
+  fi
 fi
-
-echo "[gitconfig] Please enter your name"
-read name
-sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
-
-echo "[gitconfig] Please enter your e-mail address"
-read email
-sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
-
-for path in "${paths[@]}"
-do :
-  cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
-done
-
-# cleanup as there's no need for this anymore
-if [ -d "$installdir/docker/dependencies" ]; then
-  rm -r $installdir/docker/dependencies
-fi
-
 ## end gitconfig
 
 ## ssh
@@ -183,6 +189,7 @@ if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
   then
     for path in "${paths[@]}"
     do :
+      echo $path
       if [ ! -d $installdir/data/home/$path/.ssh ]; then
         mkdir $installdir/data/home/$path/.ssh
       fi
@@ -221,16 +228,20 @@ fi
 
 ## end docker compose
 
-chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
-chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
-chown -R $SUDO_USER:$SUDO_USER $installdir/docker
+if [ ! $FIRSTRUN = "0" ]; then
+  chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
+  chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
+  chown -R $SUDO_USER:$SUDO_USER $installdir/docker
+  # set max_map_count for sonarqube
+  # sysctl -w vm.max_map_count=262144
+  # make it permanent
+  echo "vm.max_map_count=262144" > /etc/sysctl.d/sonarqube.conf
+  echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
+  sysctl -p --system
 
-# set max_map_count for sonarqube
-# sysctl -w vm.max_map_count=262144
-# make it permanent
-echo "vm.max_map_count=262144" > /etc/sysctl.d/sonarqube.conf
-echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
-sysctl -p --system
+fi
+
+
 
 
 echo "Installation prepared"
