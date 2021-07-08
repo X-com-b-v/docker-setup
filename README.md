@@ -23,7 +23,8 @@ After the installscript did its work, change directory to your installdir. All y
 There's a separate sonarqube.yml file which will download and give you a sonarqube instance linked to a postgres db. Run this by using `docker-compose -f sonarqube.yml up -d`
 
 ## Adding new hosts
-You can simply add new hosts by adding the project folder (or git clone the project) to the `installdir/data/shared/sites/` directory. After this, go back to the `installdir/docker` directory and run `sudo ./devctl nginxrestart` (or run `docker-compose restart nginx`) to restart the nginx container so new hosts are found and added. You can access the new host by using this url: `http://<host>.<xcomuser>.o.xotap.nl
+You can simply add new hosts by adding the project folder (or git clone the project) to the `installdir/data/shared/sites/` directory. 
+Run `devctl restart nginx` from your machine, or go back to the `installdir/docker` directory and run `sudo ./devctl nginxrestart` (or run `docker-compose restart nginx`) to restart the nginx container so new hosts are found and added. You can access the new host by using this url: `http://<host>.<xcomuser>.o.xotap.nl
 
 ## X-Com DNS and accessing your hosts
 ### Internal network
@@ -31,6 +32,7 @@ If you are in the X-Com network, a DNS entry probably already is created so you 
 `magento2.mycha.o.xotap.nl`
 
 ### No DNS or internal network
+Since we are working on linux and docker uses the native host, you can simply add entries mapped to localhost in your /etc/hosts file. `127.0.0.1 <host>.<xcomuser>.o.xotap.nl`.
 If you are working from home or any other location, you will need to fetch your current NAT IP address (192.168.x.x for example) and add the host manually to your `/etc/hosts` file. An example on my end:
 ```
 192.168.2.185 magento2.mycha.o.xotap.nl
