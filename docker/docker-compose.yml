@@ -121,7 +121,7 @@ services:
     entrypoint: /run.sh
 
   php80:
-    build: php74
+    build: php80
     # restart: always
     network_mode: "host"
     volumes:

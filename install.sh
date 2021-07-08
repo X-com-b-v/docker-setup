@@ -147,7 +147,6 @@ done
 
 if [ ! -d "$installdir/docker" ]; then
   mkdir -p $installdir/docker
-  cp -r ./docker/* $installdir/docker/
 fi
 
 ## end prepare paths
@@ -213,6 +212,8 @@ fi
 
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
+cp -r ./docker/* $installdir/docker/
+
 
 read -p "Do you want docker containers to restart automatically? [y/N] " -n 1 -r
 echo    # (optional) move to a new line
