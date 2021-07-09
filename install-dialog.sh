@@ -10,11 +10,19 @@ if [ ! -f "/etc/xcomuser" ]; then
   echo $SUDO_USER > /etc/xcomuser
 fi
 
+if dialog --stdout --title "Preinstall some necessary packages?" \
+            --backtitle "Packages" \
+            --yesno "Will run apt update and install basic packages \n\n
+curl git software-properties-common apt-transport-https gnupg-agent ca-certificates" 10 60; then
+  apt update -qq
+  DEBIAN_FRONTEND=noninteractive apt install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates -y -qq
+fi
+
 FIRSTRUN=1
 originstalldir=
 while [[ -z $originstalldir ]]; do
   exec 3>&1
-  originstalldir=$(dialog --inputbox "Please enter full path to install directory" 6 60 /home/$SUDO_USER/X-Com 2>&1 1>&3)
+  originstalldir=$(dialog --inputbox "Full path to install directory" 8 60 /home/$SUDO_USER/X-Com 2>&1 1>&3)
   exitcode=$?;
   exec 3>&-;
   if [ ! $exitcode = "0" ]; then
@@ -43,19 +51,6 @@ if [ ! -f /usr/local/bin/devctl ]; then
   sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
   chmod +x /usr/local/bin/devctl
 fi
-
-## updates
-
-#echo "Running updates"
-#apt -qq update 
-# apt -qq -y upgrade // a bit heavy, especially if there are packages you don't want to upgrade
-# install docker dependencies
-#DEBIAN_FRONTEND=noninteractive apt -y -qq install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates
-# removed parted, xfsprogs, ntpdate
-# exim does not come with ubuntu default install
-#apt -y purge exim4 exim4-base exim4-config exim4-daemon-light && apt-get -y autoremove
-
-## end updates
 
 ## docker and docker-compose
 
@@ -232,7 +227,8 @@ fi
 if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
 if dialog --stdout --title "Use ssh /home/$SUDO_USER/.ssh/id_rsa?" \
             --backtitle "ssh" \
-            --yesno "Copy ssh keys to each selected php container?" 7 60; then
+            --yesno "Copy ssh keys to each selected php container? \n
+$paths" 7 60; then
     #for path in "${paths[@]}"
     for path in $paths
     do :
@@ -259,7 +255,7 @@ fi
 if dialog --stdout --title "Do you want docker containers to restart automatically" \
             --backtitle "auto restart" \
             --defaultno \
-            --yesno "Yes: Always restart, No: No restart" 7 60; then
+            --yesno "Will automatically start containers on system boot. Very annoying." 7 60; then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
 fi
 
