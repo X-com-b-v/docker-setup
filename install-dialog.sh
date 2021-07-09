@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 if [ "$EUID" -ne 0 ]; then
-  dialog --title "Root" --msgbox 'Please run this file as root' 6 20
+  dialog --title "Root" --msgbox 'Please run this file as root' 8 44
+  clear
   exit 1
 fi
 
@@ -265,3 +266,5 @@ dialog --title "Complete" --msgbox "Installation prepared \n
 2: run docker-compose up -d \n
 3: get some coffee as this might take some time \n
 " 9 53
+clear
+exit 0
