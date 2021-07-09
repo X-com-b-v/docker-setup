@@ -164,9 +164,6 @@ do :
   if [ ! -d "$installdir/data/home/$path/bin" ]; then
     mkdir -p "$installdir/data/home/$path/bin"
   fi
-  if [ ! -f "$installdir/data/home/$path/bin/redis-cli" ]; then
-    cp dep/redis-cli $installdir/data/home/$path/bin/
-  fi
   if [ -f docker-compose-snippets/$path ]; then
     cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
   fi
