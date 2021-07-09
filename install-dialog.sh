@@ -123,7 +123,7 @@ cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 # cp -r ./docker/* $installdir/docker/
 
 # make sure other services are not forgotten, these are not updated for a second run
-services=( "mailtrap" "mysql57" "mysql80" "elasticsearch6" "elasticsearch7" )
+services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch6" "elasticsearch7" )
 for service in "${services[@]}"
 do :
   if [ ! -d $installdir/docker/$service ]; then
