@@ -113,6 +113,21 @@ if dialog --stdout --title "Skip configurator versioning post-checkout / post-me
   SKIP_CONFIGURATOR=1
 fi
 
+if [ ! -d "$installdir/docker" ]; then
+  mkdir -p $installdir/docker
+fi
+# replace existing docker compose with new to update settings after a second install
+cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
+# cp -r ./docker/* $installdir/docker/
+
+services=( "mailtrap" "mysql57" "mysql80" "elasticsearch6" "elasticsearch7" )
+for service in "${services[@]}"
+do :
+  if [ ! -d $installdir/docker/$service ]; then
+    cp -r ./docker/$service $installdir/docker/$service
+  fi
+done
+
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
 options=(php56 "PHP 5.6" off    # any option can be set to default to "on"
          php70 "PHP 7.0" off
@@ -154,11 +169,14 @@ do :
   if [ ! -f "$installdir/data/home/$path/bin/redis-cli" ]; then
     cp dep/redis-cli $installdir/data/home/$path/bin/
   fi
+  if [ -f docker-compose-snippets/$path ]; then
+    cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
+  fi
+  if [ ! -d $installdir/docker/$path ]; then
+    cp -r ./docker/$path $installdir/docker/
+  fi
+  
 done
-
-if [ ! -d "$installdir/docker" ]; then
-  mkdir -p $installdir/docker
-fi
 
 ## end prepare paths
 
@@ -231,10 +249,6 @@ fi
 ## end ssh
 
 ## docker compose
-
-# replace existing docker compose with new to update settings after a second install
-cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
-cp -r ./docker/* $installdir/docker/
 
 #read -p "Do you want docker containers to restart automatically? [y/N] " -n 1 -r
 #echo    # (optional) move to a new line

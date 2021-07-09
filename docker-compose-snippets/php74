@@ -1,0 +1,14 @@
+  php74:
+    build: php74
+    # restart: always
+    network_mode: "host"
+    volumes:
+      - installdirectory/data/shared/sites:/data/shared/sites
+      - ./php74/php.pool.d:/etc/php/7.4/fpm/pool.d:ro
+      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - installdirectory/data/shared/media:/data/shared/media
+      - installdirectory/data/home/php74:/home/web
+      - /etc/xcomuser:/etc/xcomuser:ro
+    user: web
+    working_dir: /data/shared/sites
+    entrypoint: /run.sh

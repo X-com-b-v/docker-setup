@@ -1,12 +1,9 @@
-version: "2"
+version: "3.4"
 
 services:
   nginx:
     build: nginx
     # restart: always
-  #  ports:
-  #    - 80:80
-  #    - 443:443
     network_mode: "host"
     working_dir: /etc/nginx/sites-enabled
     volumes:
@@ -15,125 +12,6 @@ services:
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - /etc/xcomuser:/etc/xcomuser:ro
-  #  links:
-  #    - apache24:apache
-
-  # php56:
-  #   build: php56
-  #   # restart: always
-  #   network_mode: "host"
-  #   volumes:
-  #     - installdirectory/data/shared/sites:/data/shared/sites
-  #     - ./php56/php.pool.d:/etc/php/5.6/fpm/pool.d:ro
-  #     - installdirectory/data/shared/sockets:/data/shared/sockets
-  #     - installdirectory/data/home/php56:/home/web
-  #     - /etc/xcomuser:/etc/xcomuser:ro
-  #   entrypoint: /run.sh
-  #   environment:
-  #     - XCOM_SERVERTYPE=dev
-
-  # php70:
-  #   build: php70
-  #   # restart: always
-  #   network_mode: "host"
-  #   volumes:
-  #     - installdirectory/data/shared/sites:/data/shared/sites
-  #     - ./php70/php.pool.d:/etc/php/7.0/fpm/pool.d:ro
-  #     - installdirectory/data/shared/sockets:/data/shared/sockets
-  #     - installdirectory/data/home/php70:/home/web
-  #     - /etc/xcomuser:/etc/xcomuser:ro
-  #   user: web
-  #   working_dir: /data/shared/sites
-  #   entrypoint: /run.sh
-  # #  links:
-  # #    - mysql57:mysql
-  # #    - redis28:redis
-  # #    - mongo:mongo
-  # #  ports:
-  # #    - 8090:8090
-  # #    - 3000:3000
-  # #    - 1700:1700/udp
-  # #    - 1701:1701/udp
-  # #    - 3001:3001
-
-  php71:
-    build: php71
-    # restart: always
-    network_mode: "host"
-    volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - ./php71/php.pool.d:/etc/php/7.1/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
-      - installdirectory/data/home/php71:/home/web
-      - /etc/xcomuser:/etc/xcomuser:ro
-    user: web
-    working_dir: /data/shared/sites
-    entrypoint: /run.sh
-  #  links:
-  #    - mysql57:mysql
-  #    - redis28:redis
-  #    - mongo:mongo
-
-  php72:
-    build: php72
-    # restart: always
-    network_mode: "host"
-    volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - ./php72/php.pool.d:/etc/php/7.2/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
-      - installdirectory/data/home/php72:/home/web
-      - /etc/xcomuser:/etc/xcomuser:ro
-    user: web
-    working_dir: /data/shared/sites
-    entrypoint: /run.sh
-
-  php73:
-    build: php73
-    # restart: always
-    network_mode: "host"
-    volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - ./php73/php.pool.d:/etc/php/7.3/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
-      - installdirectory/data/home/php73:/home/web
-      - /etc/xcomuser:/etc/xcomuser:ro
-    user: web
-    working_dir: /data/shared/sites
-    entrypoint: /run.sh
-
-  php74:
-    build: php74
-    # restart: always
-    network_mode: "host"
-    volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - ./php74/php.pool.d:/etc/php/7.4/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
-      - installdirectory/data/home/php74:/home/web
-      - /etc/xcomuser:/etc/xcomuser:ro
-    user: web
-    working_dir: /data/shared/sites
-    entrypoint: /run.sh
-
-  php80:
-    build: php80
-    # restart: always
-    network_mode: "host"
-    volumes:
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - ./php80/php.pool.d:/etc/php/8.0/fpm/pool.d:ro
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
-      - installdirectory/data/home/php74:/home/web
-      - /etc/xcomuser:/etc/xcomuser:ro
-    user: web
-    working_dir: /data/shared/sites
-    entrypoint: /run.sh
 
   mysql57:
     image: mysql:5.7
@@ -147,15 +25,15 @@ services:
       - installdirectory/data/mysql57:/var/lib/mysql
       - ./mysql57/conf.d:/etc/mysql/conf.d:ro
 
-  # mysql80:
-  #   image: mysql:8.0
-  #   # restart: always
-  #   network_mode: "host"
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=xcom
-  #   volumes:
-  #     - installdirectory/data/mysql80:/var/lib/mysql
-  #     - ./mysql80/conf.d:/etc/mysql/conf.d:ro
+  mysql80:
+    image: mysql:8.0
+    # restart: always
+    network_mode: "host"
+    environment:
+      - MYSQL_ROOT_PASSWORD=xcom
+    volumes:
+      - installdirectory/data/mysql80:/var/lib/mysql
+      - ./mysql80/conf.d:/etc/mysql/conf.d:ro
 
   redis:
     image: redis:5.0
@@ -165,27 +43,6 @@ services:
   #    - 6379:6379      
     volumes:
       - installdirectory/data/redis28:/data
-      
-#  samba:
-#    build: samba
-    # restart: always
-#    network_mode: "host"
-  #  ports:
-  #    - "138:138/udp"
-  #    - 139:139
-  #    - 445:445
-  #    - "445:445/udp"
-#    volumes:
-#      - installdirectory/data/shared/sites:/data/shared/sites
-
-  # mongo:
-  #   image: mongo:3.4-jessie
-  #   # restart: always
-  #   network_mode: "host"
-  # #  ports:
-  # #    - "27017:27017"
-  #   volumes:
-  #     - installdirectory/data/mongo:/data/db
 
   mailtrap:
     build: mailtrap
@@ -214,3 +71,4 @@ services:
       - 9500:9300
     environment:
       - discovery.type=single-node
+
