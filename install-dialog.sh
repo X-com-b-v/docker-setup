@@ -117,7 +117,8 @@ options=(php56 "PHP 5.6" off    # any option can be set to default to "on"
          php80 "PHP 8.0" off)
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
-for path in "${paths[@]}"
+#for path in "${paths[@]}"
+for path in paths
 do :
   if [ ! -d "$installdir/data/home/$path" ]; then
     mkdir -p "$installdir/data/home/$path"
@@ -156,20 +157,26 @@ fi
 ## end prepare paths
 
 ## gitconfig
-read -p "[git config] Configure gitconfig options? [y/N] " -n 1 -r
-echo    # (optional) move to a new line
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
+#read -p "[git config] Configure gitconfig options? [y/N] " -n 1 -r
+#echo    # (optional) move to a new line
+#if [[ $REPLY =~ ^[Yy]$ ]]
+#then
+
+if dialog --stdout --title "Configure gitconfig options?" \
+            --backtitle "git config" \
+            --yesno "Yes: Configure git config, No: Continue installation" 7 60; then
   if [ ! -d "$installdir/docker/dependencies" ]; then
     mkdir -p $installdir/docker/dependencies
     cp ./dep/gitconfig $installdir/docker/dependencies/
   fi
-  echo "[gitconfig] Please enter your name"
-  read name
+  name=$(dialog --inputbox "Please enter your name" 6 60  --output-fd 1)
+  #echo "[gitconfig] Please enter your name"
+  #read name
   sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
 
-  echo "[gitconfig] Please enter your e-mail address"
-  read email
+  email=$(dialog --inputbox "Please enter e-mail address" 6 60  --output-fd 1)
+  #echo "[gitconfig] Please enter your e-mail address"
+  #read email
   sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
   for path in "${paths[@]}"
   do :
@@ -186,11 +193,15 @@ fi
 ## ssh
 
 if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
-  read -p "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this? [y/N] " -n 1 -r
-  echo    # (optional) move to a new line
-  if [[ $REPLY =~ ^[Yy]$ ]]
-  then
-    for path in "${paths[@]}"
+if dialog --stdout --title "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this?" \
+            --backtitle "ssh" \
+            --yesno "Yes: Configure ssh keys, No: Continue installation" 7 60; then
+  #read -p "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this? [y/N]" -n 1 -r
+  #echo    # (optional) move to a new line
+  #if [[ $REPLY =~ ^[Yy]$ ]]
+  #then
+    #for path in "${paths[@]}"
+    for path in paths
     do :
       echo $path
       if [ ! -d $installdir/data/home/$path/.ssh ]; then
@@ -218,16 +229,19 @@ fi
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 cp -r ./docker/* $installdir/docker/
 
-
-read -p "Do you want docker containers to restart automatically? [y/N] " -n 1 -r
-echo    # (optional) move to a new line
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
+#read -p "Do you want docker containers to restart automatically? [y/N] " -n 1 -r
+#echo    # (optional) move to a new line
+#if [[ $REPLY =~ ^[Yy]$ ]]
+#then
+if dialog --stdout --title "Do you want docker containers to restart automatically" \
+            --backtitle "auto restart" \
+            --defaultno \
+            --yesno "Yes: Always restart, No: No restart" 7 60; then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
 fi
 
 if [ -f "$installdir/docker/docker-compose.yml" ]; then
-  echo "Setting up correct values for docker-compose based on your given installdir"
+  #echo "Setting up correct values for docker-compose based on your given installdir"
   sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
 
@@ -246,10 +260,8 @@ if [ ! $FIRSTRUN = "0" ]; then
 
 fi
 
-
-
-
-echo "Installation prepared"
-echo "1: Change directory to $installdir/docker"
-echo "2: run docker-compose up -d"
-echo "3: get some coffee as this might take some time"
+dialog --title "Complete" --msgbox "Installation prepared \n 
+1: Change directory to $installdir/docker \n
+2: run docker-compose up -d \n
+3: get some coffee as this might take some time \n
+" 9 53

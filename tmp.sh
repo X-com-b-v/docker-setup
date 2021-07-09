@@ -8,12 +8,10 @@ options=(php56 "PHP 5.6" off    # any option can be set to default to "on"
          php74 "PHP 7.4" on
          php80 "PHP 8.0" off)
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
-clear
+#paths=( "php71" "php72" "php73" "php74" "php80" )
+#clear
 for path in $paths
-do
-    case $path in
-        php73)
-            echo "PHP 73"
-            ;;
-    esac
+#for path in "${paths[@]}"
+do :
+    echo $path
 done
