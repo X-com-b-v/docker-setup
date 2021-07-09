@@ -44,7 +44,7 @@ RUN sed -i 's/^;user_ini.cache_ttl.*/user_ini.cache_ttl=5/g' /etc/php/*/*/php.in
 
 COPY conf.d/xdebug.ini /etc/php/7.3/mods-available/
 
-RUN update-alternatives --set php /usr/bin/php7.3
+#RUN update-alternatives --set php /usr/bin/php7.3
 
 USER web
 WORKDIR /data/sites
