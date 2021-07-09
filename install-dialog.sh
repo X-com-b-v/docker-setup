@@ -11,14 +11,19 @@ if [ ! -f "/etc/xcomuser" ]; then
 fi
 
 FIRSTRUN=1
+originstalldir=
+while [[ -z $originstalldir ]]; do
+  exec 3>&1
+  originstalldir=$(dialog --inputbox "Please enter full path to install directory $exitcode $res" 6 60 2>&1 1>&3)
+  exitcode=$?;
+  exec 3>&-;
+  if [ ! $exitcode = "0" ]; then
+    clear
+    exit $exitcode
+  fi
+done
 
-#echo "Please enter the directory you want to install base to (without trailing slash)"
-#read installdir
-originstalldir=$(dialog --inputbox "Please enter full path to install directory" 6 60  --output-fd 1)
 installdir=$(echo $originstalldir | sed 's:/*$::')
-
-echo $installdir
-
 
 if [ ! -d $installdir ]; then
   mkdir -p $installdir
