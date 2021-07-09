@@ -14,7 +14,7 @@ FIRSTRUN=1
 originstalldir=
 while [[ -z $originstalldir ]]; do
   exec 3>&1
-  originstalldir=$(dialog --inputbox "Please enter full path to install directory $exitcode $res" 6 60 2>&1 1>&3)
+  originstalldir=$(dialog --inputbox "Please enter full path to install directory" 6 60 /home/$SUDO_USER/X-Com 2>&1 1>&3)
   exitcode=$?;
   exec 3>&-;
   if [ ! $exitcode = "0" ]; then
@@ -60,9 +60,10 @@ fi
 ## docker and docker-compose
 
 if [ ! -f /usr/bin/docker ] && [[ ! -f /usr/local/bin/docker-compose || ! -f /usr/local/docker-compose ]]; then
-  if dialog --stdout --title "Docker and docker-compose not found, want me to install both?" \
+  if dialog --stdout --title "Docker and docker-compose missing" \
             --backtitle "docker & docker-compose" \
-            --yesno "Yes: Install docker, No: Continue installation" 7 60; then
+            --defaultno \
+            --yesno "Tries to install docker and docker-compose for you, it is not properly tested" 7 60; then
       #dialog --title "Information" --msgbox "TRUE" 6 44
       if [[ ! -f /usr/bin/docker && -n "$(uname -v | grep Ubuntu)" ]]; then
       # not sure if this will work, untested
@@ -110,7 +111,7 @@ fi
 
 if dialog --stdout --title "Skip configurator versioning post-checkout / post-merge?" \
             --backtitle "git hooks" \
-            --yesno "Yes: Skip configurator, No: Continue installation" 7 60; then
+            --yesno "Will not execute magento configurator" 7 60; then
   SKIP_CONFIGURATOR=1
 fi
 
@@ -121,6 +122,7 @@ fi
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 # cp -r ./docker/* $installdir/docker/
 
+# make sure other services are not forgotten, these are not updated for a second run
 services=( "mailtrap" "mysql57" "mysql80" "elasticsearch6" "elasticsearch7" )
 for service in "${services[@]}"
 do :
@@ -178,30 +180,40 @@ do :
   fi
   
 done
-
 ## end prepare paths
 
 ## gitconfig
-#read -p "[git config] Configure gitconfig options? [y/N] " -n 1 -r
-#echo    # (optional) move to a new line
-#if [[ $REPLY =~ ^[Yy]$ ]]
-#then
-
 if dialog --stdout --title "Configure gitconfig options?" \
             --backtitle "git config" \
-            --yesno "Yes: Configure git config, No: Continue installation" 7 60; then
+            --yesno "Gitconfig containing aliases, makes life easy" 7 60; then
   if [ ! -d "$installdir/docker/dependencies" ]; then
     mkdir -p $installdir/docker/dependencies
     cp ./dep/gitconfig $installdir/docker/dependencies/
   fi
-  name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60  --output-fd 1)
-  #echo "[gitconfig] Please enter your name"
-  #read name
+  name=
+  while [[ -z $name ]]; do
+    exec 3>&1
+    name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60 2>&1 1>&3)
+    exitcode=$?;
+    exec 3>&-;
+    if [ ! $exitcode = "0" ]; then
+      clear
+      exit $exitcode
+    fi
+  done
   sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
 
-  email=$(dialog --title "git config" --inputbox "Please enter e-mail address" 6 60  --output-fd 1)
-  #echo "[gitconfig] Please enter your e-mail address"
-  #read email
+  email=
+  while [[ -z $email ]]; do
+    exec 3>&1
+    email=$(dialog --title "git config" --inputbox "Please enter your e-mail address" 6 60 2>&1 1>&3)
+    exitcode=$?;
+    exec 3>&-;
+    if [ ! $exitcode = "0" ]; then
+      clear
+      exit $exitcode
+    fi
+  done
   sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
   #for path in "${paths[@]}"
   for path in $paths:
@@ -217,15 +229,10 @@ fi
 ## end gitconfig
 
 ## ssh
-
 if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
 if dialog --stdout --title "Use ssh /home/$SUDO_USER/.ssh/id_rsa?" \
             --backtitle "ssh" \
-            --yesno "Yes: Configure ssh keys, No: Continue installation" 7 60; then
-  #read -p "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this? [y/N]" -n 1 -r
-  #echo    # (optional) move to a new line
-  #if [[ $REPLY =~ ^[Yy]$ ]]
-  #then
+            --yesno "Copy ssh keys to each selected php container?" 7 60; then
     #for path in "${paths[@]}"
     for path in $paths
     do :
@@ -246,15 +253,9 @@ if dialog --stdout --title "Use ssh /home/$SUDO_USER/.ssh/id_rsa?" \
     done
   fi
 fi
-
 ## end ssh
 
 ## docker compose
-
-#read -p "Do you want docker containers to restart automatically? [y/N] " -n 1 -r
-#echo    # (optional) move to a new line
-#if [[ $REPLY =~ ^[Yy]$ ]]
-#then
 if dialog --stdout --title "Do you want docker containers to restart automatically" \
             --backtitle "auto restart" \
             --defaultno \
@@ -266,7 +267,6 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
   #echo "Setting up correct values for docker-compose based on your given installdir"
   sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
-
 ## end docker compose
 
 if [ ! $FIRSTRUN = "0" ]; then
@@ -279,7 +279,6 @@ if [ ! $FIRSTRUN = "0" ]; then
   echo "vm.max_map_count=262144" > /etc/sysctl.d/sonarqube.conf
   echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
   sysctl -p --system
-
 fi
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
