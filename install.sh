@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo "deprecated, please use install-dialog.sh"
+exit 1
+
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root, use sudo"
   exit

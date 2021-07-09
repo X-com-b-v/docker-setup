@@ -29,6 +29,7 @@ if [ ! -d $installdir ]; then
   mkdir -p $installdir
 else
   #echo "Existing installation found, continue setup to update docker-compose file and other dependencies"
+  dialog --title "Existing installation" --msgbox "Existing installation found, continuing with overrides" 8 44
   FIRSTRUN=0
 fi
 
