@@ -124,7 +124,7 @@ options=(php56 "PHP 5.6" off    # any option can be set to default to "on"
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
 #for path in "${paths[@]}"
-for path in paths
+for path in $paths
 do :
   if [ ! -d "$installdir/data/home/$path" ]; then
     mkdir -p "$installdir/data/home/$path"
@@ -175,16 +175,17 @@ if dialog --stdout --title "Configure gitconfig options?" \
     mkdir -p $installdir/docker/dependencies
     cp ./dep/gitconfig $installdir/docker/dependencies/
   fi
-  name=$(dialog --inputbox "Please enter your name" 6 60  --output-fd 1)
+  name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60  --output-fd 1)
   #echo "[gitconfig] Please enter your name"
   #read name
   sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
 
-  email=$(dialog --inputbox "Please enter e-mail address" 6 60  --output-fd 1)
+  email=$(dialog --title "git config" --inputbox "Please enter e-mail address" 6 60  --output-fd 1)
   #echo "[gitconfig] Please enter your e-mail address"
   #read email
   sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
-  for path in "${paths[@]}"
+  #for path in "${paths[@]}"
+  for path in $paths:
   do :
     cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
   done
@@ -199,7 +200,7 @@ fi
 ## ssh
 
 if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
-if dialog --stdout --title "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this?" \
+if dialog --stdout --title "Use ssh /home/$SUDO_USER/.ssh/id_rsa?" \
             --backtitle "ssh" \
             --yesno "Yes: Configure ssh keys, No: Continue installation" 7 60; then
   #read -p "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do you want to copy this? [y/N]" -n 1 -r
@@ -207,7 +208,7 @@ if dialog --stdout --title "Found ssh key at /home/$SUDO_USER/.ssh/id_rsa, do yo
   #if [[ $REPLY =~ ^[Yy]$ ]]
   #then
     #for path in "${paths[@]}"
-    for path in paths
+    for path in $paths
     do :
       echo $path
       if [ ! -d $installdir/data/home/$path/.ssh ]; then
