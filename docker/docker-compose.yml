@@ -36,13 +36,13 @@ services:
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
 
   redis:
-    image: redis:5.0
+    image: redis:6.2
     # restart: always
     network_mode: "host"
   #  ports:
   #    - 6379:6379      
     volumes:
-      - installdirectory/data/redis28:/data
+      - installdirectory/data/redis:/data
 
   mailtrap:
     build: mailtrap
