@@ -2,11 +2,11 @@
 
 XCOMUSER=$(cat /etc/xcomuser)
 
-DEFAULT_PHP="7.2"
+DEFAULT_PHP="7.3"
 
-if [ ! -d "/data/shared/sites/example" ]; then
-    mkdir /data/shared/sites/example
-fi
+#if [ ! -d "/data/shared/sites/example" ]; then
+#    mkdir /data/shared/sites/example
+#fi
 
 rm /etc/nginx/sites-enabled/*
 for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
@@ -28,18 +28,18 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json"
     elif [ -f "/data/shared/sites/$SITEBASENAME/bin/magento" ]; then
         # Lijkt op magento 2
-        echo '{"template":"magento2","webserver":"nginx","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        echo '{"template":"magento2","webserver":"nginx","php_version":"7.3"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
         cat << EOF > "/data/shared/sites/$SITEBASENAME/.siteconfig/params.conf.example"
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://magento2.customer.com.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://magento2.customer.com.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://magento2.customer.com.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://magento2.customer.com.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN magento2.customer.com.$XCOMUSER.o.xotap.nl;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://magento2.customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://magento2.customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://magento2.customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://magento2.customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN magento2.customer.be.$XCOMUSER.o.xotap.nl;
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://customer.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://customer.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://customer.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://customer.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN customer.$XCOMUSER.o.xotap.nl;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN customer.be.$XCOMUSER.o.xotap.nl;
 EOF
 
     elif [ -f "/data/shared/sites/$SITEBASENAME/app/etc/local.xml" ]; then
@@ -56,10 +56,7 @@ EOF
         echo '{"template":"drupal","webserver":"nginx","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
     elif [ -d "/data/shared/sites/$SITEBASENAME/htdocs/wire" ]; then
         # Lijkt processwire
-        echo '{"template":"processwire","webserver":"apache","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
-    elif [ -f "/data/shared/sites/$SITEBASENAME/config/pre_index.php" ]; then
-        # Lijkt itix backend
-        echo '{"template":"default","webserver":"apache","php_protocol":"mod_php","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        echo '{"template":"processwire","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"\
     else
         # default hosting
         echo '{"template":"default","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
@@ -87,6 +84,10 @@ EOF
     if [ -f "/data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf" ]; then
         # Custom nginx found, don't care what the config is, uses this one.
         cp /data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf /etc/nginx/sites-enabled/$SITEBASENAME.conf
+    # https://stackoverflow.com/questions/43158140/way-to-create-multiline-comments-in-bash
+    # : ' multi line comment because : is shorthand for true and does not process any params
+    # we dont need other stuff like proxy as below
+    : '
     elif [ "$USE_WEBSERVER" != "nginx" ]; then
         # Nginx is not needed, just forward traffic to next webserver
 
@@ -111,6 +112,7 @@ EOF
 
         cp /etc/nginx/site-templates/proxy.conf /data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf.example
         cp /etc/nginx/site-templates/proxy.conf /etc/nginx/sites-enabled/$SITEBASENAME.conf
+    '
     else
         # webserver is nginx, check for custom template
         if [ "$USE_TEMPLATE" != "" ] && [ -f "/etc/nginx/site-templates/$USE_TEMPLATE.conf" ]; then
