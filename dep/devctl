@@ -19,6 +19,7 @@ status                  | Shows running status of all containers managed by this
 build                   | Build all containers in docker-compose file
 hostversions            | Shows which installed projects run on which PHP version
 installdir              | Shows current install directory
+sonarqube               | Creates sonarqube and postgres instances
 EOF
 }
 
@@ -71,6 +72,8 @@ case "$1" in
     installdir)
         get_installdir
         ;;
+    sonarqube)
+        docker-compose -f sonarqube.yml up -d
     *)
         usage
         exit 1
