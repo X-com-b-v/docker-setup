@@ -272,11 +272,12 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
 fi
 ## end docker compose
 
+chown $SUDO_USER:$SUDO_USER $installdir
+chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
+chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
+chown -R $SUDO_USER:$SUDO_USER $installdir/docker
+
 if [ ! $FIRSTRUN = "0" ]; then
-    chown $SUDO_USER:$SUDO_USER $installdir
-    chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
-    chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
-    chown -R $SUDO_USER:$SUDO_USER $installdir/docker
     # set max_map_count for sonarqube
     # sysctl -w vm.max_map_count=262144
     # make it permanent
