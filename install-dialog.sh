@@ -277,9 +277,10 @@ if [ ! $FIRSTRUN = "0" ]; then
 fi
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
-1: Change directory to $installdir/docker \n
-2: run docker-compose up -d \n
-3: get some coffee as this might take some time \n
+1: Run devctl build\n
+2: Get coffee\n
+3: Run devctl up\n
+4: Get coffee\n
 " 9 53
 clear
 exit 0
