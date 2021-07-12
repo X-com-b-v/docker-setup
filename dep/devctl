@@ -1,97 +1,57 @@
 #!/bin/bash
-
-devctl_download() {
-    DOWNLOADLIST=$(curl -s http://devbuilder.o.xotap.nl:8095/list.txt)
-    if [ ! -d ".images" ]; then mkdir .images; fi
-    for image in $DOWNLOADLIST; do
-        if [ "$image" != "" ]; then
-            curl -s "http://devbuilder.o.xotap.nl:8095/$image.tar" | docker load
-        fi
-    done
-}
-
-devctl_removeall() {
-    docker kill $(docker ps -q -f name=docker)
-    docker rm $(docker ps -a -q -f name=docker)
-    docker rmi $(docker images "docker*" -q)
-}
-
+    
 command_exists () {
     type "$1" &> /dev/null ;
 }
 
-devctl_up() {
-    docker-compose up -d
+usage () {
+
+cat <<EOF
+Usage: $0 [options]
+All commands are executed in context of installdirectory/docker
+Options:
+             | Show this help
+up           | Create and daemonize all containers in docker-compose file
+restart      | Restart all built containers
+stop         | Stop all built containers.
+start        | Start all built containers
+status       | Shows running status of all containers managed by this docker-compose file (ps -a)
+build        | Build all containers in docker-compose file
+hostversions | Shows which installed projects run on which PHP version
+installdir   | Shows current install directory
+EOF
 }
 
-usage="$(basename "$0") [-h] [-s n] -- program to calculate the answer to life, the universe and everything
+get_installdir() {
+    echo "installdirectory/docker"
+}
 
-where:
-    -h  show this help text
-    -s  set the seed value (default: 42)"
-    
-INSTALLPATH=installdirectory/data/shared/sites
+get_versions() {
+    INSTALLPATH=installdirectory/data/shared/sites
+    for path in $INSTALLPATH/* ; do
+        if ! command_exists jq ; then
+            echo "Need jq to run this, please use sudo apt install jq"
+            exit 1
+        fi
+        if [ -d $path/.siteconfig ]; then
+            VHOST=$(basename $path)
+            if [ -f $path/.siteconfig/config.json ] ; then
+                PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json")
+            elif [ -f $path/.siteconfig/config.json.example ]; then
+                PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json.example")
+            fi
+            echo "$VHOST -> PHP $PHPVERSION"
+        fi
+    done
+}
 
 cd installdirectory/docker
 case "$1" in
-    devfullbuild)
-	devctl_removeall
-        docker-compose build
-        ;;
-    devexport)
-        rm -Rf images
-        mkdir images
-        : > images/list.txt
-        for name in `docker images --format='{{.Repository}}' | grep docker`; do
-            echo "Exporting: $name"
-            docker save "$name" > images/$name.tar
-            printf "$name\n" >> images/list.txt
-        done
-        ;;
-    devserver)
-	docker kill devhost
-	docker rm devhost
-	docker run -d -p 0.0.0.0:8095:80 --restart=always --name devhost -v `pwd`/images:/www fnichol/uhttpd
-	;;
-    removeall)
-        devctl_removeall
-        ;;
-    download)
-        devctl_download
-        ;;
-    fastupdate)
-        git pull
-        devctl_removeall
-        devctl_download
-        devctl_up
-        ;;
-    update)
-        devctl_removeall
-        sudo ./install
-        devctl_download
-        devctl_up
-        ;;
-    updatesingle)
-        if [ ! -z "$2" ]; then
-            curl -s "http://devbuilder.o.xotap.nl:8095/$2.tar" | docker load
-        fi
-        ;;
-    nginxrestart)
-        docker-compose kill nginx
-        docker-compose start nginx
-        ;;
-    apacherestart)
-        docker-compose kill apache24 apachephp56 apachephp70 apachephp71 apachephp72 apachephp73 nginx
-        docker-compose start apache24 apachephp56 apachephp70 apachephp71 apachephp72 apachephp73 nginx
-        ;;
     up)
-        devctl_up
+        docker-compose up -d
         ;;
     restart)
         docker-compose restart ${@:2}
-        ;;
-    kill)
-        docker-compose kill
         ;;
     stop)
         docker-compose stop ${@:2}
@@ -100,27 +60,19 @@ case "$1" in
         docker-compose start ${@:2}
         ;;
     status)
-        docker-compose ps
+        docker-compose ps -a
+        ;;
+    build)
+        docker-compose build
         ;;
     hostversions)
-        for path in $INSTALLPATH/* ; do
-            if ! command_exists jq ; then
-                echo "Need jq to run this, please use sudo apt install jq"
-                exit 1
-            fi
-            if [ -d $path/.siteconfig ]; then
-                VHOST=$(basename $path)
-                if [ -f $path/.siteconfig/config.json ] ; then
-                    PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json")
-                elif [ -f $path/.siteconfig/config.json.example ]; then
-                    PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json.example")
-                fi
-                echo "$VHOST -> PHP $PHPVERSION"
-            fi
-        done
+        get_versions
+        ;;
+    installdir)
+        get_installdir
         ;;
     *)
-        echo "Usage: ./devctl {up|restart|kill|update|fastupdate|nginxrestart|apacherestart|removeall|download|devfullbuild|devexport|devserver|hostversions|status}"
+        usage
         exit 1
 esac
 
