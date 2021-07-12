@@ -15,7 +15,7 @@ if dialog --stdout --title "Preinstall some necessary packages?" \
             --yesno "Will run apt update and install basic packages \n\n
 curl git software-properties-common apt-transport-https gnupg-agent ca-certificates" 10 60; then
   apt update -qq
-  DEBIAN_FRONTEND=noninteractive apt install curl git software-properties-common apt-transport-https gnupg-agent ca-certificates -y -qq
+  DEBIAN_FRONTEND=noninteractive apt install curl git jq software-properties-common apt-transport-https gnupg-agent ca-certificates -y -qq
 fi
 
 FIRSTRUN=1
@@ -144,9 +144,11 @@ do :
     cp -R /etc/skel/. $installdir/data/home/$path
     echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
   fi
-  if [ ! -f "$installdir/data/home/$path/.zshrc" ]; then
-    cp dep/zshrc $installdir/data/home/$path/.zshrc
-  fi
+
+  # give me a fresh bashrc and zshrc file
+  cp /etc/skel/.bashrc $installdir/data/home/$path
+  cp dep/zshrc $installdir/data/home/$path/.zshrc
+  
   if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
     echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
   fi
