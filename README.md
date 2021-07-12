@@ -4,48 +4,31 @@ This installscript is meant for Linux only. For Windows, use Kim Peeters' instal
 git clone https://xcom-ro:xco5991@bitbucket.org/X-com/devserver.git /docker
 ```
 ## Dependencies
-You will need [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) installed.
+You will need [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) installed. You can let the script try and do this for you, but it's better if you do it manually as the function is untested.
 
 ## Run the install script
-* Run the installscript with sudo, not as logged in root user. This will create the `/etc/xcomuser` file with your current username
-* The installscript will ask you for a location where 
+* Run the installscript with `sudo`. The installer will prompt you for this if you're not root.
+* The installscript will ask you for a location where you want to install, defaults to /home/user/x-com
 ```bash
-$ chmod +x install
-$ sudo ./install
+$ chmod +x install-dialog.sh
+$ sudo ./install-dialog.sh
 ```
-The installscript will automatically install the packages you need. It will create the necessary folders based on your preferred installation dir (I advice to simply use a subdirectory in your home folder).  
-The script will copy all files in this directory to your chosen installation path.
+The installer will automatically install needed packages on your system. It will also create necessary folders based on the chosen install path.  
+It is important to note that references to `xcomuser` in all documents refer to your base user which you used to run the script with. For example, my username in Linux is `mycha` and this name will be used as `xcomuser`.
 
-## Docker-compose
-After the installscript did its work, change directory to your installdir. All you have to do is run `sudo docker-compose up -d`. This will build and run your created containers. Take a cup of coffee, this might take a while.
+## Devctl
+Devctl is small tool which helps managing containers. After installation, you can run `devctl build` to build all containers.
 
 ## Sonarqube
 There's a separate sonarqube.yml file which will download and give you a sonarqube instance linked to a postgres db. Run this by using `docker-compose -f sonarqube.yml up -d`
 
 ## Adding new hosts
 You can simply add new hosts by adding the project folder (or git clone the project) to the `installdir/data/shared/sites/` directory. 
-Run `devctl restart nginx` from your machine, or go back to the `installdir/docker` directory and run `sudo ./devctl nginxrestart` (or run `docker-compose restart nginx`) to restart the nginx container so new hosts are found and added. You can access the new host by using this url: `http://<host>.<xcomuser>.o.xotap.nl
+Run `devctl restart nginx` from your machine, or go back to the `installdir/docker` directory and run `docker-compose restart nginx` to restart the nginx container so new hosts are found and added. You can access the new host by using this url: `http://<host>.<xcomuser>.o.xotap.nl` after adding them to your `/etc/hosts` file. See the next chapter
 
-## X-Com DNS and accessing your hosts
-### Internal network
-If you are in the X-Com network, a DNS entry probably already is created so you will not have to edit your `/etc/hosts` file in order to access your project. Just browse to the url configured based on your project name directory and `/etc/xcomuser` file, an example:  
-`magento2.mycha.o.xotap.nl`
-
-### No DNS or internal network
+## Accessing your hosts
 Since we are working on linux and docker uses the native host, you can simply add entries mapped to localhost in your /etc/hosts file. `127.0.0.1 <host>.<xcomuser>.o.xotap.nl`.
-If you are working from home or any other location, you will need to fetch your current NAT IP address (192.168.x.x for example) and add the host manually to your `/etc/hosts` file. An example on my end:
-```
-192.168.2.185 magento2.mycha.o.xotap.nl
-```
-Open a web browser and browse to `magento2.mycha.o.xotap.nl`. This can of course be any host you added.
-
-## Run commands
-In order to run commands, you could access the docker containers directly and use `php` commands there. I like to have all php software on my local machine so I don't have to run all commands from docker. To do this, you will need all [Magento's required php dependencies](https://devdocs.magento.com/guides/v2.3/install-gde/system-requirements-tech.html#required-php-extensions) on your machine.
-Or copy paste the following:
-```bash
-$ sudo apt install php7.2 php7.2-common php7.2-gd php7.2-mysql php7.2-curl php7.2-intl php7.2-xsl php7.2-mbstring php7.2-zip php7.2-bcmath php7.2-iconv php7.2-soap phpunit
-```
-
+Open a web browser and browse to `<host>.<xcomuser>.o.xotap.nl`. This can of course be any host you added.
 
 ### Run commands in container
 To execute commands on the commandline you need to login a specific PHP container. Otherwise no php executable will be available. Here you can also use/install npm, bower, grunt, gulp composer e.t.c.
@@ -76,9 +59,9 @@ or press CTRL+D
 ```
 
 ## Container maintenance
-There is no active maintenance on the docker-compose file. Maybe I will add it as a private repo on bitbucket so it is accessible for everyone within the team. So if you want to update the containers, you have to manually copy/paste the docker-compose file to your installdir/docker directory and run `docker-compose build` and `docker-compose up -d` again.
+Whenever I have time I will make updates to this repository. You can always re-run the installer, it should not break your existing installation. Do however choose all PHP options you've previously selected as well, otherwise they will be excluded from your docker-compose file after the installer has done its work.
 
 ### Sidenotes
-- You can add your own user to the `docker` group so you won't need to use sudo every time. Although this is not encouraged
-- You can use a database manager like mysql-workbench or dbeaver to easily access mysql instances (my personal preference goes to dbeaver as workbench tends to crash often).
+- You can add your own user to the `docker` group so you won't need to use sudo every time. (According to the internet, this is discouraged but I still do it)
+- You can use a database manager like mysql-workbench or dbeaver to easily access mysql instances (my personal preference goes to dbeaver as workbench tends to crash often). You could also use integrated db manager in PHPStorm (which is a small version of DataGrip or so it seems)
 

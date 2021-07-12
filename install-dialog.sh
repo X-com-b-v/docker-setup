@@ -22,7 +22,7 @@ FIRSTRUN=1
 originstalldir=
 while [[ -z $originstalldir ]]; do
   exec 3>&1
-  originstalldir=$(dialog --inputbox "Full path to install directory" 8 60 /home/$SUDO_USER/X-Com 2>&1 1>&3)
+  originstalldir=$(dialog --inputbox "Full path to install directory" 8 60 /home/$SUDO_USER/x-com 2>&1 1>&3)
   exitcode=$?;
   exec 3>&-;
   if [ ! $exitcode = "0" ]; then
