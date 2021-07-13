@@ -74,6 +74,7 @@ case "$1" in
         ;;
     sonarqube)
         docker-compose -f sonarqube.yml up -d
+	;;
     *)
         usage
         exit 1
