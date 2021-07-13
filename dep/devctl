@@ -49,7 +49,7 @@ get_versions() {
 cd installdirectory/docker
 case "$1" in
     up)
-        docker-compose up -d
+        docker-compose up -d ${@:2}
         ;;
     restart)
         docker-compose restart ${@:2}
@@ -64,7 +64,7 @@ case "$1" in
         docker-compose ps -a
         ;;
     build)
-        docker-compose build
+        docker-compose build ${@:2}
         ;;
     hostversions)
         get_versions
