@@ -272,9 +272,9 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
 fi
 ## end docker compose
 
-#chown $SUDO_USER:$SUDO_USER $installdir
+chown $SUDO_USER:$SUDO_USER $installdir
+chown $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
 chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
-chown -R $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
 chown -R $SUDO_USER:$SUDO_USER $installdir/docker
 
 if [ ! $FIRSTRUN = "0" ]; then
