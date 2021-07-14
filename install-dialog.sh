@@ -124,6 +124,7 @@ if [ ! -d "$installdir/docker" ]; then
 fi
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
+cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
 # cp -r ./docker/* $installdir/docker/
 
 # make sure other services are not forgotten, these are not updated for a second run
