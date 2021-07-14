@@ -72,6 +72,4 @@ if [ ! -d "/home/web/.nvm" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | zsh
 fi
 
-update-alternatives --set php /usr/bin/php7.3
-
 sudo tail -f /var/log/php7.3-fpm.log
