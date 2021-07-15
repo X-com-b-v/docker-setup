@@ -18,7 +18,7 @@ if ! grep -q "export XCOM_SERVERUSER" /home/web/.bashrc; then
 fi
 
 if ! grep -q "toilet -w" /home/web/.bashrc; then
-  echo "toilet -w 100 -F metal X-Com" >> /home/web/.bashrc
+  echo "toilet -w 120 -F gay X-Com PHP 7.4" >> /home/web/.bashrc
 fi
 
 if [ ! -f "/home/web/.git-completion.bash" ]; then
