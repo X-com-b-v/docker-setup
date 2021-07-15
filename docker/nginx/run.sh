@@ -79,7 +79,7 @@ EOF
             fi
             if [ -d "/data/shared/sites/$1/pub/media" ]; then
                 mv /data/shared/sites/$1/pub/media/* /data/shared/media/$1/
-                rm -r /data/shared/sites/$1/pub/media
+                rm -rf /data/shared/sites/$1/pub/media
             fi
             ln -s /data/shared/media/$1 /data/shared/sites/$1/pub/media
             chown -R web.web /data/shared/sites/$1/pub/media
