@@ -45,6 +45,9 @@ EOF
     elif [ -f "/data/shared/sites/$SITEBASENAME/app/etc/local.xml" ]; then
         # Lijkt op magento1
         echo '{"template":"magento","webserver":"nginx","php_version":"7.0"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+    elif [ -f "/data/shared/sites/$SITEBASENAME/bin/package.sh" ]; then
+        # Lijkt op shopware
+        echo '{"template":"shopware","webserver":"nginx","php_version":"7.4"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
     elif [ -f "/data/shared/sites/$SITEBASENAME/src/Kernel.php" ]; then
         # Lijkt symfony 4
         echo '{"template":"symfony4","webserver":"nginx","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
