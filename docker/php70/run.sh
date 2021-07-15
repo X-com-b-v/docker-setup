@@ -69,7 +69,7 @@ if [ ! -f "/home/web/bin/deb" ]; then
 fi
 
 if [ ! -d "/home/web/.nvm" ]; then
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | zsh
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 fi
 
 sudo tail -f /var/log/php7.0-fpm.log

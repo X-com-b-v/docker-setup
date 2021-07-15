@@ -12,20 +12,20 @@ SHELL="/bin/bash";
 if ! groups $USER | grep &>/dev/null '\bdocker\b'; then
     # check if current user is not root
     if [ "$EUID" -ne 0 ]; then
-        if sudo docker exec -it "docker_$@_1" which zsh >&/dev/null && sudo docker exec -it "docker_$@_1" test -d "/home/web/.oh-my-zsh"; 
-            then SHELL="$(sudo docker exec -it "docker_$@_1" which zsh)";
-        fi
+        #if sudo docker exec -it "docker_$@_1" which zsh >&/dev/null && sudo docker exec -it "docker_$@_1" test -d "/home/web/.oh-my-zsh"; 
+        #    then SHELL="$(sudo docker exec -it "docker_$@_1" which zsh)";
+        #fi
         sudo docker exec -it "docker_$@_1" ${SHELL//$'\r'/}
     else
-        if docker exec -it "docker_$@_1" which zsh >&/dev/null && docker exec -it "docker_$@_1" test -d "/home/web/.oh-my-zsh";
-            then SHELL="$(docker exec -it "docker_$@_1" which zsh)";
-        fi
+        #if docker exec -it "docker_$@_1" which zsh >&/dev/null && docker exec -it "docker_$@_1" test -d "/home/web/.oh-my-zsh";
+        #    then SHELL="$(docker exec -it "docker_$@_1" which zsh)";
+        #fi
         docker exec -it "docker_$@_1" ${SHELL//$'\r'/}
     fi
 else
-    if docker exec -it "docker_$@_1" which zsh >&/dev/null && docker exec -it "docker_$@_1" test -d "/home/web/.oh-my-zsh";
-        then SHELL="$(docker exec -it "docker_$@_1" which zsh)";
-    fi
+    #if docker exec -it "docker_$@_1" which zsh >&/dev/null && docker exec -it "docker_$@_1" test -d "/home/web/.oh-my-zsh";
+    #    then SHELL="$(docker exec -it "docker_$@_1" which zsh)";
+    #fi
     docker exec -it "docker_$@_1" ${SHELL//$'\r'/}
 fi
 
