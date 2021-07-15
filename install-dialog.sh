@@ -69,23 +69,24 @@ if [ ! -f /usr/bin/docker ] && [[ ! -f /usr/local/bin/docker-compose || ! -f /us
             --yesno "Tries to install docker and docker-compose for you, it is not properly tested" 7 60; then
         #dialog --title "Information" --msgbox "TRUE" 6 44
         if [[ ! -f /usr/bin/docker && -n "$(uname -v | grep Ubuntu)" ]]; then
-        # not sure if this will work, untested
-        #echo "Installing docker"
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-        apt-key fingerprint 0EBFCD88
-        RELEASE=$(lsb_release -cs)
-        add-apt-repository \
-        "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-        $RELEASE \
-        stable"
-        apt -qq update
-        apt -y install docker-ce
-    fi
-    if [ ! -f /usr/local/bin/docker-compose ]; then
-        echo "Installing docker-compose"
-        curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        chmod +x /usr/local/bin/docker-compose
-    fi
+            # not sure if this will work, untested
+            #echo "Installing docker"
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            apt-key fingerprint 0EBFCD88
+            #RELEASE=$(lsb_release -cs)
+            RELEASE=focal
+            add-apt-repository \
+                "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+                $RELEASE \
+                stable"
+            apt update -qq
+            apt install docker-ce -y
+        fi
+        if [ ! -f /usr/local/bin/docker-compose ]; then
+            echo "Installing docker-compose"
+            curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+        fi
     else
         dialog --title "Information" --msgbox "You can download both at \n https://docs.docker.com/install/ \n https://docs.docker.com/compose/install/" 7 50
     fi
