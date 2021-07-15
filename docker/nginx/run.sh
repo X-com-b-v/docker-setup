@@ -21,6 +21,10 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         mkdir -p /data/shared/sites/$SITEBASENAME/logs
     fi
 
+    if [ ! -d "/data/shared/media/$SITEBASENAME" ]; then
+        mkdir -p /data/shared/media/$SITEBASENAME
+    fi
+
     HOSTFOUND="0"
     CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
 
@@ -64,6 +68,27 @@ EOF
         # default hosting
         echo '{"template":"default","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
     fi
+
+    # handle media part, only for magento
+    handleMedia () {
+        if [ -f "/data/shared/sites/$1/bin/magento" ]; then
+            if [ ! -d "/data/shared/media/$1" ]; then
+                mkdir -p "/data/shared/media/$1"
+            fi
+            chown -R web.web /data/shared/media/$1
+            if [ -L "/data/shared/sites/$1/pub/media" ]; then
+                # exit function if pub/media already is a symlink
+                return
+            fi
+            if [ -d "/data/shared/sites/$1/pub/media" ]; then
+                mv /data/shared/sites/$1/pub/media/* /data/shared/media/$1/
+                rm -r /data/shared/sites/$1/pub/media
+            fi
+            ln -s /data/shared/media/$1 /data/shared/sites/$1/pub/media
+            chown -R web.web /data/shared/sites/$1/pub/media
+        fi
+    }
+    handleMedia "$SITEBASENAME"
 
     PROXYPORT=""
     USE_TEMPLATE=$(jq -r .template "$CONFIGFILE")
