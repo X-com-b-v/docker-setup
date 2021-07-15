@@ -41,23 +41,22 @@ else
     FIRSTRUN=0
 fi
 
-if [ ! -f /usr/local/bin/enter ]; then
-    cp dep/enter /usr/local/bin/enter
-    chmod +x /usr/local/bin/enter
-fi
-
 if [ ! -f /usr/local/bin/devctl ]; then
     cp dep/devctl /usr/local/bin/devctl
+    cp dep/enter /usr/local/bin/enter
     sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
     chmod +x /usr/local/bin/devctl
+    chmod +x /usr/local/bin/enter
 else
     if dialog --stdout --title "devctl found, overwrite?" \
             --backtitle "devctl" \
             --yesno "Found devctl, want to overwrite existing with new parameters?" 10 60; 
     then
         cp dep/devctl /usr/local/bin/devctl
+        cp dep/enter /usr/local/bin/enter
         sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
         chmod +x /usr/local/bin/devctl
+        chmod +x /usr/local/bin/enter
     fi
 fi
 
