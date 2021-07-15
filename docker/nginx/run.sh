@@ -23,6 +23,7 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
 
     if [ ! -d "/data/shared/media/$SITEBASENAME" ]; then
         mkdir -p /data/shared/media/$SITEBASENAME
+        chown -R web.web /data/shared/media/$SITEBASENAME
     fi
 
     HOSTFOUND="0"
@@ -72,10 +73,6 @@ EOF
     # handle media part, only for magento
     handleMedia () {
         if [ -f "/data/shared/sites/$1/bin/magento" ]; then
-            if [ ! -d "/data/shared/media/$1" ]; then
-                mkdir -p "/data/shared/media/$1"
-            fi
-            chown -R web.web /data/shared/media/$1
             if [ -L "/data/shared/sites/$1/pub/media" ]; then
                 # exit function if pub/media already is a symlink
                 return
