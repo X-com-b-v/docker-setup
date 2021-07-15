@@ -153,6 +153,7 @@ clear
         mkdir -p "$installdir/data/home/$path"
         cp -R /etc/skel/. $installdir/data/home/$path
         echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
+        echo "alias ls='ls --color=auto -lrth --group-directories-first'" >> $installdir/data/home/$path/.bash_aliases
     fi
 
     # give me a fresh bashrc and zshrc file
