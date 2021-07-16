@@ -20,7 +20,7 @@ build                   | Build all containers in docker-compose file
 hostversions [projects] | Shows which installed projects run on which PHP version
 installdir              | Shows current install directory
 sonarqube               | Creates sonarqube and postgres instances
-flushredis              | Flush redis completely
+flushredis [db]         | Flush redis completely, or a single db
 EOF
 }
 
