@@ -15,7 +15,7 @@ up [containers]         | Create and daemonize containers in docker-compose file
 restart [containers]    | Restart all built containers
 stop [containers]       | Stop all built containers.
 start [containers]      | Start all built containers
-status                  | Shows running status of all containers managed by this docker-compose file (ps -a)
+status|ps               | Shows running status of all containers managed by this docker-compose file (ps -a)
 build                   | Build all containers in docker-compose file
 hostversions [projects] | Shows which installed projects run on which PHP version
 installdir              | Shows current install directory
@@ -85,7 +85,7 @@ case "$1" in
     start)
         docker-compose start ${@:2}
         ;;
-    status)
+    status|ps)
         docker-compose ps -a
         ;;
     build)
