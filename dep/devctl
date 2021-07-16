@@ -63,6 +63,14 @@ get_versions() {
     done
 }
 
+flush_redis () {
+    if [ $# -eq 0 ]; then
+        docker exec -it "docker_redis_1" redis-cli flushall
+        return
+    fi
+    docker exec -it "docker_redis_1" redis-cli -n $1 flushdb
+}
+
 cd installdirectory/docker
 case "$1" in
     up)
@@ -93,7 +101,7 @@ case "$1" in
         docker-compose -f sonarqube.yml up -d
 	    ;;
     flushredis)
-        docker exec -it "docker_redis_1" redis-cli flushall
+        flush_redis $2
         ;;
     *)
         usage
