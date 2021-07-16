@@ -17,7 +17,7 @@ stop [containers]       | Stop all built containers.
 start [containers]      | Start all built containers
 status                  | Shows running status of all containers managed by this docker-compose file (ps -a)
 build                   | Build all containers in docker-compose file
-hostversions            | Shows which installed projects run on which PHP version
+hostversions [projects] | Shows which installed projects run on which PHP version
 installdir              | Shows current install directory
 sonarqube               | Creates sonarqube and postgres instances
 flushredis              | Flush redis completely
@@ -30,11 +30,27 @@ get_installdir() {
 
 get_versions() {
     INSTALLPATH=installdirectory/data/shared/sites
-    for path in $INSTALLPATH/* ; do
-        if ! command_exists jq ; then
-            echo "Need jq to run this, please use sudo apt install jq"
-            exit 1
-        fi
+    if ! command_exists jq ; then
+        echo "Need jq to run this, please use sudo apt install jq"
+        exit 1
+    fi
+    if [ $# -eq 0 ]; then
+        for path in $INSTALLPATH/* ; do
+            if [ -d $path/.siteconfig ]; then
+                VHOST=$(basename $path)
+                if [ -f $path/.siteconfig/config.json ] ; then
+                    PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json")
+                elif [ -f $path/.siteconfig/config.json.example ]; then
+                    PHPVERSION=$(jq -r .php_version "$path/.siteconfig/config.json.example")
+                fi
+                echo "$VHOST -> PHP $PHPVERSION"
+            fi
+        done
+        # no need to do anything else for now
+        return
+    fi
+    for project in $@ ; do
+        path=$INSTALLPATH/$project
         if [ -d $path/.siteconfig ]; then
             VHOST=$(basename $path)
             if [ -f $path/.siteconfig/config.json ] ; then
@@ -68,7 +84,7 @@ case "$1" in
         docker-compose build
         ;;
     hostversions)
-        get_versions
+        get_versions ${@:2}
         ;;
     installdir)
         get_installdir
