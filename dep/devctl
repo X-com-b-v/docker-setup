@@ -20,6 +20,7 @@ build                   | Build all containers in docker-compose file
 hostversions            | Shows which installed projects run on which PHP version
 installdir              | Shows current install directory
 sonarqube               | Creates sonarqube and postgres instances
+flushredis              | Flush redis completely
 EOF
 }
 
@@ -74,7 +75,10 @@ case "$1" in
         ;;
     sonarqube)
         docker-compose -f sonarqube.yml up -d
-	;;
+	    ;;
+    flushredis)
+        docker exec -it "docker_redis_1" redis-cli flushall
+        ;;
     *)
         usage
         exit 1
