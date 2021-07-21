@@ -19,12 +19,16 @@ status|ps               | Shows running status of all containers managed by this
 build                   | Build all containers in docker-compose file
 hostversions [projects] | Shows which installed projects run on which PHP version
 installdir              | Shows current install directory
+dockerdir               | Shows current docker directory
 sonarqube               | Creates sonarqube and postgres instances
 flushredis [db]         | Flush redis completely, or a single db
 EOF
 }
 
 get_installdir() {
+    echo "installdirectory"
+}
+get_dockerdir() {
     echo "installdirectory/docker"
 }
 
@@ -96,6 +100,9 @@ case "$1" in
         ;;
     installdir)
         get_installdir
+        ;;
+    dockerdir)
+        get_dockerdir
         ;;
     sonarqube)
         docker-compose -f sonarqube.yml up -d
