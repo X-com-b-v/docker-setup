@@ -156,9 +156,9 @@ clear
         echo "alias ls='ls --color=auto -lrth --group-directories-first'" >> $installdir/data/home/$path/.bash_aliases
     fi
 
-    # give me a fresh bashrc and zshrc file
-    cp /etc/skel/.bashrc $installdir/data/home/$path
-    cp dep/zshrc $installdir/data/home/$path/.zshrc
+    # give me a fresh bashrc --and zshrc file--
+    #cp /etc/skel/.bashrc $installdir/data/home/$path
+    #cp dep/zshrc $installdir/data/home/$path/.zshrc
     
     if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
         echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
@@ -166,9 +166,12 @@ clear
     if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
         echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
     fi
+    if grep -q "SKIP_CONFIGURATOR" $installdir/data/home/$path/.bashrc; then
+        sed -i '/SKIP_CONFIGURATOR/d' $installdir/data/home/$path/.bashrc
+    fi
     if [ $SKIP_CONFIGURATOR = "1" ]; then
         echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
-        echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.zshrc
+        #echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.zshrc
     fi
     if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
         cp dep/git-autocomplete.sh $installdir/data/home/$path/
