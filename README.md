@@ -1,8 +1,4 @@
 # Install
-This installscript is meant for Linux only. For Windows, use Kim Peeters' installation script using the command below:
-```
-git clone https://xcom-ro:xco5991@bitbucket.org/X-com/devserver.git /docker
-```
 ## Dependencies
 You will need [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) installed. You can let the script try and do this for you, but it's better if you do it manually as the function is untested.
 
