@@ -12,18 +12,17 @@ rm /etc/nginx/sites-enabled/*
 for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     SITEBASENAME=`basename $d`
 
-    if [ ! -d "/data/shared/sites/$SITEBASENAME/.siteconfig" ]; then
-        mkdir -p /data/shared/sites/$SITEBASENAME/.siteconfig
-        chown -R web.web /data/shared/sites/$SITEBASENAME/.siteconfig
-    fi
+    dirs=( "/data/shared/sites/$SITEBASENAME/.siteconfig" "/data/shared/media/$SITEBASENAME" )
+    for dir in ${dirs[@]}
+    do :
+        if [ ! -d "$dir" ]; then
+            mkdir -p $dir
+            chown -R web.web $dir
+        fi
+    done
 
     if [ ! -d "/data/shared/sites/$SITEBASENAME/logs" ]; then
         mkdir -p /data/shared/sites/$SITEBASENAME/logs
-    fi
-
-    if [ ! -d "/data/shared/media/$SITEBASENAME" ]; then
-        mkdir -p /data/shared/media/$SITEBASENAME
-        chown -R web.web /data/shared/media/$SITEBASENAME
     fi
 
     HOSTFOUND="0"
