@@ -172,6 +172,10 @@ clear
     if [ ! -d $installdir/docker/$path ]; then
         cp -r ./docker/$path $installdir/docker/
     fi
+    if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
+        mkdir -p $installdir/docker/$path/conf.d
+        cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
+    fi
     done
 ## end prepare paths
 
