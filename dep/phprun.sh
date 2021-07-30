@@ -29,8 +29,9 @@ if [ ! -d "/home/web/bin" ]; then
   mkdir -p /home/web/bin
 fi
 
-if [ ! -d "/home/web/.oh-my-zsh" ]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+if [ ! -f "/home/web/bin/starship" ]; then
+    sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- --bin-dir /home/web/bin --force
+    echo 'eval "$(starship init bash)"' >> /home/web/.bashrc
 fi
 
 if [ ! -f "/home/web/bin/composer" ]; then

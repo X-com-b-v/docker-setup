@@ -176,11 +176,12 @@ clear
             mkdir -p $installdir/docker/$path/conf.d
             cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
         fi
-        cp ./dep/phprun.sh $installdir/docker/$path/run.sh
+
         position=4
         phpversion="$path"
         phpversion="${phpversion:0:position}.${phpversion:position}"
 
+        cp ./dep/phprun.sh $installdir/docker/$path/run.sh
         sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/run.sh
     done
 ## end prepare paths
