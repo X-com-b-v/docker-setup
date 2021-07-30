@@ -94,24 +94,13 @@ fi
 ## end docker and docker-compose
 
 ## prepare paths
-
-if [ ! -d "$installdir/data/shared/sites" ]; then
-    mkdir -p $installdir/data/shared/sites
-    #chown -R web.web $installdir/data/shared/sites
-fi
-
-if [ ! -d "$installdir/data/shared/media" ]; then
-  mkdir -p $installdir/data/shared/media
-  #chown -R web.web $installdir/data/shared/media
-fi
-
-if [ ! -d "$installdir/data/shared/sockets" ]; then
-    mkdir -p $installdir/data/shared/sockets
-fi
-
-if [ ! -d "$installdir/data/home" ]; then
-    mkdir -p $installdir/data/home
-fi
+folders=( "$installdir/docker" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" )
+for folder in ${folders[@]}
+do :
+    if [ ! -d "$folder" ]; then
+        mkdir -p $folder
+    fi
+done
 
 if dialog --stdout --title "Skip configurator versioning post-checkout / post-merge?" \
             --backtitle "git hooks" \
@@ -119,9 +108,6 @@ if dialog --stdout --title "Skip configurator versioning post-checkout / post-me
     SKIP_CONFIGURATOR=1
 fi
 
-if [ ! -d "$installdir/docker" ]; then
-    mkdir -p $installdir/docker
-fi
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
