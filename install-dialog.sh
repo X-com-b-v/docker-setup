@@ -135,47 +135,53 @@ clear
     #for path in "${paths[@]}"
     for path in $paths
     do :
-    if [ ! -d "$installdir/data/home/$path" ]; then
-        mkdir -p "$installdir/data/home/$path"
-        cp -R /etc/skel/. $installdir/data/home/$path
-        echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
-        echo "alias ls='ls --color=auto -lrth --group-directories-first'" >> $installdir/data/home/$path/.bash_aliases
-    fi
+        if [ ! -d "$installdir/data/home/$path" ]; then
+            mkdir -p "$installdir/data/home/$path"
+            cp -R /etc/skel/. $installdir/data/home/$path
+            echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
+            echo "alias ls='ls --color=auto -lrth --group-directories-first'" >> $installdir/data/home/$path/.bash_aliases
+        fi
 
-    # give me a fresh bashrc --and zshrc file--
-    #cp /etc/skel/.bashrc $installdir/data/home/$path
-    #cp dep/zshrc $installdir/data/home/$path/.zshrc
-    
-    if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
-        echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
-    fi
-    if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
-        echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
-    fi
-    if grep -q "SKIP_CONFIGURATOR" $installdir/data/home/$path/.bashrc; then
-        sed -i '/SKIP_CONFIGURATOR/d' $installdir/data/home/$path/.bashrc
-    fi
-    if [ $SKIP_CONFIGURATOR = "1" ]; then
-        echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
-        #echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.zshrc
-    fi
-    if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
-        cp dep/git-autocomplete.sh $installdir/data/home/$path/
-        chmod +x $installdir/data/home/$path/git-autocomplete.sh
-    fi
-    if [ ! -d "$installdir/data/home/$path/bin" ]; then
-        mkdir -p "$installdir/data/home/$path/bin"
-    fi
-    if [ -f docker-compose-snippets/$path ]; then
-        cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
-    fi
-    if [ ! -d $installdir/docker/$path ]; then
-        cp -r ./docker/$path $installdir/docker/
-    fi
-    if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
-        mkdir -p $installdir/docker/$path/conf.d
-        cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
-    fi
+        # give me a fresh bashrc --and zshrc file--
+        #cp /etc/skel/.bashrc $installdir/data/home/$path
+        #cp dep/zshrc $installdir/data/home/$path/.zshrc
+        
+        if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
+            echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
+        fi
+        if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
+            echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
+        fi
+        if grep -q "SKIP_CONFIGURATOR" $installdir/data/home/$path/.bashrc; then
+            sed -i '/SKIP_CONFIGURATOR/d' $installdir/data/home/$path/.bashrc
+        fi
+        if [ $SKIP_CONFIGURATOR = "1" ]; then
+            echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
+            #echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.zshrc
+        fi
+        if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
+            cp dep/git-autocomplete.sh $installdir/data/home/$path/
+            chmod +x $installdir/data/home/$path/git-autocomplete.sh
+        fi
+        if [ ! -d "$installdir/data/home/$path/bin" ]; then
+            mkdir -p "$installdir/data/home/$path/bin"
+        fi
+        if [ -f docker-compose-snippets/$path ]; then
+            cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
+        fi
+        if [ ! -d $installdir/docker/$path ]; then
+            cp -r ./docker/$path $installdir/docker/
+        fi
+        if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
+            mkdir -p $installdir/docker/$path/conf.d
+            cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
+        fi
+        cp ./dep/phprun.sh $installdir/docker/$path/run.sh
+        position=4
+        phpversion="$path"
+        phpversion="${phpversion:0:position}.${phpversion:position}"
+
+        sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/run.sh
     done
 ## end prepare paths
 

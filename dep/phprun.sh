@@ -5,8 +5,8 @@ export XCOM_SERVERUSER=$XCOMUSER
 export XCOM_SERVERTYPE=dev
 
 sudo /etc/init.d/nullmailer start
-sudo /etc/init.d/php7.3-fpm start
-sudo /etc/init.d/php7.3-fpm status
+sudo /etc/init.d/##PHPVERSION##-fpm start
+sudo /etc/init.d/##PHPVERSION##-fpm status
 
 if [ $? -ne 0 ]; then
   exit $?
@@ -18,7 +18,7 @@ if ! grep -q "export XCOM_SERVERUSER" /home/web/.bashrc; then
 fi
 
 if ! grep -q "toilet -w" /home/web/.bashrc; then
-  echo "toilet -w 100 -F gay X-Com PHP 7.3" >> /home/web/.bashrc
+  echo "toilet -w 100 -F gay X-Com ##PHPVERSION##" >> /home/web/.bashrc
 fi
 
 if [ ! -f "/home/web/.git-completion.bash" ]; then
@@ -72,4 +72,4 @@ if [ ! -d "/home/web/.nvm" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 fi
 
-sudo tail -f /var/log/php7.3-fpm.log
+sudo tail -f /var/log/##PHPVERSION##-fpm.log
