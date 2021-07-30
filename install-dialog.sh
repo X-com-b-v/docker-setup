@@ -179,45 +179,45 @@ clear
 if dialog --stdout --title "Configure gitconfig options?" \
             --backtitle "git config" \
             --yesno "Gitconfig containing aliases, makes life easy" 7 60; then
-if [ ! -d "$installdir/docker/dependencies" ]; then
-    mkdir -p $installdir/docker/dependencies
-    cp ./dep/gitconfig $installdir/docker/dependencies/
-fi
-name=
-while [[ -z $name ]]; do
-    exec 3>&1
-    name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60 2>&1 1>&3)
-    exitcode=$?;
-    exec 3>&-;
-    if [ ! $exitcode = "0" ]; then
-    clear
-    exit $exitcode
+    if [ ! -d "$installdir/docker/dependencies" ]; then
+        mkdir -p $installdir/docker/dependencies
+        cp ./dep/gitconfig $installdir/docker/dependencies/
     fi
-done
-sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
+    name=
+    while [[ -z $name ]]; do
+        exec 3>&1
+        name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60 2>&1 1>&3)
+        exitcode=$?;
+        exec 3>&-;
+        if [ ! $exitcode = "0" ]; then
+        clear
+        exit $exitcode
+        fi
+    done
+    sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
 
-email=
-while [[ -z $email ]]; do
-    exec 3>&1
-    email=$(dialog --title "git config" --inputbox "Please enter your e-mail address" 6 60 2>&1 1>&3)
-    exitcode=$?;
-    exec 3>&-;
-    if [ ! $exitcode = "0" ]; then
-    clear
-    exit $exitcode
+    email=
+    while [[ -z $email ]]; do
+        exec 3>&1
+        email=$(dialog --title "git config" --inputbox "Please enter your e-mail address" 6 60 2>&1 1>&3)
+        exitcode=$?;
+        exec 3>&-;
+        if [ ! $exitcode = "0" ]; then
+        clear
+        exit $exitcode
+        fi
+    done
+    sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
+    #for path in "${paths[@]}"
+    for path in $paths:
+    do :
+        cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
+    done
+
+    # cleanup as there's no need for this anymore
+    if [ -d "$installdir/docker/dependencies" ]; then
+        rm -r $installdir/docker/dependencies
     fi
-done
-sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
-#for path in "${paths[@]}"
-for path in $paths:
-do :
-    cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
-done
-
-# cleanup as there's no need for this anymore
-if [ -d "$installdir/docker/dependencies" ]; then
-    rm -r $installdir/docker/dependencies
-fi
 fi
 ## end gitconfig
 
