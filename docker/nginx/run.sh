@@ -155,8 +155,13 @@ EOF
     sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
 done
 
-/etc/init.d/nginx start
-/etc/init.d/nginx status
+#/etc/init.d/nginx start
+#/etc/init.d/nginx status
+
+nginx -t
+#rc-service nginx restart
+rc-service nginx start
+rc-service nginx status
 
 if [ $? -eq 0 ];then
     tail -f /var/log/nginx/error.log
