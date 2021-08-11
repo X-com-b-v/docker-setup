@@ -4,10 +4,6 @@ XCOMUSER=`cat /etc/xcomuser`
 export XCOM_SERVERUSER=$XCOMUSER
 export XCOM_SERVERTYPE=dev
 
-sudo /etc/init.d/nullmailer start
-sudo /etc/init.d/php7.4-fpm start
-sudo /etc/init.d/php7.4-fpm status
-
 if [ $? -ne 0 ]; then
   exit $?
 fi
@@ -73,4 +69,4 @@ if [ ! -d "/home/web/.nvm" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 fi
 
-sudo tail -f /var/log/php7.4-fpm.log
+php-fpm -R

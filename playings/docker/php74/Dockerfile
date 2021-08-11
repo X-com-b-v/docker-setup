@@ -51,6 +51,7 @@ RUN apk --no-cache update \
         rsync \
         ca-certificates \
         oniguruma-dev \
+    && apk add nullmailer --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted \
     && phpModules=" \
             bcmath \
             bz2 \
@@ -101,8 +102,15 @@ RUN apk --no-cache update \
 
 
 COPY ./conf.d/*.ini $PHP_INI_DIR/conf.d/
+ADD run.sh /run.sh
+# ADD php.pool.d/php-fpm.conf /usr/local/etc/php-fpm.conf
+ADD php.pool.d/www.conf /usr/local/etc/php-fpm.d/www.conf
+ADD php.pool.d/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
-RUN chown web:web /usr/local/var/log/php-fpm.log
+RUN echo 127.0.0.1 > /etc/nullmailer/remotes
+RUN chmod +x /run.sh
 
 USER web
 WORKDIR /data/shared/sites
+
+CMD ["/run.sh"]

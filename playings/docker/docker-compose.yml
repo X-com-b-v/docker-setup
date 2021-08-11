@@ -15,7 +15,7 @@ services:
     network_mode: "host"
     volumes:
       - /home/mycha/x-com/data/shared/sites:/data/shared/sites
-      - ./php74/php.pool.d:/usr/local/etc/php-fpm.d
+      #- ./php74/php.pool.d:/usr/local/etc/php-fpm.d:ro
       - /home/mycha/x-com/data/shared/sockets:/data/shared/sockets
       - /home/mycha/x-com/data/shared/media:/data/shared/media
       - /home/mycha/x-com/data/home/php74:/home/web
