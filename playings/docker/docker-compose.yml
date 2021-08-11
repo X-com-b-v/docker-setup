@@ -1,0 +1,22 @@
+version : "2"
+
+services:
+  nginx_test:
+    build: nginx
+    network_mode: "host"
+    volumes:
+      - ./alp/site-templates:/etc/nginx/site-templates:ro
+      - /home/mycha/x-com/data/shared/sites:/data/shared/sites
+      - /home/mycha/x-com/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/x-com/data/shared/media:/data/shared/media
+      - /etc/xcomuser:/etc/xcomuser:ro
+  php74_test:
+    build: php74
+    network_mode: "host"
+    volumes:
+      - /home/mycha/x-com/data/shared/sites:/data/shared/sites
+      - ./php74/php.pool.d:/usr/local/etc/php-fpm.d
+      - /home/mycha/x-com/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/x-com/data/shared/media:/data/shared/media
+      - /home/mycha/x-com/data/home/php74:/home/web
+      - /etc/xcomuser:/etc/xcomuser:ro
