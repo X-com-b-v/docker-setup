@@ -20,6 +20,7 @@ RUN apk --no-cache update \
         imap-dev \
         openssh \
         sudo \
+        git \
         nano \
         make \
         shadow \
