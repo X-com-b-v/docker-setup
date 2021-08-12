@@ -159,7 +159,7 @@ done
 #/etc/init.d/nginx status
 
 nginx -t
-#rc-service nginx restart
+rc-service nginx stop
 rc-service nginx start
 rc-service nginx status
 
