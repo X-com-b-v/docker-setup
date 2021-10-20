@@ -17,8 +17,9 @@ if ! grep -q "export XCOM_SERVERUSER" /home/web/.bashrc; then
   echo "export XCOM_SERVERUSER=`cat /etc/xcomuser`" >> /home/web/.bashrc
 fi
 
-if ! grep -q "toilet -w" /home/web/.bashrc; then
-  echo "toilet -w 100 -F gay X-Com ##PHPVERSION##" >> /home/web/.bashrc
+echo "toilet -w 100 -F gay X-Com PHP" > /home/web/.toilet
+if ! grep -q "source /home/web/.toilet" /home/web/.bashrc; then
+  echo "source /home/web/.toilet" >> /home/web/.bashrc
 fi
 
 if [ ! -f "/home/web/.git-completion.bash" ]; then

@@ -1,5 +1,5 @@
 # default
-FROM debian:bullseye-slim
+FROM debian:buster
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
 RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget unzip zsh
@@ -12,6 +12,7 @@ RUN echo 'Version 1.0.0' > /etc/xcom_docker_version
 RUN apt-get update && apt-get -y install apt-transport-https lsb-release ca-certificates gnupg
 RUN wget -q https://packages.sury.org/php/apt.gpg -O- | apt-key add -
 RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
+RUN apt-get -y install binutils-multiarch libodbc1 odbcinst1debian2 unixodbc-dev
 
 #yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
@@ -24,7 +25,7 @@ RUN curl https://packages.microsoft.com/config/debian/9/prod.list | tee /etc/apt
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
     php7.2-fpm php7.2-cli php7.2-mysql php7.2-gd php7.2-intl php7.2-curl php7.2-xsl php7.2-xdebug php7.2-mbstring php7.2-zip php7.2-soap php7.2-ssh2 php7.2-mongodb php7.2-bcmath php-imagick \
-    build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python toilet openjdk-11-jre php7.2-dev yarn dialog apt-utils unixodbc-dev rsync
+    build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python toilet openjdk-11-jre php7.2-dev yarn dialog apt-utils rsync
 
 #install sqlsrv for mssql
 RUN ACCEPT_EULA=Y apt-get -y install msodbcsql17 mssql-tools && pecl install sqlsrv-5.8.1 && pecl install pdo_sqlsrv-5.8.1
