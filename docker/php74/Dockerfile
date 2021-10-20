@@ -1,5 +1,5 @@
 # default
-FROM debian:buster
+FROM debian:bullseye-slim
 
 RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
 RUN apt-get update && apt-get -y upgrade && apt-get -y install curl nano locales sudo jq wget unzip zsh
