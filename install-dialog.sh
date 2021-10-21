@@ -169,13 +169,13 @@ clear
         if [ -f docker-compose-snippets/$path ]; then
             cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
         fi
-        if [ ! -d $installdir/docker/$path ]; then
-            cp -r ./docker/$path $installdir/docker/
-        fi
+        cp -r ./docker/$path $installdir/docker/
+
         if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
             mkdir -p $installdir/docker/$path/conf.d
-            cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
         fi
+        cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
+
 
         position=4
         phpversion="$path"
