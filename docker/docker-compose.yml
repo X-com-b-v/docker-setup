@@ -1,61 +1,60 @@
-version: "2"
+version: "3"
 
 services:
   nginx:
     build: nginx
     # restart: always
-    network_mode: "host"
+    ports:
+      - 80:80
+      - 443:443
     working_dir: /etc/nginx/sites-enabled
     volumes:
       - ./nginx/site-templates:/etc/nginx/site-templates:ro
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - installdirectory/data/shared/sockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
+      - /home/mycha/x-com/data/shared/sites:/data/shared/sites
+      - /home/mycha/x-com/data/shared/sockets:/data/shared/sockets
+      - /home/mycha/x-com/data/shared/media:/data/shared/media
       - /etc/xcomuser:/etc/xcomuser:ro
 
   mysql57:
     image: mysql:5.7
     # restart: always
-    network_mode: "host"
     environment:
       - MYSQL_ROOT_PASSWORD=xcom
-  #  ports:
-  #    - 3306:3306
+    ports:
+      - 3306:3306
     volumes:
-      - installdirectory/data/mysql57:/var/lib/mysql
+      - /home/mycha/x-com/data/mysql57:/var/lib/mysql
       - ./mysql57/conf.d:/etc/mysql/conf.d:ro
 
   mysql80:
     image: mysql:8.0
     # restart: always
-    network_mode: "host"
     environment:
       - MYSQL_ROOT_PASSWORD=xcom
+    ports:
+      - 3308:3308
     volumes:
-      - installdirectory/data/mysql80:/var/lib/mysql
+      - /home/mycha/x-com/data/mysql80:/var/lib/mysql
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
 
   redis:
-    image: redis:6.2
+    image: redis:6.2-alpine
     # restart: always
-    network_mode: "host"
-  #  ports:
-  #    - 6379:6379      
+    ports:
+      - 6379:6379
     volumes:
-      - installdirectory/data/redis:/data
+      - /home/mycha/x-com/data/redis:/data
 
   mailtrap:
     build: mailtrap
     # restart: always
-    network_mode: "host"
-  #  ports:
-  #    - 8085:8085
-  #    - 25:25
+    ports:
+      - 8085:8085
+      - 0.0.0.0:25:25
 
   elasticsearch6:
     build: elasticsearch6
     # restart: always
-    # network_mode: "host"
     ports:
       - 9200:9200
       - 9300:9300
@@ -65,7 +64,6 @@ services:
   elasticsearch7:
     build: elasticsearch7
     # restart: always
-    # network_mode: "host"
     ports:
       - 9400:9200
       - 9500:9300
