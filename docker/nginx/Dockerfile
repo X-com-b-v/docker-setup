@@ -13,7 +13,9 @@ RUN apk add --no-cache openrc bash nginx jq nano openssl sudo && \
     openrc && \
     touch /run/openrc/softlevel
 
-#RUN chown web.root /var/lib/nginx /var/lib/nginx/tmp /var/lib/nginx/tmp/client_body
+RUN mkdir -p /var/lib/nginx/tmp /var/log/nginx \
+    && chown -R web:web /var/lib/nginx /var/log/nginx \
+    && chmod -R 755 /var/lib/nginx /var/log/nginx
 
 #CMD ["nginx", "-g", "daemon off;"]
 CMD ["/run.sh"]
