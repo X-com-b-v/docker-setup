@@ -52,22 +52,12 @@ services:
       - 8085:8085
       - 0.0.0.0:25:25
 
-  elasticsearch6:
-    build: elasticsearch6
+  elasticsearch:
+    build: elasticsearch
     # restart: always
     ports:
       - 9200:9200
       - 9300:9300
-    environment:
-      - discovery.type=single-node
-      - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
-
-  elasticsearch7:
-    build: elasticsearch7
-    # restart: always
-    ports:
-      - 9400:9200
-      - 9500:9300
     environment:
       - discovery.type=single-node
       - LOG4J_FORMAT_MSG_NO_LOOKUPS=true

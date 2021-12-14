@@ -94,7 +94,7 @@ fi
 ## end docker and docker-compose
 
 ## prepare paths
-folders=( "$installdir/docker" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" )
+folders=( "$installdir/docker" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" )
 for folder in ${folders[@]}
 do :
     if [ ! -d "$folder" ]; then
@@ -114,7 +114,7 @@ cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
 # cp -r ./docker/* $installdir/docker/
 
 # make sure other services are not forgotten, these are not updated for a second run
-services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch6" "elasticsearch7" )
+services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" )
 for service in "${services[@]}"
 do :
     if [ ! -d $installdir/docker/$service ]; then
