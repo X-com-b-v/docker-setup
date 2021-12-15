@@ -10,9 +10,9 @@ services:
     working_dir: /etc/nginx/sites-enabled
     volumes:
       - ./nginx/site-templates:/etc/nginx/site-templates:ro
-      - /home/mycha/x-com/data/shared/sites:/data/shared/sites
-      - /home/mycha/x-com/data/shared/sockets:/data/shared/sockets
-      - /home/mycha/x-com/data/shared/media:/data/shared/media
+      - installdirectory/data/shared/sites:/data/shared/sites
+      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - installdirectory/data/shared/media:/data/shared/media
       - /etc/xcomuser:/etc/xcomuser:ro
 
   mysql57:
@@ -23,7 +23,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /home/mycha/x-com/data/mysql57:/var/lib/mysql
+      - installdirectory/data/mysql57:/var/lib/mysql
       - ./mysql57/conf.d:/etc/mysql/conf.d:ro
 
   mysql80:
@@ -34,7 +34,7 @@ services:
     ports:
       - 3308:3308
     volumes:
-      - /home/mycha/x-com/data/mysql80:/var/lib/mysql
+      - installdirectory/data/mysql80:/var/lib/mysql
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
 
   redis:
@@ -43,7 +43,7 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - /home/mycha/x-com/data/redis:/data
+      - installdirectory/data/redis:/data
 
   mailtrap:
     build: mailtrap
@@ -58,6 +58,8 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    volumes:
+      - installdirectory/data:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
       - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
