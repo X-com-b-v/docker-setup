@@ -1,5 +1,8 @@
 version: "3"
 
+volumes:
+  elasticsearch:
+
 services:
   nginx:
     build: nginx
@@ -59,7 +62,7 @@ services:
       - 9200:9200
       - 9300:9300
     volumes:
-      - installdirectory/data:/usr/share/elasticsearch/data
+      - elasticsearch:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
       - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
