@@ -1,5 +1,9 @@
 version: "3"
 
+networks:
+  xcom_network:
+    driver: bridge
+
 volumes:
   elasticsearch:
 
@@ -17,6 +21,8 @@ services:
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - /etc/xcomuser:/etc/xcomuser:ro
+    networks:
+      - xcom_network
 
   mysql57:
     image: mysql:5.7
@@ -28,7 +34,8 @@ services:
     volumes:
       - installdirectory/data/mysql57:/var/lib/mysql
       - ./mysql57/conf.d:/etc/mysql/conf.d:ro
-
+    networks:
+      - xcom_network
   mysql80:
     image: mysql:8.0
     # restart: always
@@ -39,7 +46,8 @@ services:
     volumes:
       - installdirectory/data/mysql80:/var/lib/mysql
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
-
+    networks:
+      - xcom_network
   redis:
     image: redis:6.2-alpine
     # restart: always
@@ -47,14 +55,16 @@ services:
       - 6379:6379
     volumes:
       - installdirectory/data/redis:/data
-
+    networks:
+      - xcom_network
   mailtrap:
     build: mailtrap
     # restart: always
     ports:
       - 8085:8085
       - 0.0.0.0:25:25
-
+    networks:
+      - xcom_network
   elasticsearch:
     build: elasticsearch
     # restart: always
@@ -66,4 +76,5 @@ services:
     environment:
       - discovery.type=single-node
       - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
-
+    networks:
+      - xcom_network

@@ -1,7 +1,6 @@
   php80:
     build: php80
     # restart: always
-    network_mode: "host"
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
       - ./php80/php.pool.d:/etc/php/8.0/fpm/pool.d:ro
@@ -12,3 +11,5 @@
     user: web
     working_dir: /data/shared/sites
     entrypoint: /run.sh
+    networks:
+      - xcom_network
