@@ -24,7 +24,7 @@ RUN apt-get update && \
     php7.4-fpm php7.4-cli php7.4-mysql php7.4-gd php7.4-intl php7.4-curl php7.4-xsl php7.4-xdebug php7.4-mbstring php7.4-zip php7.4-soap php7.4-mongodb php7.4-bcmath php-imagick \
     build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python yarn toilet openjdk-11-jre rsync
 
-RUN echo 127.0.0.1 > /etc/nullmailer/remotes
+RUN echo mailtrap > /etc/nullmailer/remotes
 
 ADD run.sh /run.sh
 RUN chmod +x /run.sh

@@ -18,7 +18,7 @@ RUN apt-get update && \
     php5.6-fpm php5.6-cli php5.6-mysql php5.6-gd php5.6-intl php5.6-curl php5.6-xsl php5.6-mbstring php5.6-zip php5.6-soap php-imagick \
     build-essential git git-flow subversion bzip2 default-mysql-client nullmailer python toilet rsync
 
-RUN echo 127.0.0.1 > /etc/nullmailer/remotes
+RUN echo mailtrap > /etc/nullmailer/remotes
 
 ADD run.sh /run.sh
 RUN chmod +x /run.sh

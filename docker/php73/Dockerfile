@@ -31,7 +31,7 @@ RUN apt-get update && \
 #install sqlsrv for mssql
 #RUN ACCEPT_EULA=Y apt-get -y install msodbcsql17 mssql-tools && pecl install sqlsrv && pecl install pdo_sqlsrv
 
-RUN echo 127.0.0.1 > /etc/nullmailer/remotes
+RUN echo mailtrap > /etc/nullmailer/remotes
 
 RUN printf "; priority=20\nextension=sqlsrv.so\n" > /etc/php/7.3/mods-available/sqlsrv.ini
 RUN printf "; priority=30\nextension=pdo_sqlsrv.so\n" > /etc/php/7.3/mods-available/pdo_sqlsrv.ini
