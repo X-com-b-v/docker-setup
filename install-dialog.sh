@@ -114,7 +114,7 @@ cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
 # cp -r ./docker/* $installdir/docker/
 
 # make sure other services are not forgotten, these are not updated for a second run
-services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" )
+services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" "varnish" )
 for service in "${services[@]}"
 do :
     if [ ! -d $installdir/docker/$service ]; then
