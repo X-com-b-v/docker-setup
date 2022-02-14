@@ -22,6 +22,7 @@ installdir              | Shows current install directory
 dockerdir               | Shows current docker directory
 sonarqube               | Creates sonarqube and postgres instances
 flushredis [db]         | Flush redis completely, or a single db
+flushvarnish [url]      | Flush varnish url
 EOF
 }
 
@@ -75,6 +76,10 @@ flush_redis () {
     docker exec -it "docker_redis_1" redis-cli -n $1 flushdb
 }
 
+flush_varnish () {
+    curl -X PURGE -H "X-Magento-Tags-Pattern: .*" $1
+}
+
 cd installdirectory/docker
 case "$1" in
     up)
@@ -109,6 +114,9 @@ case "$1" in
 	    ;;
     flushredis)
         flush_redis $2
+        ;;
+    flushvarnish)
+        flush_varnish $2
         ;;
     *)
         usage
