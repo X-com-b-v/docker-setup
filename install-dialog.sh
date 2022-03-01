@@ -113,13 +113,14 @@ cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
 # cp -r ./docker/* $installdir/docker/
 
-# make sure other services are not forgotten, these are not updated for a second run
+# make sure other services are not forgotten, these are not updated every run
 services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" "varnish" )
 for service in "${services[@]}"
 do :
-    # if [ ! -d $installdir/docker/$service ]; then
-        cp -r ./docker/$service $installdir/docker/$service
-    # fi
+    if [ ! -d $installdir/docker/$service ]; then
+        mkdir -p $installdir/docker/$service
+    fi
+    cp -r ./docker/$service/* $installdir/docker/$service
 done
 
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
