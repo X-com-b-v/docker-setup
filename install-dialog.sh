@@ -117,9 +117,9 @@ cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
 services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" "varnish" )
 for service in "${services[@]}"
 do :
-    if [ ! -d $installdir/docker/$service ]; then
+    # if [ ! -d $installdir/docker/$service ]; then
         cp -r ./docker/$service $installdir/docker/$service
-    fi
+    # fi
 done
 
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
