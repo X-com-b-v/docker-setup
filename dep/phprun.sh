@@ -5,8 +5,6 @@ export XCOM_SERVERUSER=$XCOMUSER
 export XCOM_SERVERTYPE=dev
 
 sudo /etc/init.d/nullmailer start
-sudo /etc/init.d/##PHPVERSION##-fpm start
-sudo /etc/init.d/##PHPVERSION##-fpm status
 
 if [ $? -ne 0 ]; then
   exit $?
@@ -74,4 +72,4 @@ if [ ! -d "/home/web/.nvm" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 fi
 
-sudo tail -f /var/log/##PHPVERSION##-fpm.log
+sudo php-fpm -R

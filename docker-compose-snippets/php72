@@ -3,7 +3,8 @@
     # restart: always
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
-      - ./php72/php.pool.d:/etc/php/7.2/fpm/pool.d:ro
+      - ./php72/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      - ./php72/conf.d/php.ini:/usr/local/etc/php/php.ini
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php72:/home/web
@@ -15,3 +16,5 @@
       - xcom_network
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    environment:
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: 1
