@@ -175,8 +175,10 @@ clear
         if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
             mkdir -p $installdir/docker/$path/conf.d
         fi
+        
+        # copy configs
         cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
-
+        cp ./dep/opcache.ini $installdir/docker/$path/conf.d/
 
         position=4
         phpversion="$path"

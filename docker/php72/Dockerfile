@@ -18,7 +18,6 @@ RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mbstring bcmath calen
 
 RUN docker-php-ext-enable xdebug 
 
-ADD conf.d/opcache.ini "$PHP_INI_DIR/conf.d/opcache.ini"
 ADD conf.d/xdebug.ini "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"
 
 ADD run.sh /run.sh
