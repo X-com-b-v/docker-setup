@@ -2,7 +2,7 @@
 
 XCOMUSER=$(cat /etc/xcomuser)
 
-DEFAULT_PHP="7.3"
+DEFAULT_PHP="7.4"
 
 #if [ ! -d "/data/shared/sites/example" ]; then
 #    mkdir /data/shared/sites/example
@@ -32,18 +32,18 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json"
     elif [ -f "/data/shared/sites/$SITEBASENAME/bin/magento" ]; then
         # Lijkt op magento 2
-        echo '{"template":"magento2","webserver":"nginx","php_version":"7.3"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        echo '{"template":"magento2","webserver":"nginx","php_version":"7.4"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
         cat << EOF > "/data/shared/sites/$SITEBASENAME/.siteconfig/params.conf.example"
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://customer.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://customer.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://customer.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://customer.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN customer.$XCOMUSER.o.xotap.nl;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://customer.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN customer.be.$XCOMUSER.o.xotap.nl;
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN $SITEBASENAME.$XCOMUSER.o.xotap.nl;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $SITEBASENAME.be.$XCOMUSER.o.xotap.nl;
 EOF
 
     elif [ -f "/data/shared/sites/$SITEBASENAME/app/etc/local.xml" ]; then
