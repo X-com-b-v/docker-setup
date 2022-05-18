@@ -58,7 +58,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=xcom
     ports:
-      - 3308:3308
+      - 3308:3306
     volumes:
       - installdirectory/data/mysql80:/var/lib/mysql
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
