@@ -23,6 +23,7 @@ dockerdir               | Shows current docker directory
 sonarqube               | Creates sonarqube and postgres instances
 flushredis [db]         | Flush redis completely, or a single db
 flushvarnish [url]      | Flush varnish url
+tail [container]        | Tail container logs
 EOF
 }
 
@@ -117,6 +118,9 @@ case "$1" in
         ;;
     flushvarnish)
         flush_varnish $2
+        ;;
+    tail)
+        docker-compose logs -f $2
         ;;
     *)
         usage
