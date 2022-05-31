@@ -2,6 +2,8 @@
 ## Dependencies
 You will need [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) installed. You can let the script try and do this for you, but it's better if you do it manually as the function is untested.
 
+The installer requires `dialog`, this can be installed via `sudo apt install dialog`
+
 ## Run the install script
 * Run the installscript with `sudo`. The installer will prompt you for this if you're not root.
 * The installscript will ask you for a location where you want to install, defaults to /home/user/x-com

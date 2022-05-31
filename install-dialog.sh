@@ -33,9 +33,13 @@ done
 
 installdir=$(echo $originstalldir | sed 's:/*$::')
 
-if [ ! -d $installdir ]; then
+if [ -z "$installdir" ]; then
+    installdir="/"
+fi
+
+if [ ! -d $installdir ] ; then
     mkdir -p $installdir
-else
+elif [ -d $installdir ] && [ $installdir != "/" ]; then
     #echo "Existing installation found, continue setup to update docker-compose file and other dependencies"
     dialog --title "Existing installation" --msgbox "Existing installation found, continuing with overrides" 8 44
     FIRSTRUN=0
