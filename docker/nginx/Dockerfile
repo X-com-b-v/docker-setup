@@ -1,21 +1,14 @@
-FROM alpine:3.14
+FROM nginx:stable
 
 ADD nginx.conf /etc/nginx/nginx.conf
+ADD fastcgi.conf /etc/nginx/fastcgi.conf
 ADD run.sh /run.sh
 
-RUN apk update
-RUN apk add --no-cache openrc bash nginx jq nano openssl sudo && \
-    adduser --uid 1000 --shell /bin/bash --disabled-password --gecos "" web && \
+RUN apt-get update && apt-get -y install jq nano openssl sudo && \
+    useradd -u 1000 -s /bin/bash web && \
     echo 'web ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
-    mkdir -p /etc/nginx/sites-enabled/ && \
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/C=NL/ST=Limburg/L=Maasbree/O=X-com B.V./OU=ICT/CN=devserver" && \
-    chmod +x /run.sh && \
-    openrc && \
-    touch /run/openrc/softlevel
-
-RUN mkdir -p /var/lib/nginx/tmp /var/log/nginx \
-    && chown -R web:web /var/lib/nginx /var/log/nginx \
-    && chmod -R 755 /var/lib/nginx /var/log/nginx
+    chmod +x /run.sh
 
 #CMD ["nginx", "-g", "daemon off;"]
 CMD ["/run.sh"]

@@ -159,9 +159,11 @@ done
 #/etc/init.d/nginx status
 
 nginx -t
-rc-service nginx stop
-rc-service nginx start
-rc-service nginx status
+#rc-service nginx stop
+#rc-service nginx start
+#rc-service nginx status
+
+service nginx restart
 
 if [ $? -eq 0 ];then
     tail -f /var/log/nginx/error.log
