@@ -63,7 +63,7 @@ EOF
         echo '{"template":"drupal","webserver":"nginx","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
     elif [ -d "/data/shared/sites/$SITEBASENAME/htdocs/wire" ]; then
         # Lijkt processwire
-        echo '{"template":"processwire","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"\
+        echo '{"template":"processwire","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
     else
         # default hosting
         echo '{"template":"default","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
