@@ -98,14 +98,15 @@ update_hosts () {
     XCOMUSER=$(cat /etc/xcomuser)
     TMPHOSTS="/tmp/hosts"
     cp $HOSTS $TMPHOSTS
-    sudo sed -i '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' $TMPHOSTS
+    sed -i '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' $TMPHOSTS
 
     sudo echo "#START XCOM HOSTS" >> $TMPHOSTS
     for d in `find -L $INSTALLDIR/data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         SITEBASENAME=`basename $d`
-        sudo echo $IPADDR $SITEBASENAME.$XCOMUSER.o.xotap.nl>> $TMPHOSTS
+        echo $IPADDR $SITEBASENAME.$XCOMUSER.o.xotap.nl>> $TMPHOSTS
     done
-    sudo echo "#END XCOM HOSTS" >> $TMPHOSTS
+    echo $IPADDR "devserver" >> $TMPHOSTS
+    echo "#END XCOM HOSTS" >> $TMPHOSTS
     sudo cp $TMPHOSTS $HOSTS
     rm $TMPHOSTS
 }
