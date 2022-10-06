@@ -25,6 +25,7 @@ flushredis [db]         | Flush redis completely, or a single db
 flushvarnish [url]      | Flush varnish url
 tail [container]        | Tail container logs
 updatehosts             | Update /etc/hosts, requires root
+reload                  | Update /etc/hosts, restart nginx
 EOF
 }
 
@@ -82,16 +83,18 @@ flush_varnish () {
     curl -X PURGE -H "X-Magento-Tags-Pattern: .*" $1
 }
 
+reload () {
+    update_hosts
+    cd $(get_dockerdir)
+    docker-compose restart nginx
+}
+
 update_hosts () {
-    if [ "$EUID" -ne 0 ]; then
-        echo "Please run as root"
-        exit 1
-    fi
     INSTALLDIR=$(get_installdir)
-    IPADDR=127.0.0.1
-    HOSTS="/etc/hosts"
-    #HOSTS="/mnt/c/Windows/System32/drivers/etc/hosts"
-    #IPADDR=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+    #IPADDR=127.0.0.1
+    #HOSTS="/etc/hosts"
+    HOSTS="/mnt/c/Windows/System32/drivers/etc/hosts"
+    IPADDR=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
     XCOMUSER=$(cat /etc/xcomuser)
     TMPHOSTS="/tmp/hosts"
     cp $HOSTS $TMPHOSTS
@@ -150,6 +153,9 @@ case "$1" in
         ;;
     updatehosts)
         update_hosts
+        ;;
+    reload)
+        reload
         ;;
     *)
         usage
