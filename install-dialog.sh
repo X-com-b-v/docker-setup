@@ -6,6 +6,12 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+CONFIGFILE="/home/$SUDO_USER/.config/docker-setup.config"
+. $CONFIGFILE
+
+#echo $installdir
+#exit 0
+
 if [ ! -f "/etc/xcomuser" ]; then
     echo $SUDO_USER > /etc/xcomuser
 fi
@@ -22,7 +28,12 @@ FIRSTRUN=1
 originstalldir=
 while [[ -z $originstalldir ]]; do
     exec 3>&1
-    originstalldir=$(dialog --inputbox "Full path to install directory" 8 60 /home/$SUDO_USER/x-com 2>&1 1>&3)
+    origdir="/home/$SUDO_USER/x-com"
+    if [ ! -z "$installdir" ]; then
+        echo $installdir
+        origdir=$installdir
+    fi
+    originstalldir=$(dialog --inputbox "Full path to install directory \nLeave empty to use root /" 8 60 $origdir 2>&1 1>&3)
     exitcode=$?;
     exec 3>&-;
     if [ ! $exitcode = "0" ]; then
@@ -41,7 +52,7 @@ if [ ! -d $installdir ] ; then
     mkdir -p $installdir
 elif [ -d $installdir ] && [ $installdir != "/" ]; then
     #echo "Existing installation found, continue setup to update docker-compose file and other dependencies"
-    dialog --title "Existing installation" --msgbox "Existing installation found, continuing with overrides" 8 44
+    dialog --title "Existing installation" --msgbox "Existing installation found. Using previous config file for current values" 8 44
     FIRSTRUN=0
 fi
 
@@ -86,13 +97,8 @@ if [ ! -f /usr/bin/docker ] && [[ ! -f /usr/local/bin/docker-compose || ! -f /us
             apt update -qq
             apt install docker-ce -y
         fi
-        if [ ! -f /usr/local/bin/docker-compose ]; then
-            echo "Installing docker-compose"
-            curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            chmod +x /usr/local/bin/docker-compose
-        fi
     else
-        dialog --title "Information" --msgbox "You can download both at \n https://docs.docker.com/install/ \n https://docs.docker.com/compose/install/" 7 50
+        dialog --title "Information" --msgbox "You can docker both at \n https://docs.docker.com/install/" 7 50
     fi
 fi
 ## end docker and docker-compose
@@ -294,6 +300,12 @@ if [ ! $FIRSTRUN = "0" ]; then
     echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
     sysctl -p --system
 fi
+
+# clear config file and write settings to it
+echo "" > $CONFIGFILE
+echo installdir=$installdir > $CONFIGFILE
+echo skip_configurator=$SKIP_CONFIGURATOR > $CONFIGFILE
+sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
 1: Run devctl build\n
