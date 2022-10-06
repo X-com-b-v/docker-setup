@@ -168,6 +168,7 @@ case "$1" in
         update_hosts
         cd $(get_dockerdir)
         docker compose restart nginx
+        ;;
     *)
         usage
         exit 1
