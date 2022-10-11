@@ -16,11 +16,11 @@ if ! groups $USER | grep &>/dev/null '\bdocker\b'; then
 fi
 
 cd $(devctl dockerdir)
-${PREPEND} docker-compose exec $@ which $SHELL > /dev/null 2>&1
+${PREPEND} docker compose exec $@ which $SHELL > /dev/null 2>&1
 EXITCODE=$?
 # check if latest command exit code is not 0
 if [ ! $EXITCODE = "0" ]; then
-    ${PREPEND} docker-compose exec $@ $FALLBACK
+    ${PREPEND} docker compose exec $@ $FALLBACK
 else
-    ${PREPEND} docker-compose exec $@ $SHELL
+    ${PREPEND} docker compose exec $@ $SHELL
 fi
