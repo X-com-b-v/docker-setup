@@ -84,6 +84,8 @@ options=(preinstall "Preinstall packages" "off"    # any option can be set to de
          gitconfig "Configure gitconfig" "off"
          ssh "Copy ssh keys to selected php versions" "on"
          restart "Restart docker containers automatically" "on"
+         varnish "Determine to use varnish or not" "off"
+         xdebug "Enable xdebug by default" "off"
 )
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
