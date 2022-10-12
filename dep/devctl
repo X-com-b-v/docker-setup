@@ -85,12 +85,6 @@ flush_varnish () {
     curl -X PURGE -H "X-Magento-Tags-Pattern: .*" $1
 }
 
-reload () {
-    update_hosts
-    cd $(get_dockerdir)
-    docker-compose restart nginx
-}
-
 update_hosts () {
     INSTALLDIR=$(get_installdir)
     HOSTS="/etc/hosts"
@@ -102,6 +96,9 @@ update_hosts () {
     fi
     XCOMUSER=$(cat /etc/xcomuser)
     TMPHOSTS="/tmp/hosts"
+    if [ ! -f $TMPHOSTS ]; then
+        touch $TMPHOSTS
+    fi
     sudo chmod 755 $TMPHOSTS
     cp $HOSTS $TMPHOSTS
     sed -i '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' $TMPHOSTS

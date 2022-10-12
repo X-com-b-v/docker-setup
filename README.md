@@ -1,6 +1,6 @@
 # Install
 ## Dependencies
-You will need [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) installed. You can let the script try and do this for you, but it's better if you do it manually as the function is untested.
+You will need [Docker CE](https://docs.docker.com/engine/install/ubuntu/) installed.
 
 The installer requires `dialog`, this can be installed via `sudo apt install dialog`
 
@@ -11,7 +11,7 @@ The installer requires `dialog`, this can be installed via `sudo apt install dia
 $ chmod +x install-dialog.sh
 $ sudo ./install-dialog.sh
 ```
-The installer will automatically install needed packages on your system. It will also create necessary folders based on the chosen install path.  
+The installer will automatically install needed packages on your system if you tell it to (advised for first run). It will also create necessary folders based on the chosen install path.  
 It is important to note that references to `xcomuser` in all documents refer to your base user which you used to run the script with. For example, my username in Linux is `mycha` and this name will be used as `xcomuser`.
 
 ## Devctl
@@ -21,12 +21,7 @@ Devctl is small tool which helps managing containers. After installation, you ca
 There's a separate sonarqube.yml file which will download and give you a sonarqube instance linked to a postgres db. Run this by using `docker-compose -f sonarqube.yml up -d`
 
 ## Adding new hosts
-You can simply add new hosts by adding the project folder (or git clone the project) to the `installdir/data/shared/sites/` directory. 
-Run `devctl restart nginx` from your machine, or go back to the `installdir/docker` directory and run `docker-compose restart nginx` to restart the nginx container so new hosts are found and added. You can access the new host by using this url: `http://<host>.<xcomuser>.o.xotap.nl` after adding them to your `/etc/hosts` file. See the next chapter
-
-## Accessing your hosts
-Since we are working on linux and docker uses the native host, you can simply add entries mapped to localhost in your /etc/hosts file. `127.0.0.1 <host>.<xcomuser>.o.xotap.nl`.
-Open a web browser and browse to `<host>.<xcomuser>.o.xotap.nl`. This can of course be any host you added.
+You can simply run `devctl reload` to update the hosts and restart nginx, so all vhosts are created.
 
 ## Running xdebug
 xDebug will work when configuring PHPStorm correctly. There's a few things of note here. The current setup expects you to run docker version 20.04+ (check with `docker -v` to see current version). More information on why can be found below (the `extra_hosts` part).

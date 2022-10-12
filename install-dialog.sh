@@ -16,21 +16,12 @@ if [ ! -f "/etc/xcomuser" ]; then
     echo $SUDO_USER > /etc/xcomuser
 fi
 
-if dialog --stdout --title "Preinstall some necessary packages?" \
-            --backtitle "Packages" \
-            --yesno "Will run apt update and install basic packages \n\n
-curl git software-properties-common apt-transport-https gnupg-agent ca-certificates" 10 60; then
-    apt update -qq
-    DEBIAN_FRONTEND=noninteractive apt install curl git jq software-properties-common apt-transport-https gnupg-agent ca-certificates -y -qq
-fi
-
 FIRSTRUN=1
 originstalldir=
 while [[ -z $originstalldir ]]; do
     exec 3>&1
     origdir="/home/$SUDO_USER/x-com"
     if [ ! -z "$installdir" ]; then
-        echo $installdir
         origdir=$installdir
     fi
     originstalldir=$(dialog --inputbox "Full path to install directory \nLeave empty to use root /" 8 60 $origdir 2>&1 1>&3)
@@ -52,56 +43,82 @@ if [ ! -d $installdir ] ; then
     mkdir -p $installdir
 elif [ -d $installdir ] && [ $installdir != "/" ]; then
     #echo "Existing installation found, continue setup to update docker-compose file and other dependencies"
-    dialog --title "Existing installation" --msgbox "Existing installation found. Using previous config file for current values" 8 44
+    # dialog --title "Existing installation" --msgbox "Existing installation found. Using previous config file for current values" 8 44
     FIRSTRUN=0
 fi
 
-if [ ! -f /usr/local/bin/devctl ]; then
+setup_devctl () {
     cp dep/devctl /usr/local/bin/devctl
     cp dep/enter /usr/local/bin/enter
     sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
     chmod +x /usr/local/bin/devctl
     chmod +x /usr/local/bin/enter
-else
-    if dialog --stdout --title "devctl found, overwrite?" \
-            --backtitle "devctl" \
-            --yesno "Found devctl, want to overwrite existing with new parameters?" 10 60; 
-    then
-        cp dep/devctl /usr/local/bin/devctl
-        cp dep/enter /usr/local/bin/enter
-        sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
-        chmod +x /usr/local/bin/devctl
-        chmod +x /usr/local/bin/enter
-    fi
+}
+
+if [ -z "$SKIP_CONFIGURATOR" ]; then 
+    SKIP_CONFIGURATOR=off
 fi
+setup_configurator () {
+    SKIP_CONFIGURATOR=on
+}
 
-## docker and docker-compose
+SETUP_GITCONFIG=0
+setup_gitconfig () {
+    SETUP_GITCONFIG=1
+}
 
-if [ ! -f /usr/bin/docker ] && [[ ! -f /usr/local/bin/docker-compose || ! -f /usr/local/docker-compose ]]; then
-    if dialog --stdout --title "Docker and docker-compose missing" \
-            --backtitle "docker & docker-compose" \
-            --defaultno \
-            --yesno "Tries to install docker and docker-compose for you, it is not properly tested" 7 60; then
-        #dialog --title "Information" --msgbox "TRUE" 6 44
-        if [[ ! -f /usr/bin/docker && -n "$(uname -v | grep Ubuntu)" ]]; then
-            # not sure if this will work, untested
-            #echo "Installing docker"
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-            apt-key fingerprint 0EBFCD88
-            #RELEASE=$(lsb_release -cs)
-            RELEASE=focal
-            add-apt-repository \
-                "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-                $RELEASE \
-                stable"
+SETUP_SSH=0
+setup_ssh () {
+    SETUP_SSH=1
+}
+
+SETUP_RESTART=0
+setup_restart () {
+    SETUP_RESTART=1
+}
+
+cmd=(dialog --separate-output --checklist "Select options:" 22 76 16)
+options=(preinstall "Preinstall packages" "off"    # any option can be set to default to "on"
+         devctl "Overwrite devctl" "on"
+         configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
+         gitconfig "Configure gitconfig" "off"
+         ssh "Copy ssh keys to selected php versions" "on"
+         restart "Restart docker containers automatically" "on"
+)
+settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+clear
+if [ -z "$settings" ]; then
+    echo "No settings provided, or cancelled"
+    exit 1
+fi
+for setting in $settings
+do :
+    case "$setting" in
+        preinstall)
             apt update -qq
-            apt install docker-ce -y
-        fi
-    else
-        dialog --title "Information" --msgbox "You can docker both at \n https://docs.docker.com/install/" 7 50
-    fi
-fi
-## end docker and docker-compose
+            DEBIAN_FRONTEND=noninteractive apt install curl git jq software-properties-common apt-transport-https gnupg-agent ca-certificates -y -qq
+            ;;
+        devctl)
+            setup_devctl
+            ;;
+        configurator)
+            setup_configurator
+            ;;
+        gitconfig)
+            setup_gitconfig
+            ;;
+        ssh)
+            setup_ssh
+            ;;
+        restart)
+            setup_restart
+            ;;
+        *)
+            echo "No settings provided"
+            exit 1;
+            ;;
+    esac        
+done
 
 ## prepare paths
 folders=( "$installdir/docker" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" )
@@ -111,12 +128,6 @@ do :
         mkdir -p $folder
     fi
 done
-
-if dialog --stdout --title "Skip configurator versioning post-checkout / post-merge?" \
-            --backtitle "git hooks" \
-            --yesno "Will not execute magento configurator" 7 60; then
-    SKIP_CONFIGURATOR=1
-fi
 
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
@@ -143,66 +154,88 @@ options=(php56 "PHP 5.6" off    # any option can be set to default to "on"
          php80 "PHP 8.0" off)
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
-    #for path in "${paths[@]}"
-    for path in $paths
-    do :
-        if [ ! -d "$installdir/data/home/$path" ]; then
-            mkdir -p "$installdir/data/home/$path"
-            cp -R /etc/skel/. $installdir/data/home/$path
-            echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
-            echo "alias ls='ls --color=auto -lrth --group-directories-first'" >> $installdir/data/home/$path/.bash_aliases
-        fi
+if [ -z "$paths" ]; then
+    echo "No paths provided, or cancelled"
+    exit 1
+fi
+for path in $paths
+do :
+    if [ ! -d "$installdir/data/home/$path" ]; then
+        mkdir -p "$installdir/data/home/$path"
+        cp -R /etc/skel/. $installdir/data/home/$path
+        echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
+        echo "alias ls='ls --color=auto -lrth --group-directories-first'" >> $installdir/data/home/$path/.bash_aliases
+    fi
 
-        # give me a fresh bashrc --and zshrc file--
-        #cp /etc/skel/.bashrc $installdir/data/home/$path
-        #cp dep/zshrc $installdir/data/home/$path/.zshrc
-        
-        if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
-            echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
-        fi
-        if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
-            echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
-        fi
-        if grep -q "SKIP_CONFIGURATOR" $installdir/data/home/$path/.bashrc; then
-            sed -i '/SKIP_CONFIGURATOR/d' $installdir/data/home/$path/.bashrc
-        fi
-        if [ $SKIP_CONFIGURATOR = "1" ]; then
-            echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
-            #echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.zshrc
-        fi
-        if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
-            cp dep/git-autocomplete.sh $installdir/data/home/$path/
-            chmod +x $installdir/data/home/$path/git-autocomplete.sh
-        fi
-        if [ ! -d "$installdir/data/home/$path/bin" ]; then
-            mkdir -p "$installdir/data/home/$path/bin"
-        fi
-        if [ -f docker-compose-snippets/$path ]; then
-            cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
-        fi
-        cp -r ./docker/$path $installdir/docker/
+    # give me a fresh bashrc --and zshrc file--
+    #cp /etc/skel/.bashrc $installdir/data/home/$path
+    #cp dep/zshrc $installdir/data/home/$path/.zshrc
+    
+    if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
+        echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
+    fi
+    if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
+        echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
+    fi
+    if grep -q "SKIP_CONFIGURATOR" $installdir/data/home/$path/.bashrc; then
+        sed -i '/SKIP_CONFIGURATOR/d' $installdir/data/home/$path/.bashrc
+    fi
+    if [ $SKIP_CONFIGURATOR = "1" ]; then
+        echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
+    fi
 
-        if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
-            mkdir -p $installdir/docker/$path/conf.d
+    if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
+        cp dep/git-autocomplete.sh $installdir/data/home/$path/
+        chmod +x $installdir/data/home/$path/git-autocomplete.sh
+    fi
+    if [ ! -d "$installdir/data/home/$path/bin" ]; then
+        mkdir -p "$installdir/data/home/$path/bin"
+    fi
+    if [ -f docker-compose-snippets/$path ]; then
+        cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
+    fi
+    cp -r ./docker/$path $installdir/docker/
+
+    if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
+        mkdir -p $installdir/docker/$path/conf.d
+    fi
+    
+    ## ssh
+    if [ $SETUP_SSH -eq 1 ]; then 
+        if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
+            if [ ! -d $installdir/data/home/$path/.ssh ]; then
+                mkdir $installdir/data/home/$path/.ssh
+            fi
+            # also use ssh config if found
+            if [ -f "/home/$SUDO_USER/.ssh/config" ]; then
+                cp /home/$SUDO_USER/.ssh/config $installdir/data/home/$path/.ssh/
+            fi
+            if [ -d "/home/$SUDO_USER/.ssh/X-com" ]; then
+                cp -r /home/$SUDO_USER/.ssh/X-com $installdir/data/home/$path/.ssh/
+            fi
+            cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
+            cp /home/$SUDO_USER/.ssh/id_rsa.pub $installdir/data/home/$path/.ssh/
+            # chmod -r 400 $installdir/data/home/$path/.ssh/*
+            
         fi
-        
-        # copy configs
-        cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
-        cp ./dep/opcache.ini $installdir/docker/$path/conf.d/
+    fi
+    ## end ssh
 
-        position=4
-        phpversion="$path"
-        phpversion="${phpversion:0:position}.${phpversion:position}"
+    # copy configs
+    cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
+    cp ./dep/opcache.ini $installdir/docker/$path/conf.d/
 
-        cp ./dep/phprun.sh $installdir/docker/$path/run.sh
-        sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/run.sh
-    done
+    position=4
+    phpversion="$path"
+    phpversion="${phpversion:0:position}.${phpversion:position}"
+
+    cp ./dep/phprun.sh $installdir/docker/$path/run.sh
+    sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/run.sh
+done
 ## end prepare paths
 
 ## gitconfig
-if dialog --stdout --title "Configure gitconfig options?" \
-            --backtitle "git config" \
-            --yesno "Gitconfig containing aliases, makes life easy" 7 60; then
+if [ $SETUP_GITCONFIG -eq 1 ]; then
     if [ ! -d "$installdir/docker/dependencies" ]; then
         mkdir -p $installdir/docker/dependencies
         cp ./dep/gitconfig $installdir/docker/dependencies/
@@ -213,10 +246,10 @@ if dialog --stdout --title "Configure gitconfig options?" \
         name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60 2>&1 1>&3)
         exitcode=$?;
         exec 3>&-;
-        if [ ! $exitcode = "0" ]; then
-        clear
-        exit $exitcode
-        fi
+        # if [ ! $exitcode = "0" ]; then
+        # clear
+        # exit $exitcode
+        # fi
     done
     sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
 
@@ -226,14 +259,14 @@ if dialog --stdout --title "Configure gitconfig options?" \
         email=$(dialog --title "git config" --inputbox "Please enter your e-mail address" 6 60 2>&1 1>&3)
         exitcode=$?;
         exec 3>&-;
-        if [ ! $exitcode = "0" ]; then
-        clear
-        exit $exitcode
-        fi
+        # if [ ! $exitcode = "0" ]; then
+        # clear
+        # exit $exitcode
+        # fi
     done
     sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
     #for path in "${paths[@]}"
-    for path in $paths:
+    for path in $paths
     do :
         cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
     done
@@ -243,41 +276,10 @@ if dialog --stdout --title "Configure gitconfig options?" \
         rm -r $installdir/docker/dependencies
     fi
 fi
+
 ## end gitconfig
 
-## ssh
-if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
-    if dialog --stdout --title "Use ssh /home/$SUDO_USER/.ssh/id_rsa?" \
-                --backtitle "ssh" \
-                --yesno "Copy ssh keys to each selected php container? \n
-    $paths" 7 60; then
-        #for path in "${paths[@]}"
-        for path in $paths
-        do :
-        echo $path
-        if [ ! -d $installdir/data/home/$path/.ssh ]; then
-            mkdir $installdir/data/home/$path/.ssh
-        fi
-        # also use ssh config if found
-        if [ -f "/home/$SUDO_USER/.ssh/config" ]; then
-            cp /home/$SUDO_USER/.ssh/config $installdir/data/home/$path/.ssh/
-        fi
-        if [ -d "/home/$SUDO_USER/.ssh/X-com" ]; then
-            cp -r /home/$SUDO_USER/.ssh/X-com $installdir/data/home/$path/.ssh/
-        fi
-        cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
-        cp /home/$SUDO_USER/.ssh/id_rsa.pub $installdir/data/home/$path/.ssh/
-        # chmod -r 400 $installdir/data/home/$path/.ssh/*
-        done
-    fi
-fi
-## end ssh
-
-## docker compose
-if dialog --stdout --title "Do you want docker containers to restart automatically" \
-            --backtitle "auto restart" \
-            --defaultno \
-            --yesno "Will automatically start containers on system boot. Very annoying." 7 60; then
+if [ $SETUP_RESTART -eq 1 ]; then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
 fi
 
@@ -285,7 +287,6 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
     #echo "Setting up correct values for docker-compose based on your given installdir"
     sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
-## end docker compose
 
 chown $SUDO_USER:$SUDO_USER $installdir
 chown $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
@@ -302,16 +303,17 @@ if [ ! $FIRSTRUN = "0" ]; then
 fi
 
 # clear config file and write settings to it
-echo "" > $CONFIGFILE
 echo installdir=$installdir > $CONFIGFILE
-echo skip_configurator=$SKIP_CONFIGURATOR > $CONFIGFILE
+echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >> $CONFIGFILE
 sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
-1: Run devctl build\n
-2: Get coffee\n
-3: Run devctl up\n
-4: Get coffee\n
-" 9 53
+1: cd to $installdir\n
+2: Run docker compose build\n
+3: Get coffee\n
+4: Run docker compose up -d\n
+5: Get coffee\n
+6: Run devctl up\n
+" 12 53
 clear
 exit 0
