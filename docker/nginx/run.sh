@@ -8,10 +8,25 @@ DEFAULT_PHP="7.4"
 #    mkdir /data/shared/sites/example
 #fi
 
+# handle media part, only for magento
+handleMedia () {
+    if [ -L "/data/shared/sites/$1/pub/media" ]; then
+        # exit function if pub/media already is a symlink
+        return
+    fi
+    if [ -d "/data/shared/sites/$1/pub/media" ]; then
+        mv /data/shared/sites/$1/pub/media/* /data/shared/media/$1/
+        rm -rf /data/shared/sites/$1/pub/media
+    fi
+    ln -s /data/shared/media/$1 /data/shared/sites/$1/pub/media
+    chown -R web.web /data/shared/sites/$1/pub/media
+}
+
 rm /etc/nginx/sites-enabled/*
 for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     SITEBASENAME=`basename $d`
 
+    # prepare directories for siteconfig and media
     dirs=( "/data/shared/sites/$SITEBASENAME/.siteconfig" "/data/shared/media/$SITEBASENAME" )
     for dir in ${dirs[@]}
     do :
@@ -21,18 +36,21 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         fi
     done
 
+    # create log directory
     if [ ! -d "/data/shared/sites/$SITEBASENAME/logs" ]; then
         mkdir -p /data/shared/sites/$SITEBASENAME/logs
     fi
 
     HOSTFOUND="0"
+    # example config file
     CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+    CONFIG=""
 
     if [ -f "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json" ]; then
         CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json"
     elif [ -f "/data/shared/sites/$SITEBASENAME/bin/magento" ]; then
         # Lijkt op magento 2
-        echo '{"template":"magento2","webserver":"nginx","php_version":"7.4"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        CONFIG='{"template":"magento2","webserver":"nginx","php_version":"7.4"}'
         cat << EOF > "/data/shared/sites/$SITEBASENAME/.siteconfig/params.conf.example"
 fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
 fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
@@ -45,46 +63,31 @@ fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL ht
 fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
 fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $SITEBASENAME.be.$XCOMUSER.o.xotap.nl;
 EOF
-
-    elif [ -f "/data/shared/sites/$SITEBASENAME/app/etc/local.xml" ]; then
-        # Lijkt op magento1
-        echo '{"template":"magento","webserver":"nginx","php_version":"7.0"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
-    elif [ -f "/data/shared/sites/$SITEBASENAME/bin/package.sh" ]; then
-        # Lijkt op shopware
-        echo '{"template":"shopware","webserver":"nginx","php_version":"7.4"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
-    elif [ -f "/data/shared/sites/$SITEBASENAME/src/Kernel.php" ]; then
-        # Lijkt symfony 4
-        echo '{"template":"symfony4","webserver":"nginx","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
-    elif [ -f "/data/shared/sites/$SITEBASENAME/app/AppKernel.php" ]; then
-        # Lijkt symfony
-        echo '{"template":"symfony","webserver":"nginx","php_version":"7.0"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
-    elif [ -d "/data/shared/sites/$SITEBASENAME/core/lib/Drupal/Core" ]; then
-        # Lijkt drupal9
-        echo '{"template":"drupal","webserver":"nginx","php_version":"7.2"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        handleMedia "$SITEBASENAME"
     elif [ -d "/data/shared/sites/$SITEBASENAME/htdocs/wire" ]; then
         # Lijkt processwire
-        echo '{"template":"processwire","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        CONFIG='{"template":"processwire","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}'
+    elif [ -f "/data/shared/sites/$SITEBASENAME/app/etc/local.xml" ]; then
+        # Lijkt op magento1
+        CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.0"}'
+    elif [ -f "/data/shared/sites/$SITEBASENAME/bin/package.sh" ]; then
+        # Lijkt op shopware
+        CONFIG='{"template":"shopware","webserver":"nginx","php_version":"7.4"}'
+    elif [ -f "/data/shared/sites/$SITEBASENAME/src/Kernel.php" ]; then
+        # Lijkt symfony 4
+        CONFIG='{"template":"symfony4","webserver":"nginx","php_version":"7.2"}'
+    elif [ -f "/data/shared/sites/$SITEBASENAME/app/AppKernel.php" ]; then
+        # Lijkt symfony
+        CONFIG='{"template":"symfony","webserver":"nginx","php_version":"7.0"}'
+    elif [ -d "/data/shared/sites/$SITEBASENAME/core/lib/Drupal/Core" ]; then
+        # Lijkt drupal9
+        CONFIG='{"template":"drupal","webserver":"nginx","php_version":"7.2"}'
     else
         # default hosting
-        echo '{"template":"default","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}' > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
+        CONFIG='{"template":"default","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}'
     fi
 
-    # handle media part, only for magento
-    handleMedia () {
-        if [ -f "/data/shared/sites/$1/bin/magento" ]; then
-            if [ -L "/data/shared/sites/$1/pub/media" ]; then
-                # exit function if pub/media already is a symlink
-                return
-            fi
-            if [ -d "/data/shared/sites/$1/pub/media" ]; then
-                mv /data/shared/sites/$1/pub/media/* /data/shared/media/$1/
-                rm -rf /data/shared/sites/$1/pub/media
-            fi
-            ln -s /data/shared/media/$1 /data/shared/sites/$1/pub/media
-            chown -R web.web /data/shared/sites/$1/pub/media
-        fi
-    }
-    handleMedia "$SITEBASENAME"
+    echo $CONFIG > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
 
     PROXYPORT=""
     USE_TEMPLATE=$(jq -r .template "$CONFIGFILE")

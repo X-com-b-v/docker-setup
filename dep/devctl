@@ -83,6 +83,14 @@ flush_redis () {
 
 flush_varnish () {
     curl -X PURGE -H "X-Magento-Tags-Pattern: .*" $1
+    curl -X PURGE $1
+}
+
+update_varnish_acl () {
+    # fetch subnet from docker xcom network
+    SUBNET=$(docker network inspect docker_xcom_network | jq '.[].IPAM.Config[].Subnet')
+    cd $(get_dockerdir)
+    sed -i -e 's:"devctl varnishacl":'"$SUBNET"':g' varnish/default.vcl
 }
 
 update_hosts () {
@@ -149,6 +157,9 @@ case "$1" in
     mongo)
         docker compose -f mongo.yml ${@:2}
 	    ;;
+    varnishacl)
+        update_varnish_acl
+        ;;
     flushredis)
         flush_redis $2
         ;;

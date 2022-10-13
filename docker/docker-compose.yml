@@ -12,7 +12,7 @@ services:
     build: nginx
     # restart: always
     ports:
-      - 8080:80
+      - 80:80
       - 443:443
     working_dir: /etc/nginx/sites-enabled
     volumes:
@@ -23,23 +23,6 @@ services:
       - /etc/xcomuser:/etc/xcomuser:ro
     networks:
       - xcom_network
-  varnish:
-    image: varnish:stable
-    volumes:
-      - "./varnish/default.vcl:/etc/varnish/default.vcl"
-    ports:
-      - "80:80"
-    tmpfs:
-      - /var/lib/varnish:exec
-    environment:
-      - VARNISH_SIZE=2G
-    command: "-p default_keep=300"
-    networks:
-      - xcom_network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      - "nginx"
   mysql57:
     image: mysql:5.7
     # restart: always

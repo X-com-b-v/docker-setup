@@ -6,8 +6,6 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-
-
 CONFIGFILE="/home/$SUDO_USER/.config/docker-setup.config"
 . $CONFIGFILE
 
@@ -54,31 +52,15 @@ setup_devctl () {
     chmod +x /usr/local/bin/enter
 }
 
-setup_configurator () {
-    SKIP_CONFIGURATOR=on
-}
-
-setup_gitconfig () {
-    SETUP_GITCONFIG=on
-}
-
-setup_ssh () {
-    SETUP_SSH=on
-}
-
-setup_restart () {
-    SETUP_RESTART=on
-}
-
 cmd=(dialog --separate-output --checklist "Select options:" 22 76 16)
 options=(preinstall "Preinstall packages" "off"    # any option can be set to default to "on"
-         devctl "Overwrite devctl" "on"
+         devctl "Setup devctl" "on"
          configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
          ssh "Copy ssh keys to selected php versions" "$SETUP_SSH"
          restart "Restart docker containers automatically" "$SETUP_RESTART"
-         varnish "Use varnish" "off"
-         xdebug "Enable xdebug by default" "off"
+         varnish "Use Varnish" "$SETUP_VARNISH"
+         xdebug "Enable Xdebug" "$SETUP_XDEBUG"
 )
 
 # reset basic variables
@@ -86,6 +68,8 @@ SKIP_CONFIGURATOR=off
 SETUP_GITCONFIG=off
 SETUP_SSH=off
 SETUP_RESTART=off
+SETUP_XDEBUG=off
+SETUP_VARNISH=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
@@ -104,22 +88,22 @@ do :
             setup_devctl
             ;;
         configurator)
-            setup_configurator
+            SKIP_CONFIGURATOR=on
             ;;
         gitconfig)
-            setup_gitconfig
+            SETUP_GITCONFIG=on
             ;;
         ssh)
-            setup_ssh
+            SETUP_SSH=on
             ;;
         restart)
-            setup_restart
+            SETUP_RESTART=on
             ;;
         varnish)
-            # todo
+            SETUP_VARNISH=on
             ;;
         xdebug)
-            # todo
+            SETUP_XDEBUG=on
             ;;
         *)
             echo "No settings provided"
@@ -142,6 +126,11 @@ cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
 # cp -r ./docker/* $installdir/docker/
 
+if [ $SETUP_VARNISH == "on" ] && [ -f docker-compose-snippets/varnish ]; then
+    sed -i -e 's/- 80:80/- 8080:80/g' $installdir/docker/docker-compose.yml
+    cat docker-compose-snippets/varnish >> $installdir/docker/docker-compose.yml
+fi
+
 # make sure other services are not forgotten, these are not updated every run
 services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" "varnish" )
 for service in "${services[@]}"
@@ -153,21 +142,38 @@ do :
 done
 
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
-options=(php56 "PHP 5.6" off    # any option can be set to default to "on"
-         php70 "PHP 7.0" off
-         php71 "PHP 7.1" off
-         php72 "PHP 7.2" on
-         php73 "PHP 7.3" on
-         php74 "PHP 7.4" on
-         php80 "PHP 8.0" off)
+options=(php56 "PHP 5.6" "$PHP56"    # any option can be set to default to "on"
+         php70 "PHP 7.0" "$PHP70"
+         php71 "PHP 7.1" "$PHP71"
+         php72 "PHP 7.2" "$PHP72"
+         php73 "PHP 7.3" "$PHP73"
+         php74 "PHP 7.4" "$PHP74"
+         php80 "PHP 8.0" "$PHP80"
+         php81 "PHP 8.1" "$PHP81"
+         )
+
+# Reset PHP variables
+PHP56=off
+PHP70=off
+PHP71=off
+PHP72=off
+PHP73=off
+PHP74=off
+PHP80=off
+PHP81=off
+
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
+
 if [ -z "$paths" ]; then
     echo "No paths provided, or cancelled"
     exit 1
 fi
 for path in $paths
 do :
+    # use printf to assign php value 
+    # https://stackoverflow.com/a/55331060
+    printf -v "${path^^}" '%s' 'on'
     if [ ! -d "$installdir/data/home/$path" ]; then
         mkdir -p "$installdir/data/home/$path"
         cp -R /etc/skel/. $installdir/data/home/$path
@@ -232,6 +238,11 @@ do :
     # copy configs
     cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
     cp ./dep/opcache.ini $installdir/docker/$path/conf.d/
+
+    if [ $SETUP_XDEBUG == "off" ]; then
+        sed -i -e 's/xdebug.mode=debug,develop/;xdebug.mode=debug,develop/g' $installdir/docker/$path/conf.d/xdebug.ini
+        sed -i -e 's/;xdebug.mode=off/xdebug.mode=off/g' $installdir/docker/$path/conf.d/xdebug.ini
+    fi
 
     position=4
     phpversion="$path"
@@ -316,6 +327,17 @@ echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >> $CONFIGFILE
 echo SETUP_GITCONFIG=$SETUP_GITCONFIG >> $CONFIGFILE
 echo SETUP_SSH=$SETUP_SSH >> $CONFIGFILE
 echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
+echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
+echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
+
+echo PHP56=$PHP56 >> $CONFIGFILE
+echo PHP70=$PHP70 >> $CONFIGFILE
+echo PHP71=$PHP71 >> $CONFIGFILE
+echo PHP72=$PHP72 >> $CONFIGFILE
+echo PHP73=$PHP73 >> $CONFIGFILE
+echo PHP74=$PHP74 >> $CONFIGFILE
+echo PHP80=$PHP80 >> $CONFIGFILE
+echo PHP81=$PHP81 >> $CONFIGFILE
 sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
