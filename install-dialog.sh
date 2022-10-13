@@ -6,11 +6,10 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+
+
 CONFIGFILE="/home/$SUDO_USER/.config/docker-setup.config"
 . $CONFIGFILE
-
-#echo $installdir
-#exit 0
 
 if [ ! -f "/etc/xcomuser" ]; then
     echo $SUDO_USER > /etc/xcomuser
@@ -55,38 +54,39 @@ setup_devctl () {
     chmod +x /usr/local/bin/enter
 }
 
-if [ -z "$SKIP_CONFIGURATOR" ]; then 
-    SKIP_CONFIGURATOR=off
-fi
 setup_configurator () {
     SKIP_CONFIGURATOR=on
 }
 
-SETUP_GITCONFIG=0
 setup_gitconfig () {
-    SETUP_GITCONFIG=1
+    SETUP_GITCONFIG=on
 }
 
-SETUP_SSH=0
 setup_ssh () {
-    SETUP_SSH=1
+    SETUP_SSH=on
 }
 
-SETUP_RESTART=0
 setup_restart () {
-    SETUP_RESTART=1
+    SETUP_RESTART=on
 }
 
 cmd=(dialog --separate-output --checklist "Select options:" 22 76 16)
 options=(preinstall "Preinstall packages" "off"    # any option can be set to default to "on"
          devctl "Overwrite devctl" "on"
          configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
-         gitconfig "Configure gitconfig" "off"
-         ssh "Copy ssh keys to selected php versions" "on"
-         restart "Restart docker containers automatically" "on"
-         varnish "Determine to use varnish or not" "off"
+         gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
+         ssh "Copy ssh keys to selected php versions" "$SETUP_SSH"
+         restart "Restart docker containers automatically" "$SETUP_RESTART"
+         varnish "Use varnish" "off"
          xdebug "Enable xdebug by default" "off"
 )
+
+# reset basic variables
+SKIP_CONFIGURATOR=off
+SETUP_GITCONFIG=off
+SETUP_SSH=off
+SETUP_RESTART=off
+
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
 if [ -z "$settings" ]; then
@@ -114,6 +114,12 @@ do :
             ;;
         restart)
             setup_restart
+            ;;
+        varnish)
+            # todo
+            ;;
+        xdebug)
+            # todo
             ;;
         *)
             echo "No settings provided"
@@ -182,7 +188,7 @@ do :
     if grep -q "SKIP_CONFIGURATOR" $installdir/data/home/$path/.bashrc; then
         sed -i '/SKIP_CONFIGURATOR/d' $installdir/data/home/$path/.bashrc
     fi
-    if [ $SKIP_CONFIGURATOR = "1" ]; then
+    if [ $SKIP_CONFIGURATOR == "on" ]; then
         echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
     fi
 
@@ -203,7 +209,7 @@ do :
     fi
     
     ## ssh
-    if [ $SETUP_SSH -eq 1 ]; then 
+    if [ $SETUP_SSH == "on" ]; then 
         if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
             if [ ! -d $installdir/data/home/$path/.ssh ]; then
                 mkdir $installdir/data/home/$path/.ssh
@@ -237,7 +243,7 @@ done
 ## end prepare paths
 
 ## gitconfig
-if [ $SETUP_GITCONFIG -eq 1 ]; then
+if [ $SETUP_GITCONFIG == "on" ]; then
     if [ ! -d "$installdir/docker/dependencies" ]; then
         mkdir -p $installdir/docker/dependencies
         cp ./dep/gitconfig $installdir/docker/dependencies/
@@ -281,7 +287,7 @@ fi
 
 ## end gitconfig
 
-if [ $SETUP_RESTART -eq 1 ]; then
+if [ $SETUP_RESTART == "on" ]; then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
 fi
 
@@ -307,15 +313,19 @@ fi
 # clear config file and write settings to it
 echo installdir=$installdir > $CONFIGFILE
 echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >> $CONFIGFILE
+echo SETUP_GITCONFIG=$SETUP_GITCONFIG >> $CONFIGFILE
+echo SETUP_SSH=$SETUP_SSH >> $CONFIGFILE
+echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
 sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
+Config is written to ~/.config/docker-setup.config\n
 1: cd to $installdir\n
 2: Run docker compose build\n
 3: Get coffee\n
 4: Run docker compose up -d\n
 5: Get coffee\n
 6: Run devctl up\n
-" 12 53
+" 13 53
 clear
 exit 0
