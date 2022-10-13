@@ -22,6 +22,7 @@ installdir              | Shows current install directory
 dockerdir               | Shows current docker directory
 sonarqube [options]     | Manage sonarqube and postgres instances
 mongo [options]         | Manage mongo instances, executes options for docker compose
+varnishacl              | Update the varnish vcl with docker_xcom_network ip/subnet
 flushredis [db]         | Flush redis completely, or a single db
 flushvarnish [url]      | Flush varnish url
 tail [container]        | Tail container logs
