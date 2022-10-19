@@ -41,4 +41,5 @@
 [branch]
   autosetuprebase = remote
 [push]
-  default = simple
+  default = current
+  autoSetupRemote = true
