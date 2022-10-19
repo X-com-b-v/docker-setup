@@ -20,7 +20,7 @@ backend default {
 
 acl purge {
     "127.0.0.1";
-    "devctl varnishacl";
+    "172.18.0.0/16";
 }
 
 sub vcl_recv {

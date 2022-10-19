@@ -90,8 +90,10 @@ flush_varnish () {
 update_varnish_acl () {
     # fetch subnet from docker xcom network
     SUBNET=$(docker network inspect docker_xcom_network | jq '.[].IPAM.Config[].Subnet')
-    cd $(get_dockerdir)
-    sed -i -e 's:"devctl varnishacl":'"$SUBNET"':g' varnish/default.vcl
+    if [ -n "$SUBNET" ]; then
+        cd $(get_dockerdir)
+        sed -i -e 's:"172.18.0.0/16":'"$SUBNET"':g' varnish/default.vcl
+    fi
 }
 
 update_hosts () {
