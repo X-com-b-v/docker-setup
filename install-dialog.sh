@@ -7,7 +7,9 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 CONFIGFILE="/home/$SUDO_USER/.config/docker-setup.config"
-. $CONFIGFILE
+if [ -f "$CONFIGFILE" ]; then
+    . $CONFIGFILE
+fi
 
 if [ ! -f "/etc/xcomuser" ]; then
     echo $SUDO_USER > /etc/xcomuser
@@ -52,15 +54,56 @@ setup_devctl () {
     chmod +x /usr/local/bin/enter
 }
 
+setup_gitconfig () {
+    if [ ! -d "$installdir/docker/dependencies" ]; then
+        mkdir -p $installdir/docker/dependencies
+    fi
+    cp ./dep/gitconfig $installdir/docker/dependencies/
+    name=
+    while [[ -z $name ]]; do
+        exec 3>&1
+        name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60 2>&1 1>&3)
+        exitcode=$?;
+        exec 3>&-;
+        # if [ ! $exitcode = "0" ]; then
+        # clear
+        # exit $exitcode
+        # fi
+    done
+    sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
+
+    email=
+    while [[ -z $email ]]; do
+        exec 3>&1
+        email=$(dialog --title "git config" --inputbox "Please enter your e-mail address" 6 60 2>&1 1>&3)
+        exitcode=$?;
+        exec 3>&-;
+        # if [ ! $exitcode = "0" ]; then
+        # clear
+        # exit $exitcode
+        # fi
+    done
+    sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
+    #for path in "${paths[@]}"
+}
+
+cleanup () {
+    # cleanup as there's no need for this anymore
+    if [ -d "$installdir/docker/dependencies" ]; then
+        rm -r $installdir/docker/dependencies
+    fi
+}
+
 cmd=(dialog --separate-output --checklist "Select options:" 22 76 16)
 options=(preinstall "Preinstall packages" "off"    # any option can be set to default to "on"
          devctl "Setup devctl" "on"
-         configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
+         autostart "Start docker containers automatically" "$SETUP_RESTART"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
          ssh "Copy ssh keys to selected php versions" "$SETUP_SSH"
-         restart "Restart docker containers automatically" "$SETUP_RESTART"
-         varnish "Use Varnish" "$SETUP_VARNISH"
+         varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
+         configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
+         xdebug-trigger "Trigger xdebug with request" "$SETUP_XDEBUG_TRIGGER"
 )
 
 # reset basic variables
@@ -70,6 +113,7 @@ SETUP_SSH=off
 SETUP_RESTART=off
 SETUP_XDEBUG=off
 SETUP_VARNISH=off
+SETUP_XDEBUG_TRIGGER=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
@@ -91,12 +135,13 @@ do :
             SKIP_CONFIGURATOR=on
             ;;
         gitconfig)
+            setup_gitconfig
             SETUP_GITCONFIG=on
             ;;
         ssh)
             SETUP_SSH=on
             ;;
-        restart)
+        autostart)
             SETUP_RESTART=on
             ;;
         varnish)
@@ -104,6 +149,9 @@ do :
             ;;
         xdebug)
             SETUP_XDEBUG=on
+            ;;
+        xdebug-trigger)
+            SETUP_XDEBUG_TRIGGER=on
             ;;
         *)
             echo "No settings provided"
@@ -244,59 +292,24 @@ do :
         sed -i -e 's/;xdebug.mode=off/xdebug.mode=off/g' $installdir/docker/$path/conf.d/xdebug.ini
     fi
 
+    if [ $SETUP_XDEBUG_TRIGGER == "on" ]; then
+        sed -i -e 's/xdebug.start_with_request=yes/;xdebug.start_with_request=yes/g' $installdir/docker/$path/conf.d/xdebug.ini
+        sed -i -e 's/;xdebug.start_with_request=trigger/xdebug.start_with_request=trigger/g' $installdir/docker/$path/conf.d/xdebug.ini
+    fi
+
     position=4
     phpversion="$path"
     phpversion="${phpversion:0:position}.${phpversion:position}"
 
     cp ./dep/phprun.sh $installdir/docker/$path/run.sh
     sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/run.sh
+
+    if [ $SETUP_GITCONFIG == "on" ]; then
+        cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
+    fi
+
 done
 ## end prepare paths
-
-## gitconfig
-if [ $SETUP_GITCONFIG == "on" ]; then
-    if [ ! -d "$installdir/docker/dependencies" ]; then
-        mkdir -p $installdir/docker/dependencies
-        cp ./dep/gitconfig $installdir/docker/dependencies/
-    fi
-    name=
-    while [[ -z $name ]]; do
-        exec 3>&1
-        name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60 2>&1 1>&3)
-        exitcode=$?;
-        exec 3>&-;
-        # if [ ! $exitcode = "0" ]; then
-        # clear
-        # exit $exitcode
-        # fi
-    done
-    sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
-
-    email=
-    while [[ -z $email ]]; do
-        exec 3>&1
-        email=$(dialog --title "git config" --inputbox "Please enter your e-mail address" 6 60 2>&1 1>&3)
-        exitcode=$?;
-        exec 3>&-;
-        # if [ ! $exitcode = "0" ]; then
-        # clear
-        # exit $exitcode
-        # fi
-    done
-    sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
-    #for path in "${paths[@]}"
-    for path in $paths
-    do :
-        cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
-    done
-
-    # cleanup as there's no need for this anymore
-    if [ -d "$installdir/docker/dependencies" ]; then
-        rm -r $installdir/docker/dependencies
-    fi
-fi
-
-## end gitconfig
 
 if [ $SETUP_RESTART == "on" ]; then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
@@ -329,6 +342,7 @@ echo SETUP_SSH=$SETUP_SSH >> $CONFIGFILE
 echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
 echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
+echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
 
 echo PHP56=$PHP56 >> $CONFIGFILE
 echo PHP70=$PHP70 >> $CONFIGFILE
@@ -339,6 +353,8 @@ echo PHP74=$PHP74 >> $CONFIGFILE
 echo PHP80=$PHP80 >> $CONFIGFILE
 echo PHP81=$PHP81 >> $CONFIGFILE
 sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
+
+cleanup
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
 Config is written to ~/.config/docker-setup.config\n
