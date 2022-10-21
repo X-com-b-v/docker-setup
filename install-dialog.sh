@@ -12,7 +12,13 @@ if [ -f "$CONFIGFILE" ]; then
 fi
 
 if [ ! -f "/etc/xcomuser" ]; then
-    echo $SUDO_USER > /etc/xcomuser
+    while [[ -z $xcomuser ]]; do
+        exec 3>&1
+        xcomuser=$(dialog --title "/etc/xcomuser" --inputbox "Enter your name for /etc/xcomuser" 6 60 $SUDO_USER 2>&1 1>&3)
+        exitcode=$?;
+        exec 3>&-;
+    done
+    echo $xcomuser > /etc/xcomuser
 fi
 
 FIRSTRUN=1
