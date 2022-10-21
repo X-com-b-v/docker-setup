@@ -1,18 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 XCOMUSER=$(cat /etc/xcomuser)
 
 DEFAULT_PHP="7.4"
-
-#if [ ! -d "/data/shared/sites/example" ]; then
-#    mkdir /data/shared/sites/example
-#fi
 
 # handle media part, only for magento
 handleMedia () {
     if [ -L "/data/shared/sites/$1/pub/media" ]; then
         # exit function if pub/media already is a symlink
         return
+    fi
+    if [ ! -d "/data/shared/media/$1" ]; then
+        mkdir -p "/data/shared/media/$1"
+        chown -R web.web $dir
     fi
     if [ -d "/data/shared/sites/$1/pub/media" ]; then
         mv /data/shared/sites/$1/pub/media/* /data/shared/media/$1/
@@ -22,47 +22,44 @@ handleMedia () {
     chown -R web.web /data/shared/sites/$1/pub/media
 }
 
+handleParams () {
+    cat << EOF > "/data/shared/sites/$1/.siteconfig/params.conf.example"
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://$1.$2.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://$1.$2.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://$1.$2.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://$1.$2.o.xotap.nl/;
+fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN $1.$2.o.xotap.nl;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://$1.be.$2.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://$1.be.$2.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://$1.be.$2.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://$1.be.$2.o.xotap.nl/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $1.be.$2.o.xotap.nl;
+EOF
+}
+
+
 rm /etc/nginx/sites-enabled/*
 for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     SITEBASENAME=`basename $d`
 
-    # prepare directories for siteconfig and media
-    dirs=( "/data/shared/sites/$SITEBASENAME/.siteconfig" "/data/shared/media/$SITEBASENAME" )
-    for dir in ${dirs[@]}
-    do :
-        if [ ! -d "$dir" ]; then
-            mkdir -p $dir
-            chown -R web.web $dir
-        fi
-    done
-
-    # create log directory
-    if [ ! -d "/data/shared/sites/$SITEBASENAME/logs" ]; then
-        mkdir -p /data/shared/sites/$SITEBASENAME/logs
+    if [ ! -d "/data/shared/sites/$SITEBASENAME/.siteconfig" ]; then
+        mkdir -p /data/shared/sites/$SITEBASENAME/.siteconfig
+        chown -R web.web /data/shared/sites/$SITEBASENAME/.siteconfig
     fi
 
     HOSTFOUND="0"
     # example config file
     CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
-    CONFIG=""
+
+    # default config
+    CONFIG='{"template":"default","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}'
 
     if [ -f "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json" ]; then
         CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json"
     elif [ -f "/data/shared/sites/$SITEBASENAME/bin/magento" ]; then
         # Lijkt op magento 2
         CONFIG='{"template":"magento2","webserver":"nginx","php_version":"7.4"}'
-        cat << EOF > "/data/shared/sites/$SITEBASENAME/.siteconfig/params.conf.example"
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://$SITEBASENAME.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN $SITEBASENAME.$XCOMUSER.o.xotap.nl;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://$SITEBASENAME.be.$XCOMUSER.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $SITEBASENAME.be.$XCOMUSER.o.xotap.nl;
-EOF
+        handleParams "$SITEBASENAME" "$XCOMUSER"
         handleMedia "$SITEBASENAME"
     elif [ -d "/data/shared/sites/$SITEBASENAME/htdocs/wire" ]; then
         # Lijkt processwire
@@ -82,9 +79,6 @@ EOF
     elif [ -d "/data/shared/sites/$SITEBASENAME/core/lib/Drupal/Core" ]; then
         # Lijkt drupal9
         CONFIG='{"template":"drupal","webserver":"nginx","php_version":"7.2"}'
-    else
-        # default hosting
-        CONFIG='{"template":"default","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}'
     fi
 
     echo $CONFIG > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
@@ -158,14 +152,8 @@ EOF
     sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
 done
 
-#/etc/init.d/nginx start
-#/etc/init.d/nginx status
-
+# configtest and restart
 nginx -t
-#rc-service nginx stop
-#rc-service nginx start
-#rc-service nginx status
-
 service nginx restart
 
 if [ $? -eq 0 ];then
