@@ -109,7 +109,7 @@ options=(preinstall "Preinstall packages" "off"    # any option can be set to de
          varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
          configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
-         xdebug-trigger "Trigger xdebug with request" "$SETUP_XDEBUG_TRIGGER"
+         xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
 )
 
 # reset basic variables
