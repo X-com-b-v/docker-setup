@@ -2,7 +2,7 @@ FROM php:7.2-fpm-buster
 RUN useradd -u 1000 -s /bin/bash web
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils sudo nano nullmailer git git-flow lsb-release apt-transport-https ca-certificates toilet \
-mariadb-client rsync
+mariadb-client rsync python2 python-is-python2
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y zlib1g-dev libpng-dev libonig-dev libffi-dev libicu-dev libxml2-dev \
 libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libxslt-dev 
 RUN echo 'web ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
