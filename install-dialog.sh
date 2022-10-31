@@ -196,10 +196,7 @@ do :
 done
 
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
-options=(php56 "PHP 5.6" "$PHP56"    # any option can be set to default to "on"
-         php70 "PHP 7.0" "$PHP70"
-         php71 "PHP 7.1" "$PHP71"
-         php72 "PHP 7.2" "$PHP72"
+options=(php72 "PHP 7.2" "$PHP72" # any option can be set to default to "on"
          php73 "PHP 7.3" "$PHP73"
          php74 "PHP 7.4" "$PHP74"
          php80 "PHP 8.0" "$PHP80"
@@ -207,9 +204,6 @@ options=(php56 "PHP 5.6" "$PHP56"    # any option can be set to default to "on"
          )
 
 # Reset PHP variables
-PHP56=off
-PHP70=off
-PHP71=off
 PHP72=off
 PHP73=off
 PHP74=off
@@ -350,9 +344,6 @@ echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
 echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
 
-echo PHP56=$PHP56 >> $CONFIGFILE
-echo PHP70=$PHP70 >> $CONFIGFILE
-echo PHP71=$PHP71 >> $CONFIGFILE
 echo PHP72=$PHP72 >> $CONFIGFILE
 echo PHP73=$PHP73 >> $CONFIGFILE
 echo PHP74=$PHP74 >> $CONFIGFILE
