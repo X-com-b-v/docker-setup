@@ -46,6 +46,12 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         mkdir -p /data/shared/sites/$SITEBASENAME/.siteconfig
         chown -R web.web /data/shared/sites/$SITEBASENAME/.siteconfig
     fi
+    
+    # check if logging dir exists
+    if [ ! -d "/data/shared/sites/$SITEBASENAME/logs"  ]; then
+        mkdir -p /data/shared/sites/$SITEBASENAME/logs
+        chown -R web.web /data/shared/sites/$SITEBASENAME/logs
+    fi
 
     HOSTFOUND="0"
     # example config file
