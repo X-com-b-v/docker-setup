@@ -11,12 +11,14 @@ RUN echo mailtrap > /etc/nullmailer/remotes
 
 # install modules
 RUN pecl install xdebug
+RUN pecl install mongodb
 RUN docker-php-ext-configure gd --with-freetype-dir=/usr --with-jpeg-dir=/usr --with-png-dir=/usr
 RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mbstring bcmath calendar exif fileinfo gettext intl soap xsl sockets zip
 # other extensions we dont need right now
 # mysqli pcntl hmop sockets sysvmsg sysvmsg sysvshm sysvsem ffi
 
 RUN docker-php-ext-enable xdebug 
+RUN docker-php-ext-enable mongodb 
 
 ADD conf.d/xdebug.ini "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"
 
