@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+version=0.0.1
+
 if [ "$EUID" -ne 0 ]; then
     dialog --title "Root" --msgbox 'Please run this file as root' 8 44
     clear
