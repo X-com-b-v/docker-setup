@@ -3,6 +3,7 @@
     # restart: always
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
+      - installdirectory/data/shared/modules:/data/shared/modules
       - ./php80/php.pool.d:/etc/php/8.0/fpm/pool.d:ro
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media

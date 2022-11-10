@@ -3,6 +3,7 @@
     # restart: always
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
+      - installdirectory/data/shared/modules:/data/shared/modules
       - ./php81/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
       - ./php81/conf.d/php.ini:/usr/local/etc/php/php.ini
       - installdirectory/data/shared/sockets:/data/shared/sockets
