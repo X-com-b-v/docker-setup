@@ -1,3 +1,11 @@
+## 0.0.6 (2022-11-23)
+
+
+*  DEVENV-15 ssh volume read only on target container
+*  DEVENV-15 Version 0.0.6 will be used
+
+
+
 ## 0.0.5 (2022-11-23)
 
 
