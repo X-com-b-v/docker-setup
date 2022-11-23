@@ -10,6 +10,7 @@
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php73:/home/web
       - /etc/xcomuser:/etc/xcomuser:ro
+      - ~/.ssh:/home/web/.ssh:ro
     user: web
     working_dir: /data/shared/sites
     entrypoint: /run.sh
