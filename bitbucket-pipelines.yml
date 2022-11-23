@@ -22,4 +22,4 @@ pipelines:
   branches:
     'main':
       - step:
-        <<: *tag
+          <<: *tag
