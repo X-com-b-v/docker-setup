@@ -4,20 +4,20 @@ clone:
 definitions:
   steps:
     - step: &tag
-      name: Tag
-      script:
-        - git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN}
-        - dt=$(date '+%Y-%m-%d_%H%M');
-        - source version.sh
-        - curl -o changelog.sh https://bitbucket.org/!api/2.0/snippets/X-com/6EgAxn/e552716a36f671dfd1d9817349f05e55f551574b/files/changelog-builder.sh
-        - git tag -a $VERSION -m "$dt - Version $VERSION"
-        - sh changelog.sh > CHANGELOG.md
-        - rm changelog.sh
-        - git add CHANGELOG.md && git commit -m "[skip ci] Updated changelog for version $VERSION"
-        - git push
-        - git tag -d $VERSION
-        - git tag -a $VERSION -m "$dt - Version $VERSION"
-        - git push --tags
+        name: Tag
+        script:
+          - git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN}
+          - dt=$(date '+%Y-%m-%d_%H%M');
+          - source version.sh
+          - curl -o changelog.sh https://bitbucket.org/!api/2.0/snippets/X-com/6EgAxn/e552716a36f671dfd1d9817349f05e55f551574b/files/changelog-builder.sh
+          - git tag -a $VERSION -m "$dt - Version $VERSION"
+          - sh changelog.sh > CHANGELOG.md
+          - rm changelog.sh
+          - git add CHANGELOG.md && git commit -m "[skip ci] Updated changelog for version $VERSION"
+          - git push
+          - git tag -d $VERSION
+          - git tag -a $VERSION -m "$dt - Version $VERSION"
+          - git push --tags
 pipelines:
   branches:
     'main':
