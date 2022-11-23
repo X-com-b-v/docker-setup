@@ -3,6 +3,12 @@ clone:
   depth: full
 definitions:
   steps:
+    - step: &check-tag
+        name: Check tag
+        script:
+          - git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN}
+          - source version.sh
+          - git tag -a $VERSION -m "$dt - Version $VERSION"
     - step: &tag
         name: Tag
         script:
@@ -19,6 +25,10 @@ definitions:
           - git tag -a $VERSION -m "$dt - Version $VERSION"
           - git push --tags
 pipelines:
+  pull-requests:
+    'develop': # this will run on any PR from develop to target (usually main)
+      - step:
+          <<: *check-tag
   branches:
     'main':
       - step:
