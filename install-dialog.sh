@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-version=0.0.3
-
 if [ "$EUID" -ne 0 ]; then
     dialog --title "Root" --msgbox 'Please run this file as root' 8 44
     clear
@@ -52,6 +50,10 @@ elif [ -d $installdir ] && [ $installdir != "/" ]; then
     #echo "Existing installation found, continue setup to update docker-compose file and other dependencies"
     # dialog --title "Existing installation" --msgbox "Existing installation found. Using previous config file for current values" 8 44
     FIRSTRUN=0
+fi
+
+if [ ! -d "/home/$SUDO_USER/.ssh" ] ; then
+    mkdir -p "/home/$SUDO_USER/.ssh"
 fi
 
 setup_devctl () {
@@ -107,7 +109,6 @@ options=(preinstall "Preinstall packages" "off"    # any option can be set to de
          devctl "Setup devctl" "on"
          autostart "Start docker containers automatically" "$SETUP_RESTART"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
-         ssh "Copy ssh keys to selected php versions" "$SETUP_SSH"
          varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
          configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
@@ -117,7 +118,6 @@ options=(preinstall "Preinstall packages" "off"    # any option can be set to de
 # reset basic variables
 SKIP_CONFIGURATOR=off
 SETUP_GITCONFIG=off
-SETUP_SSH=off
 SETUP_RESTART=off
 SETUP_XDEBUG=off
 SETUP_VARNISH=off
@@ -263,27 +263,6 @@ do :
     if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
         mkdir -p $installdir/docker/$path/conf.d
     fi
-    
-    ## ssh
-    if [ $SETUP_SSH == "on" ]; then 
-        if [ -f "/home/$SUDO_USER/.ssh/id_rsa" ]; then
-            if [ ! -d $installdir/data/home/$path/.ssh ]; then
-                mkdir $installdir/data/home/$path/.ssh
-            fi
-            # also use ssh config if found
-            if [ -f "/home/$SUDO_USER/.ssh/config" ]; then
-                cp /home/$SUDO_USER/.ssh/config $installdir/data/home/$path/.ssh/
-            fi
-            if [ -d "/home/$SUDO_USER/.ssh/X-com" ]; then
-                cp -r /home/$SUDO_USER/.ssh/X-com $installdir/data/home/$path/.ssh/
-            fi
-            cp /home/$SUDO_USER/.ssh/id_rsa $installdir/data/home/$path/.ssh/
-            cp /home/$SUDO_USER/.ssh/id_rsa.pub $installdir/data/home/$path/.ssh/
-            # chmod -r 400 $installdir/data/home/$path/.ssh/*
-            
-        fi
-    fi
-    ## end ssh
 
     # copy configs
     cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
@@ -340,7 +319,6 @@ fi
 echo installdir=$installdir > $CONFIGFILE
 echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >> $CONFIGFILE
 echo SETUP_GITCONFIG=$SETUP_GITCONFIG >> $CONFIGFILE
-echo SETUP_SSH=$SETUP_SSH >> $CONFIGFILE
 echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
 echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
