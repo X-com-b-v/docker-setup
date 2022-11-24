@@ -1,9 +1,6 @@
 [user]
 	email = user@email.com
 	name = username
-
-[fetch]
-  prune = true
 [alias]
   bw = blame -w -M
   c = commit
@@ -43,3 +40,7 @@
 [push]
   default = current
   autoSetupRemote = true
+[pull]
+  rebase = true
+[fetch]
+  prune = true
