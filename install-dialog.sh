@@ -281,9 +281,15 @@ do :
     position=4
     phpversion="$path"
     phpversion="${phpversion:0:position}.${phpversion:position}"
+    
+    if [[ ! -d $installdir/docker/$path/php-fpm.d || ! -f $installdir/docker/$path/php-fpm.d/zz-docker.conf ]]; then
+        mkdir -p $installdir/docker/$path/php-fpm.d
+    fi
 
     cp ./dep/phprun.sh $installdir/docker/$path/run.sh
+    cp ./dep/zz-docker.conf $installdir/docker/$path/php-fpm.d/zz-docker.conf
     sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/run.sh
+    sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/php-fpm.d/zz-docker.conf
 
     if [ $SETUP_GITCONFIG == "on" ]; then
         cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
