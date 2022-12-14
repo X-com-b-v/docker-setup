@@ -1,3 +1,13 @@
+## 0.0.7 (2022-12-14)
+
+
+*  Updated gitconfig
+*  Added license.md
+*  zz-docker can be a global dependency as except for phpversion everything is the same, installer updated to update phpversion with sed
+*  update development version to 0.0.7
+
+
+
 ## 0.0.6 (2022-11-23)
 
 
