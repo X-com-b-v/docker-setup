@@ -104,7 +104,7 @@ cleanup () {
     fi
 }
 
-cmd=(dialog --separate-output --checklist "Select options:" 22 76 16)
+cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 76 16)
 options=(preinstall "Preinstall packages" "off"    # any option can be set to default to "on"
          devctl "Setup devctl" "on"
          autostart "Start docker containers automatically" "$SETUP_RESTART"
@@ -126,6 +126,7 @@ SETUP_XDEBUG_TRIGGER=off
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
 if [ -z "$settings" ]; then
+    clear
     echo "No settings provided, or cancelled"
     exit 1
 fi
@@ -162,11 +163,41 @@ do :
             SETUP_XDEBUG_TRIGGER=on
             ;;
         *)
+            clear
             echo "No settings provided"
             exit 1;
             ;;
     esac        
 done
+
+
+cmd=(dialog --separate-output --checklist "Personalization, select options:" 22 76 16)
+options=(starship "Enable starship.rs shell prompt" "$SETUP_STARSHIP"
+         oh-my-zsh "Enable oh-my-zsh shell (conflicts with starship)" "$SETUP_ZSH"
+)
+personalizations=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+# reset personalization settings
+SETUP_STARSHIP=off
+SETUP_ZSH=off
+for personalization in $personalizations
+do :
+    case "$personalization" in
+        starship)
+            SETUP_STARSHIP=on
+            ;;
+        oh-my-zsh)
+            SETUP_ZSH=on
+            ;;
+        *)
+            # continue without personalization
+            ;;
+    esac        
+done
+
+# if ohmyzsh is enabled, disable starship
+if [ $SETUP_ZSH == "on" ]; then
+    SETUP_STARSHIP=off
+fi
 
 ## prepare paths
 folders=( "$installdir/docker" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" )
@@ -197,6 +228,8 @@ do :
     cp -r ./docker/$service/* $installdir/docker/$service
 done
 
+### PHP Configurations
+
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
 options=(php72 "PHP 7.2" "$PHP72" # any option can be set to default to "on"
          php73 "PHP 7.3" "$PHP73"
@@ -213,9 +246,9 @@ PHP80=off
 PHP81=off
 
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
-clear
 
 if [ -z "$paths" ]; then
+    clear
     echo "No paths provided, or cancelled"
     exit 1
 fi
@@ -248,6 +281,9 @@ do :
         echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
     fi
 
+    # TODO check if starship is marked for installation, export result to .bashrc 
+    # and then check the run command to see if starship needs to be downloaded and installed
+    
     if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
         cp dep/git-autocomplete.sh $installdir/data/home/$path/
         chmod +x $installdir/data/home/$path/git-autocomplete.sh
@@ -296,7 +332,7 @@ do :
     fi
 
 done
-## end prepare paths
+### End PHP Configurations
 
 if [ $SETUP_RESTART == "on" ]; then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
@@ -329,6 +365,8 @@ echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
 echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
 echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
+echo SETUP_STARSHIP=$SETUP_STARSHIP >> $CONFIGFILE
+echo SETUP_ZSH=$SETUP_ZSH >> $CONFIGFILE
 
 echo PHP72=$PHP72 >> $CONFIGFILE
 echo PHP73=$PHP73 >> $CONFIGFILE
@@ -336,7 +374,7 @@ echo PHP74=$PHP74 >> $CONFIGFILE
 echo PHP80=$PHP80 >> $CONFIGFILE
 echo PHP81=$PHP81 >> $CONFIGFILE
 sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
-
+clear
 cleanup
 
 dialog --title "Complete" --msgbox "Installation prepared \n 

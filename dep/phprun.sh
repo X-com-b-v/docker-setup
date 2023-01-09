@@ -43,10 +43,11 @@ do
     fi
 done
 
-if [ ! -f "/home/web/bin/starship" ]; then
-    sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- --bin-dir /home/web/bin --force
-    echo 'eval "$(starship init bash)"' >> /home/web/.bashrc
-fi
+# TODO check if SETUP_STARSHIP is set to "on" in .bashrc and then download and install starship bin
+#if [ ! -f "/home/web/bin/starship" ]; then
+#    sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- --bin-dir /home/web/bin --force
+#    echo 'eval "$(starship init bash)"' >> /home/web/.bashrc
+#fi
 
 if [ ! -d "/home/web/.nvm" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
