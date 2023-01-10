@@ -44,11 +44,10 @@ if [ -z "$installdir" ]; then
     installdir="/"
 fi
 
+# create installdir if it does not exist
 if [ ! -d $installdir ] ; then
     mkdir -p $installdir
 elif [ -d $installdir ] && [ $installdir != "/" ]; then
-    #echo "Existing installation found, continue setup to update docker-compose file and other dependencies"
-    # dialog --title "Existing installation" --msgbox "Existing installation found. Using previous config file for current values" 8 44
     FIRSTRUN=0
 fi
 
@@ -104,9 +103,20 @@ cleanup () {
     fi
 }
 
+# enable gitconfig when it's the first run
+SETUP_GITCONFIG=off
+SETUP_PREINSTALL=off
+if [ ! $FIRSTRUN = "0" ]; then
+   SETUP_GITCONFIG=on
+   SETUP_PREINSTALL=on
+fi
+
+# update devctl script
+setup_devctl
+
+### Global configuration ###
 cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 76 16)
-options=(preinstall "Preinstall packages" "off"    # any option can be set to default to "on"
-         devctl "Setup devctl" "on"
+options=(preinstall "Preinstall packages" "$SETUP_PREINSTALL"    # any option can be set to default to "on"
          autostart "Start docker containers automatically" "$SETUP_RESTART"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
          varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
@@ -116,9 +126,8 @@ options=(preinstall "Preinstall packages" "off"    # any option can be set to de
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
 )
 
-# reset basic variables
+# reset basic variables after they've been shown in options list
 SKIP_CONFIGURATOR=off
-SETUP_GITCONFIG=off
 SETUP_RESTART=off
 SETUP_XDEBUG=off
 SETUP_VARNISH=off
@@ -126,7 +135,6 @@ SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
-clear
 if [ -z "$settings" ]; then
     clear
     echo "No settings provided, or cancelled"
@@ -136,18 +144,14 @@ for setting in $settings
 do :
     case "$setting" in
         preinstall)
-            apt update -qq
-            DEBIAN_FRONTEND=noninteractive apt install curl git jq software-properties-common apt-transport-https gnupg-agent ca-certificates -y -qq
-            ;;
-        devctl)
-            setup_devctl
+            apt-get update -qq
+            DEBIAN_FRONTEND=noninteractive apt-get -y -qq install curl git jq software-properties-common apt-transport-https gnupg-agent ca-certificates
             ;;
         configurator)
             SKIP_CONFIGURATOR=on
             ;;
         gitconfig)
             setup_gitconfig
-            SETUP_GITCONFIG=on
             ;;
         ssh)
             SETUP_SSH=on
@@ -175,6 +179,9 @@ do :
     esac        
 done
 
+### End Global configuration ###
+
+### Personalization configuration ###
 
 cmd=(dialog --separate-output --checklist "Personalization, select options:" 22 76 16)
 options=(starship "Enable starship.rs shell prompt" "$SETUP_STARSHIP"
@@ -204,7 +211,9 @@ if [ $SETUP_ZSH == "on" ]; then
     SETUP_STARSHIP=off
 fi
 
-## prepare paths
+### End Personalization configuration ###
+
+# Prepare paths
 folders=( "$installdir/docker" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" )
 for folder in ${folders[@]}
 do :
@@ -237,7 +246,7 @@ do :
     cp -r ./docker/$service/* $installdir/docker/$service
 done
 
-### PHP Configurations
+### PHP Configurations ###
 
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
 options=(php72 "PHP 7.2" "$PHP72" # any option can be set to default to "on"
@@ -341,7 +350,7 @@ do :
     fi
 
 done
-### End PHP Configurations
+### End PHP Configurations ###
 
 if [ $SETUP_RESTART == "on" ]; then
     sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
@@ -369,7 +378,6 @@ fi
 # clear config file and write settings to it
 echo installdir=$installdir > $CONFIGFILE
 echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >> $CONFIGFILE
-echo SETUP_GITCONFIG=$SETUP_GITCONFIG >> $CONFIGFILE
 echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
 echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
@@ -389,12 +397,9 @@ cleanup
 
 dialog --title "Complete" --msgbox "Installation prepared \n 
 Config is written to ~/.config/docker-setup.config\n
-1: cd to $installdir\n
-2: Run docker compose build\n
-3: Get coffee\n
-4: Run docker compose up -d\n
-5: Get coffee\n
-6: Run devctl up\n
-" 13 53
+- cd to $installdir/docker\n
+- Run docker compose build\n
+- Run docker compose up -d\n
+" 13 60
 clear
 exit 0
