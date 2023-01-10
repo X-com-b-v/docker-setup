@@ -1,3 +1,13 @@
+## 0.0.8 (2023-01-10)
+
+
+*  DEVENV-18 prepare moving of personalizations
+*  update development version to 0.0.7
+*  DEVENV-19 prepare apache
+*  bump version to 0.0.8
+
+
+
 ## 0.0.7 (2022-12-14)
 
 
