@@ -1,3 +1,11 @@
+## 0.0.9 (2023-01-10)
+
+
+*  Updated install dialog script
+*  DEVENV-14 add samba
+
+
+
 ## 0.0.8 (2023-01-10)
 
 
