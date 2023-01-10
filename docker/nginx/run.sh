@@ -114,32 +114,13 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     # https://stackoverflow.com/questions/43158140/way-to-create-multiline-comments-in-bash
     # : ' multi line comment because : is shorthand for true and does not process any params
     # we dont need other stuff like proxy as below
-    : '
     elif [ "$USE_WEBSERVER" != "nginx" ]; then
-        # Nginx is not needed, just forward traffic to next webserver
-
-        # fallback to default apache server
-        PROXYPORT="81"
-        if [ "$USE_PHPPROTOCOL" = "fpm" ]; then
-            # Forward to default apache server, apache config determines what php version
-            PROXYPORT="81"
-        elif [ "$USE_PHPPROTOCOL" = "mod_php" ]; then
-            if [ "$USE_PHPVERSION" = "5.6" ]; then
-                PROXYPORT="82"
-            elif [ "$USE_PHPVERSION" = "7.0" ]; then
-                PROXYPORT="83"
-            elif [ "$USE_PHPVERSION" = "7.1" ]; then
-                PROXYPORT="84"
-            elif [ "$USE_PHPVERSION" = "7.2" ]; then
-                PROXYPORT="85"
-            elif [ "$USE_PHPVERSION" = "7.3" ]; then
-                PROXYPORT="86"
-            fi
-        fi
-
+        PROXYPORT="8888"
+        # if [ "$USE_WEBSERVER" = "apache" ]; then   
+        # fi
         cp /etc/nginx/site-templates/proxy.conf /data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf.example
         cp /etc/nginx/site-templates/proxy.conf /etc/nginx/sites-enabled/$SITEBASENAME.conf
-    '
+    
     else
         # webserver is nginx, check for custom template
         if [ "$USE_TEMPLATE" != "" ] && [ -f "/etc/nginx/site-templates/$USE_TEMPLATE.conf" ]; then

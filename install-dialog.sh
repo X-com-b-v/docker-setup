@@ -113,6 +113,7 @@ options=(preinstall "Preinstall packages" "off"    # any option can be set to de
          configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
+         apache "Apache configurations, for Itix" "$SETUP_APACHE"
 )
 
 # reset basic variables
@@ -122,6 +123,7 @@ SETUP_RESTART=off
 SETUP_XDEBUG=off
 SETUP_VARNISH=off
 SETUP_XDEBUG_TRIGGER=off
+SETUP_APACHE=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
@@ -161,6 +163,9 @@ do :
             ;;
         xdebug-trigger)
             SETUP_XDEBUG_TRIGGER=on
+            ;;
+        apache)
+            SETUP_APACHE=on
             ;;
         *)
             clear
@@ -218,8 +223,12 @@ if [ $SETUP_VARNISH == "on" ] && [ -f docker-compose-snippets/varnish ]; then
     cat docker-compose-snippets/varnish >> $installdir/docker/docker-compose.yml
 fi
 
+if [ $SETUP_APACHE == "on" ] && [ -f docker-compose-snippets/apache ]; then
+    cat docker-compose-snippets/apache >> $installdir/docker/docker-compose.yml
+fi
+
 # make sure other services are not forgotten, these are not updated every run
-services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" "varnish" )
+services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" "varnish" "apache" )
 for service in "${services[@]}"
 do :
     if [ ! -d $installdir/docker/$service ]; then
@@ -365,6 +374,7 @@ echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
 echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
 echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
+echo SETUP_APACHE=$SETUP_APACHE >> $CONFIGFILE
 echo SETUP_STARSHIP=$SETUP_STARSHIP >> $CONFIGFILE
 echo SETUP_ZSH=$SETUP_ZSH >> $CONFIGFILE
 

@@ -1,0 +1,15 @@
+  apache:
+    build: apache
+    working_dir: /etc/apache2/sites-enabled
+    volumes:
+      - ./apache/site-templates:/etc/apache/site-templates:ro
+      - installdirectory/data/shared/sites:/data/shared/sites
+      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - installdirectory/data/shared/media:/data/shared/media
+      - /etc/xcomuser:/etc/xcomuser:ro
+    networks:
+      - xcom_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - "nginx"
