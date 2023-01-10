@@ -124,6 +124,7 @@ options=(preinstall "Preinstall packages" "$SETUP_PREINSTALL"    # any option ca
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
+         samba "Samba configurations, for Itix" "$SETUP_SAMBA"
 )
 
 # reset basic variables after they've been shown in options list
@@ -133,6 +134,7 @@ SETUP_XDEBUG=off
 SETUP_VARNISH=off
 SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
+SETUP_SAMBA=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$settings" ]; then
@@ -170,6 +172,9 @@ do :
             ;;
         apache)
             SETUP_APACHE=on
+            ;;
+        samba)
+            SETUP_SAMBA=on
             ;;
         *)
             clear
@@ -227,17 +232,25 @@ cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
 # cp -r ./docker/* $installdir/docker/
 
+# make sure other services are not forgotten, these are not updated every run
+services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" )
+
 if [ $SETUP_VARNISH == "on" ] && [ -f docker-compose-snippets/varnish ]; then
     sed -i -e 's/- 80:80/- 8080:80/g' $installdir/docker/docker-compose.yml
     cat docker-compose-snippets/varnish >> $installdir/docker/docker-compose.yml
+    services+=( "varnish" )
 fi
 
 if [ $SETUP_APACHE == "on" ] && [ -f docker-compose-snippets/apache ]; then
     cat docker-compose-snippets/apache >> $installdir/docker/docker-compose.yml
+    services+=( "apache" )
 fi
 
-# make sure other services are not forgotten, these are not updated every run
-services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" "varnish" "apache" )
+if [ $SETUP_SAMBA == "on" ] && [ -f docker-compose-snippets/samba ]; then
+    cat docker-compose-snippets/samba >> $installdir/docker/docker-compose.yml
+    services+=( "samba" )
+fi
+
 for service in "${services[@]}"
 do :
     if [ ! -d $installdir/docker/$service ]; then
@@ -383,6 +396,7 @@ echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
 echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
 echo SETUP_APACHE=$SETUP_APACHE >> $CONFIGFILE
+echo SETUP_SAMBA=$SETUP_SAMBA >> $CONFIGFILE
 echo SETUP_STARSHIP=$SETUP_STARSHIP >> $CONFIGFILE
 echo SETUP_ZSH=$SETUP_ZSH >> $CONFIGFILE
 

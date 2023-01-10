@@ -1,5 +1,6 @@
   apache:
     build: apache
+    # restart: always
     working_dir: /etc/apache2/sites-enabled
     volumes:
       - ./apache/site-templates:/etc/apache/site-templates:ro

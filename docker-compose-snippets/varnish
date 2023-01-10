@@ -1,5 +1,6 @@
   varnish:
     image: varnish:stable
+    # restart: always
     volumes:
       - "./varnish/default.vcl:/etc/varnish/default.vcl"
     ports:
