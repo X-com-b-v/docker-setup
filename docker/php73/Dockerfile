@@ -11,8 +11,8 @@ RUN echo 'Version 1.0.0' > /etc/xcom_docker_version
 RUN echo mailtrap > /etc/nullmailer/remotes
 
 # install modules
-RUN pecl install xdebug
-RUN pecl install imagick
+RUN pecl install xdebug-3.1.6
+RUN pecl install imagick-3.7.0
 
 # mssql stuff
 RUN pecl install sqlsrv-5.8.1
