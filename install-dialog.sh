@@ -47,7 +47,7 @@ fi
 # create installdir if it does not exist
 if [ ! -d $installdir ] ; then
     mkdir -p $installdir
-elif [ -d $installdir ] && [ $installdir != "/" ]; then
+elif [ -d $installdir ]; then
     FIRSTRUN=0
 fi
 

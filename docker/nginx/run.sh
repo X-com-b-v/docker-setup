@@ -3,6 +3,8 @@
 XCOMUSER=$(cat /etc/xcomuser)
 
 DEFAULT_PHP="7.4"
+PROXYPORT="8888"
+
 
 # handle media part, only for magento
 handleMedia () {
@@ -89,7 +91,6 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
 
     echo $CONFIG > "/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
 
-    PROXYPORT=""
     USE_TEMPLATE=$(jq -r .template "$CONFIGFILE")
     USE_WEBSERVER=$(jq -r .webserver "$CONFIGFILE")
     USE_PHPPROTOCOL=$(jq -r .php_protocol "$CONFIGFILE")
@@ -115,7 +116,6 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     # : ' multi line comment because : is shorthand for true and does not process any params
     # we dont need other stuff like proxy as below
     elif [ "$USE_WEBSERVER" != "nginx" ]; then
-        PROXYPORT="8888"
         # if [ "$USE_WEBSERVER" = "apache" ]; then   
         # fi
         cp /etc/nginx/site-templates/proxy.conf /data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf.example
