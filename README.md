@@ -6,13 +6,14 @@ The installer requires `dialog`, this can be installed via `sudo apt install dia
 
 ## Run the install script
 * Run the installscript with `sudo`. The installer will prompt you for this if you're not root.
+* In order to select options during installer dialog, use the `spacebar` to select or deselect them.
 * The installscript will ask you for a location where you want to install, defaults to /home/user/x-com
 ```bash
 $ chmod +x install-dialog.sh
 $ sudo ./install-dialog.sh
 ```
 The installer will automatically install needed packages on your system if you tell it to (advised for first run). It will also create necessary folders based on the chosen install path.  
-It is important to note that references to `xcomuser` in all documents refer to your base user which you used to run the script with. For example, my username in Linux is `mycha` and this name will be used as `xcomuser`.
+ It is important to note that references to `xcomuser` in all documents refer to your base user which you used to run the script with. For example, my username in Linux is `mycha` and this name will be used as `xcomuser`.  
 
 ## Devctl
 Devctl is small tool which helps managing containers. After installation, you can run `devctl build` to build all containers.
