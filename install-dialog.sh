@@ -125,6 +125,7 @@ options=(preinstall "Preinstall packages" "$SETUP_PREINSTALL"    # any option ca
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
          samba "Samba configurations, for Itix" "$SETUP_SAMBA"
+         mongo "Mongo containers, for Itix" "$SETUP_MONGO"
 )
 
 # reset basic variables after they've been shown in options list
@@ -135,6 +136,7 @@ SETUP_VARNISH=off
 SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
 SETUP_SAMBA=off
+SETUP_MONGO=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$settings" ]; then
@@ -175,6 +177,9 @@ do :
             ;;
         samba)
             SETUP_SAMBA=on
+            ;;
+        mongo)
+            SETUP_MONGO=on
             ;;
         *)
             clear
@@ -240,15 +245,17 @@ if [ $SETUP_VARNISH == "on" ] && [ -f docker-compose-snippets/varnish ]; then
     cat docker-compose-snippets/varnish >> $installdir/docker/docker-compose.yml
     services+=( "varnish" )
 fi
-
 if [ $SETUP_APACHE == "on" ] && [ -f docker-compose-snippets/apache ]; then
     cat docker-compose-snippets/apache >> $installdir/docker/docker-compose.yml
     services+=( "apache" )
 fi
-
 if [ $SETUP_SAMBA == "on" ] && [ -f docker-compose-snippets/samba ]; then
     cat docker-compose-snippets/samba >> $installdir/docker/docker-compose.yml
     services+=( "samba" )
+fi
+if [ $SETUP_MONGO == "on" ] && [ -f docker-compose-snippets/mongo ]; then
+    cat docker-compose-snippets/mongo >> $installdir/docker/docker-compose.yml
+    services+=( "mongo" )
 fi
 
 for service in "${services[@]}"
@@ -397,6 +404,7 @@ echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
 echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
 echo SETUP_APACHE=$SETUP_APACHE >> $CONFIGFILE
 echo SETUP_SAMBA=$SETUP_SAMBA >> $CONFIGFILE
+echo SETUP_MONGO=$SETUP_MONGO >> $CONFIGFILE
 echo SETUP_STARSHIP=$SETUP_STARSHIP >> $CONFIGFILE
 echo SETUP_ZSH=$SETUP_ZSH >> $CONFIGFILE
 

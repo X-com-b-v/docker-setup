@@ -1,0 +1,13 @@
+  mongo:
+    image: mongo
+    # restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - xcom_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+

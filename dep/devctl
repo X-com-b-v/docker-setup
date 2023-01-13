@@ -21,7 +21,6 @@ hostversions [projects] | Show project used PHP versions
 installdir              | Shows current install directory
 dockerdir               | Shows current docker directory
 sonarqube [options]     | Manage sonarqube and postgres instances
-mongo [options]         | Manage mongo instances, executes options for docker compose
 varnishacl              | Update the varnish vcl with docker_xcom_network ip/subnet
 flushredis [db]         | Flush redis completely, or a single db
 flushvarnish [url]      | Flush varnish url
@@ -157,9 +156,6 @@ case "$1" in
         ;;
     sonarqube)
         docker compose -f sonarqube.yml ${@:2}
-	    ;;
-    mongo)
-        docker compose -f mongo.yml ${@:2}
 	    ;;
     varnishacl)
         update_varnish_acl
