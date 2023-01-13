@@ -4,7 +4,7 @@ RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils sudo nano nullmailer git git-flow lsb-release apt-transport-https ca-certificates toilet \
 mariadb-client rsync python2
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y zlib1g-dev libpng-dev libonig-dev libffi-dev libicu-dev libxml2-dev \
-libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libxslt-dev 
+libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libxslt-dev autoconf pkg-config libssl-dev
 RUN echo 'web ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 RUN echo 'Version 1.0.0' > /etc/xcom_docker_version
 RUN echo mailtrap > /etc/nullmailer/remotes
@@ -13,7 +13,7 @@ RUN echo mailtrap > /etc/nullmailer/remotes
 RUN pecl install xdebug-3.1.6
 RUN pecl install mongodb-1.15.0
 RUN docker-php-ext-configure gd --with-freetype-dir=/usr --with-jpeg-dir=/usr --with-png-dir=/usr
-RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mbstring bcmath calendar exif fileinfo gettext intl soap xsl sockets zip
+RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mysqli mbstring bcmath calendar exif fileinfo gettext intl soap xsl sockets zip
 # other extensions we dont need right now
 # mysqli pcntl hmop sockets sysvmsg sysvmsg sysvshm sysvsem ffi
 
