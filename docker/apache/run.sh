@@ -34,6 +34,10 @@ for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
         # default hosting
         createSiteConfigDir "$WEBPATH/$SITEBASENAME";
         echo '{"template":"default","webserver":"apache","php_version":"default"}' > "$WEBPATH/$SITEBASENAME/.siteconfig/config.json.example"
+    elif [ -d "$WEBPATH/$SITEBASENAME/htdocs/updateinfo" ]; then
+        # Lijkt itix
+        createSiteConfigDir "$WEBPATH/$SITEBASENAME";
+        echo '{"template":"default","webserver":"apache","php_protocol":"mod_php","php_version":"latest"}' > "$WEBPATH/$SITEBASENAME/.siteconfig/config.json.example"
     else
         # no site
         continue;

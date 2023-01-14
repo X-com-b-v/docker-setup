@@ -72,9 +72,6 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     elif [ -d "/data/shared/sites/$SITEBASENAME/htdocs/wire" ]; then
         # Lijkt processwire
         CONFIG='{"template":"processwire","webserver":"nginx","php_protocol":"mod_php","php_version":"latest"}'
-    elif [ -d "/data/shared/sites/$SITEBASENAME/htdocs/updateinfo" ]; then
-        # Lijkt itix
-        CONFIG='{"template":"default","webserver":"apache","php_protocol":"mod_php","php_version":"latest"}'
     elif [ -f "/data/shared/sites/$SITEBASENAME/app/etc/local.xml" ]; then
         # Lijkt op magento1
         CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.0"}'

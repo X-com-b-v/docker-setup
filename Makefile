@@ -1,6 +1,7 @@
 all: run
 
 run:
+	chmod +x ./install-dialog.sh
 	sudo ./install-dialog.sh
 
 prepare:

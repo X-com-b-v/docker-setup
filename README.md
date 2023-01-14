@@ -2,7 +2,7 @@
 ## Dependencies
 You will need [Docker CE](https://docs.docker.com/engine/install/ubuntu/) installed.
 
-The installer requires `dialog`, this can be installed via `sudo apt install dialog`
+The installer requires `dialog` and `make`, this can be installed via `sudo apt install dialog make`
 
 ## Run the install script
 * Run the installscript with `sudo`. The installer will prompt you for this if you're not root.
@@ -10,7 +10,8 @@ The installer requires `dialog`, this can be installed via `sudo apt install dia
 * The installscript will ask you for a location where you want to install, defaults to /home/user/x-com
 ```bash
 $ chmod +x install-dialog.sh
-$ sudo ./install-dialog.sh
+$ make prepare
+$ make
 ```
 The installer will automatically install needed packages on your system if you tell it to (advised for first run). It will also create necessary folders based on the chosen install path.  
  It is important to note that references to `xcomuser` in all documents refer to your base user which you used to run the script with. For example, my username in Linux is `mycha` and this name will be used as `xcomuser`.  
