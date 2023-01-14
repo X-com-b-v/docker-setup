@@ -1,5 +1,6 @@
 # default
 FROM php:7.4-fpm-bullseye
+RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
 RUN useradd -u 1000 -s /bin/bash web
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils sudo nano nullmailer git git-flow lsb-release apt-transport-https ca-certificates toilet \

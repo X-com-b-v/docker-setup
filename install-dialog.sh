@@ -69,31 +69,26 @@ setup_gitconfig () {
     fi
     cp ./dep/gitconfig $installdir/docker/dependencies/
     name=
-    while [[ -z $name ]]; do
-        exec 3>&1
-        name=$(dialog --title "git config" --inputbox "Please enter your name" 6 60 2>&1 1>&3)
-        exitcode=$?;
-        exec 3>&-;
-        # if [ ! $exitcode = "0" ]; then
-        # clear
-        # exit $exitcode
-        # fi
-    done
-    sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
-
     email=
-    while [[ -z $email ]]; do
-        exec 3>&1
-        email=$(dialog --title "git config" --inputbox "Please enter your e-mail address" 6 60 2>&1 1>&3)
-        exitcode=$?;
-        exec 3>&-;
-        # if [ ! $exitcode = "0" ]; then
-        # clear
-        # exit $exitcode
-        # fi
-    done
+    # open fd
+    exec 3>&1
+    dialog --separate-widget $'\n' --ok-label "Submit" \
+        --backtitle "Gitconfig" \
+        --title "Gitconfig" \
+        --form "Add user information" \
+    15 50 0 \
+        "Name   :" 1 1	"$name" 	1 10 39 0 \
+        "E-mail :"    2 1	"$email"  	2 10 40 0 \
+    2>&1 1>&3 | { 
+        read -r name
+        read -r email
+        echo $name
+        echo $email
+    }
+    # close fd
+    exec 3>&-
+    sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
     sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
-    #for path in "${paths[@]}"
 }
 
 cleanup () {
@@ -116,8 +111,7 @@ setup_devctl
 
 ### Global configuration ###
 cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 76 16)
-options=(preinstall "Preinstall packages" "$SETUP_PREINSTALL"    # any option can be set to default to "on"
-         autostart "Start docker containers automatically" "$SETUP_RESTART"
+options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
          varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
          configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
@@ -147,10 +141,6 @@ fi
 for setting in $settings
 do :
     case "$setting" in
-        preinstall)
-            apt-get update -qq
-            DEBIAN_FRONTEND=noninteractive apt-get -y -qq install curl git jq software-properties-common apt-transport-https gnupg-agent ca-certificates
-            ;;
         configurator)
             SKIP_CONFIGURATOR=on
             ;;
@@ -417,11 +407,29 @@ sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
 clear
 cleanup
 
-dialog --title "Complete" --msgbox "Installation prepared \n 
-Config is written to ~/.config/docker-setup.config\n
-- cd to $installdir/docker\n
-- Run docker compose build\n
-- Run docker compose up -d\n
-" 13 60
+# dialog --title "Complete" --backtitle "Run docker compose build and up?" --yesno --defaultno
+
+dialog --stdout --title "Complete" \
+  --backtitle "Completed installation" \
+  --yesno "Run docker compose build and up?" 7 60
+dialog_status=$?
+
+# Do something
+
+if [ "$dialog_status" -eq 0 ]; then
+    # The previous dialog was answered Yes
+    clear
+    cd $installdir/docker && docker compose build && docker compose up -d
+    exit $dialogstatus
+else
+  # The previous dialog was answered No or interrupted with <C-c>
+    dialog --title "Complete" --msgbox "Installation prepared \n 
+    Config is written to ~/.config/docker-setup.config\n
+    - cd to $installdir/docker\n
+    - Run docker compose build\n
+    - Run docker compose up -d\n
+    " 13 60
+fi 
+
 clear
 exit 0
