@@ -1,5 +1,5 @@
   mongo:
-    image: mongo
+    image: mongo:6.0
     # restart: always
     ports:
       - 27017:27017
@@ -10,4 +10,5 @@
       - xcom_network
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
+    volumes:
+      - installdirectory/data/mongo6:/data/db
