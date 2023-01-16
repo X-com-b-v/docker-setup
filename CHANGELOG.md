@@ -1,3 +1,23 @@
+## 0.0.10 (2023-01-16)
+
+
+*  DEVENV-17 php74 should also include sqlsrv for mssql connections (profilplast), and pin xdebug version for old version as latest xdebug has dropped support for php7
+*  Bump version to 0.0.10
+*  specifiy xdebug version for php72
+*  Updated proxyport
+*  Updated readme
+*  Added mongo via installer
+*  DEVENV-25 add mysqli and DEVENV-22 install mongodb with libssl-dev to enable libmongoc SSL
+*  DEVENV-22 mongodb default user/pass are root/xcom
+*  DEVENV-24 htdocs/updateinfo should always use apache
+*  Added makefile, updated editorconfig and automatically create containers at the end of installation if user wants to
+*  Updates to makefile, apache and nginx run
+*  Apache using bullseye-slim and remove some dependencies that will probably not be used
+*  Pin mongo to version 6 and updated mongo volumes
+*  add imagick
+
+
+
 ## 0.0.9 (2023-01-10)
 
 
