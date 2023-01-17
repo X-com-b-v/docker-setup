@@ -10,6 +10,7 @@ volumes:
 services:
   nginx:
     build: nginx
+    # image: xcommagento/docker-nginx:latest
     # restart: always
     ports:
       - 80:80

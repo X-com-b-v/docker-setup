@@ -3,8 +3,6 @@
 XCOMUSER=$(cat /etc/xcomuser)
 
 DEFAULT_PHP="7.4"
-PROXYPORT="8888"
-
 
 # handle media part, only for magento
 handleMedia () {
@@ -14,14 +12,17 @@ handleMedia () {
     fi
     if [ ! -d "/data/shared/media/$1" ]; then
         mkdir -p "/data/shared/media/$1"
-        chown -R web.web $dir
     fi
+    # move existing pub/media information to /data/shared/media/sitename
+    # and remove origin pub/media folder
     if [ -d "/data/shared/sites/$1/pub/media" ]; then
         mv /data/shared/sites/$1/pub/media/* /data/shared/media/$1/
         rm -rf /data/shared/sites/$1/pub/media
     fi
+    # add symlink for pub/media
     ln -s /data/shared/media/$1 /data/shared/sites/$1/pub/media
     chown -R web.web /data/shared/sites/$1/pub/media
+    chown -R web.web /data/shared/media/$1
 }
 
 handleParams () {
@@ -39,7 +40,6 @@ fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $1.be.
 EOF
 }
 
-
 rm /etc/nginx/sites-enabled/*
 for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     SITEBASENAME=`basename $d`
@@ -55,7 +55,6 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         chown -R web.web /data/shared/sites/$SITEBASENAME/logs
     fi
 
-    HOSTFOUND="0"
     # example config file
     CONFIGFILE="/data/shared/sites/$SITEBASENAME/.siteconfig/config.json.example"
 
@@ -131,6 +130,8 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
             cp /etc/nginx/site-templates/default.conf /etc/nginx/sites-enabled/$SITEBASENAME.conf
         fi
     fi
+
+    PROXYPORT="8888"
 
     sed -i "s/##PROXYPORT##/$PROXYPORT/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
     sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf

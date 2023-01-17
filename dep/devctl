@@ -82,8 +82,7 @@ flush_redis () {
 }
 
 flush_varnish () {
-    curl -X PURGE -H "X-Magento-Tags-Pattern: .*" $1
-    curl -X PURGE $1
+    curl -X PURGE -H "X-Magento-Tags-Pattern: .*" -k $1
 }
 
 update_varnish_acl () {
