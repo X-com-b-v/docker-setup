@@ -186,11 +186,13 @@ done
 cmd=(dialog --separate-output --checklist "Personalization, select options:" 22 76 16)
 options=(starship "Enable starship.rs shell prompt" "$SETUP_STARSHIP"
          oh-my-zsh "Enable oh-my-zsh shell (conflicts with starship)" "$SETUP_ZSH"
+         welcome-message "Show PHP welcome message " "$SETUP_WELCOME"
 )
 personalizations=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 # reset personalization settings
 SETUP_STARSHIP=off
 SETUP_ZSH=off
+SETUP_WELCOME=off
 for personalization in $personalizations
 do :
     case "$personalization" in
@@ -199,6 +201,9 @@ do :
             ;;
         oh-my-zsh)
             SETUP_ZSH=on
+            ;;
+        welcome)
+            SETUP_WELCOME=on
             ;;
         *)
             # continue without personalization
