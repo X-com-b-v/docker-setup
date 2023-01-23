@@ -18,4 +18,4 @@ RUN a2enmod remoteip rewrite expires actions fcgid alias proxy proxy_fcgi
 # Apache vars
 RUN ["/bin/bash", "-c", "sed -i 's/www-data/web/g' /etc/apache2/envvars"]
 RUN chmod +x /run.sh
-CMD ["/run.sh
+CMD ["/run.sh"]
