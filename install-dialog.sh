@@ -114,6 +114,7 @@ cmd=(dialog --separate-output --checklist "Global configuration, select options:
 options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
          varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
+         elasticsearch "Use Elasticsearch (Magento)" "$SETUP_ELASTICSEARCH"
          configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
@@ -127,6 +128,7 @@ SKIP_CONFIGURATOR=off
 SETUP_RESTART=off
 SETUP_XDEBUG=off
 SETUP_VARNISH=off
+SETUP_ELASTICSEARCH=off
 SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
 SETUP_SAMBA=off
@@ -155,6 +157,9 @@ do :
             ;;
         varnish)
             SETUP_VARNISH=on
+            ;;
+        elasticsearch)
+            SETUP_ELASTICSEARCH=on
             ;;
         xdebug)
             SETUP_XDEBUG=on
@@ -251,6 +256,11 @@ fi
 if [ $SETUP_MONGO == "on" ] && [ -f docker-compose-snippets/mongo ]; then
     cat docker-compose-snippets/mongo >> $installdir/docker/docker-compose.yml
     services+=( "mongo" )
+fi
+
+if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearch ]; then
+    cat docker-compose-snippets/elasticsearch >> $installdir/docker/docker-compose.yml
+    services+=( "elasticsearch" )
 fi
 
 for service in "${services[@]}"
@@ -396,6 +406,7 @@ echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >> $CONFIGFILE
 echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
 echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
 echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
+echo SETUP_ELASTICSEARCH=$SETUP_ELASTICSEARCH >> $CONFIGFILE
 echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
 echo SETUP_APACHE=$SETUP_APACHE >> $CONFIGFILE
 echo SETUP_SAMBA=$SETUP_SAMBA >> $CONFIGFILE
