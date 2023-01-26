@@ -1,0 +1,23 @@
+  php70:
+    # build: php70
+    image: xcommagento/docker-php70:latest
+    # restart: always
+    volumes:
+      - installdirectory/data/shared/sites:/data/shared/sites
+      - installdirectory/data/shared/modules:/data/shared/modules
+      - ./php70/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      - ./php70/conf.d/php.ini:/usr/local/etc/php/php.ini
+      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - installdirectory/data/shared/media:/data/shared/media
+      - installdirectory/data/home/php70:/home/web
+      - /etc/xcomuser:/etc/xcomuser:ro
+      - ~/.ssh:/home/web/.ssh:ro
+    user: web
+    working_dir: /data/shared/sites
+    entrypoint: /run.sh
+    networks:
+      - xcom_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: 1

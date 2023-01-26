@@ -274,7 +274,8 @@ done
 ### PHP Configurations ###
 
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
-options=(php72 "PHP 7.2" "$PHP72" # any option can be set to default to "on"
+options=(php70 "PHP 7.0" "$PHP70" # any option can be set to default to "on"
+         php72 "PHP 7.2" "$PHP72"
          php73 "PHP 7.3" "$PHP73"
          php74 "PHP 7.4" "$PHP74"
          php80 "PHP 8.0" "$PHP80"
@@ -282,6 +283,7 @@ options=(php72 "PHP 7.2" "$PHP72" # any option can be set to default to "on"
          )
 
 # Reset PHP variables
+PHP70=off
 PHP72=off
 PHP73=off
 PHP74=off
@@ -414,6 +416,7 @@ echo SETUP_MONGO=$SETUP_MONGO >> $CONFIGFILE
 echo SETUP_STARSHIP=$SETUP_STARSHIP >> $CONFIGFILE
 echo SETUP_ZSH=$SETUP_ZSH >> $CONFIGFILE
 
+echo PHP70=$PHP70 >> $CONFIGFILE
 echo PHP72=$PHP72 >> $CONFIGFILE
 echo PHP73=$PHP73 >> $CONFIGFILE
 echo PHP74=$PHP74 >> $CONFIGFILE
