@@ -61,7 +61,7 @@ services:
     image: xcommagento/docker-mailtrap:latest
     # restart: always
     ports:
-      - 8085:8085
+      - 8085:80
       - 0.0.0.0:25:25
     networks:
       - xcom_network
