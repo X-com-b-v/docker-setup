@@ -7,6 +7,7 @@
       - installdirectory/data/shared/modules:/data/shared/modules
       - ./php73/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
       - ./php73/conf.d/php.ini:/usr/local/etc/php/php.ini
+      - ./php73/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php73:/home/web
