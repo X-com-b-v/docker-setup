@@ -1,3 +1,22 @@
+## 0.0.11 (2023-01-29)
+
+
+*  Rework some docker snippets, updates to nginx run
+*  Update personalization, still under preparation
+*  Make elasticsearch a setting
+*  Fix apache dockerfile
+*  Added php70 legacy without xdebug, mongo and imagick
+*  Prepare docker compose image builds
+*  Bump version to 0.0.11
+*  Docker images on dockerhub with xdebug enabled but via trigger
+*  Mailtrap github repo is now forked by myself, updated to php8.1 with roundcube 1.6.1 interface
+*  Updated mailtrap container port as that no longer runs on 8085 but simply 80
+*  xdebug config is now volume mapped, default comes from image but this is an easy way to overwrite
+*  php81 now also uses image
+*  added gitignore
+
+
+
 ## 0.0.10 (2023-01-16)
 
 
