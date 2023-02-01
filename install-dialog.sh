@@ -257,7 +257,6 @@ if [ $SETUP_MONGO == "on" ] && [ -f docker-compose-snippets/mongo ]; then
     cat docker-compose-snippets/mongo >> $installdir/docker/docker-compose.yml
     services+=( "mongo" )
 fi
-
 if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearch ]; then
     cat docker-compose-snippets/elasticsearch >> $installdir/docker/docker-compose.yml
     services+=( "elasticsearch" )
@@ -328,7 +327,11 @@ do :
 
     # TODO check if starship is marked for installation, export result to .bashrc 
     # and then check the run command to see if starship needs to be downloaded and installed
-    
+    #if [ ! -f "/home/web/bin/starship" ]; then
+    #    sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- --bin-dir /home/web/bin --force
+    #    echo 'eval "$(starship init bash)"' >> /home/web/.bashrc
+    #fi
+
     if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
         cp dep/git-autocomplete.sh $installdir/data/home/$path/
         chmod +x $installdir/data/home/$path/git-autocomplete.sh
@@ -403,25 +406,28 @@ if [ ! $FIRSTRUN = "0" ]; then
 fi
 
 # clear config file and write settings to it
-echo installdir=$installdir > $CONFIGFILE
-echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >> $CONFIGFILE
-echo SETUP_RESTART=$SETUP_RESTART >> $CONFIGFILE
-echo SETUP_XDEBUG=$SETUP_XDEBUG >> $CONFIGFILE
-echo SETUP_VARNISH=$SETUP_VARNISH >> $CONFIGFILE
-echo SETUP_ELASTICSEARCH=$SETUP_ELASTICSEARCH >> $CONFIGFILE
-echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >> $CONFIGFILE
-echo SETUP_APACHE=$SETUP_APACHE >> $CONFIGFILE
-echo SETUP_SAMBA=$SETUP_SAMBA >> $CONFIGFILE
-echo SETUP_MONGO=$SETUP_MONGO >> $CONFIGFILE
-echo SETUP_STARSHIP=$SETUP_STARSHIP >> $CONFIGFILE
-echo SETUP_ZSH=$SETUP_ZSH >> $CONFIGFILE
+# https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash
+{
+  echo installdir=$installdir >&3
+  echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >&3
+  echo SETUP_RESTART=$SETUP_RESTART >&3
+  echo SETUP_XDEBUG=$SETUP_XDEBUG >&3
+  echo SETUP_VARNISH=$SETUP_VARNISH >&3
+  echo SETUP_ELASTICSEARCH=$SETUP_ELASTICSEARCH >&3
+  echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
+  echo SETUP_APACHE=$SETUP_APACHE >&3
+  echo SETUP_SAMBA=$SETUP_SAMBA >&3
+  echo SETUP_MONGO=$SETUP_MONGO >&3
+  echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
+  echo SETUP_ZSH=$SETUP_ZSH >&3
+  echo PHP70=$PHP70 >&3
+  echo PHP72=$PHP72 >&3
+  echo PHP73=$PHP73 >&3
+  echo PHP74=$PHP74 >&3
+  echo PHP80=$PHP80 >&3
+  echo PHP81=$PHP81 >&3
+} 3>$CONFIGFILE
 
-echo PHP70=$PHP70 >> $CONFIGFILE
-echo PHP72=$PHP72 >> $CONFIGFILE
-echo PHP73=$PHP73 >> $CONFIGFILE
-echo PHP74=$PHP74 >> $CONFIGFILE
-echo PHP80=$PHP80 >> $CONFIGFILE
-echo PHP81=$PHP81 >> $CONFIGFILE
 sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
 clear
 cleanup
