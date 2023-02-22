@@ -1,12 +1,14 @@
   varnish:
-    image: varnish:stable
+    hostname: varnish
+    image: varnish:6.0
     # restart: always
     volumes:
-      - "./varnish/default.vcl:/etc/varnish/default.vcl"
+      - "./varnish/default.vcl:/etc/varnish/default.vcl:ro"
     ports:
       - "80:80"
     tmpfs:
       - /var/lib/varnish:exec
+    user: root
     environment:
       - VARNISH_SIZE=2G
     command: "-p default_keep=300"
