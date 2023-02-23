@@ -119,6 +119,7 @@ options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
+         mysql56 "Setup legacy mysql56" "$SETUP_MYSQL56"
          samba "Samba configurations, for Itix" "$SETUP_SAMBA"
          mongo "Mongo containers, for Itix" "$SETUP_MONGO"
 )
@@ -133,6 +134,7 @@ SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
 SETUP_SAMBA=off
 SETUP_MONGO=off
+SETUP_MYSQL56=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$settings" ]; then
@@ -175,6 +177,9 @@ do :
             ;;
         mongo)
             SETUP_MONGO=on
+            ;;
+        mysql56)
+            SETUP_MYSQL56=on
             ;;
         *)
             clear
@@ -260,6 +265,10 @@ fi
 if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearch ]; then
     cat docker-compose-snippets/elasticsearch >> $installdir/docker/docker-compose.yml
     services+=( "elasticsearch" )
+fi
+if [ $SETUP_MYSQL56 == "on" ] && [ -f docker-compose-snippets/mysql56 ]; then
+    cat docker-compose-snippets/mysql56 >> $installdir/docker/docker-compose.yml
+    services+=( "mysql56" )
 fi
 
 for service in "${services[@]}"
@@ -416,6 +425,7 @@ fi
   echo SETUP_ELASTICSEARCH=$SETUP_ELASTICSEARCH >&3
   echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
   echo SETUP_APACHE=$SETUP_APACHE >&3
+  echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3
   echo SETUP_SAMBA=$SETUP_SAMBA >&3
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3

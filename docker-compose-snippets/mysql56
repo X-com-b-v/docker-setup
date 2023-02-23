@@ -1,0 +1,12 @@
+  mysql56:
+    image: mysql:5.6
+    # restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=xcom
+    ports:
+      - 3305:3306
+    volumes:
+      - installdirectory/data/mysql56:/var/lib/mysql
+      - ./mysql56/conf.d:/etc/mysql/conf.d:ro
+    networks:
+      - xcom_network
