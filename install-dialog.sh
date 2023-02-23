@@ -82,14 +82,14 @@ setup_gitconfig () {
     2>&1 1>&3 | { 
         read -r name
         read -r email
-        echo $name
-        echo $email
+        sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
+        sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
     }
+
     # close fd
     exec 3>&-
-    sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
-    sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
 }
+
 
 cleanup () {
     # cleanup as there's no need for this anymore
@@ -150,6 +150,7 @@ do :
             ;;
         gitconfig)
             setup_gitconfig
+            SETUP_GITCONFIG=on
             ;;
         ssh)
             SETUP_SSH=on
