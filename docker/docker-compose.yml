@@ -34,6 +34,11 @@ services:
     volumes:
       - installdirectory/data/mysql57:/var/lib/mysql
       - ./mysql57/conf.d:/etc/mysql/conf.d:ro
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     networks:
       - xcom_network
   mysql80:
@@ -46,6 +51,11 @@ services:
     volumes:
       - installdirectory/data/mysql80:/var/lib/mysql
       - ./mysql80/conf.d:/etc/mysql/conf.d:ro
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     networks:
       - xcom_network
   redis:
