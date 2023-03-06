@@ -24,6 +24,12 @@ for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
     HOSTFOUND="0"
     CONFIGFILE="$WEBPATH/$SITEBASENAME/.siteconfig/config.json.example"
 
+    # check if logging dir exists
+    if [ ! -d "/data/shared/sites/$SITEBASENAME/apachelogs"  ]; then
+        mkdir -p /data/shared/sites/$SITEBASENAME/apachelogs
+        chown -R web.web /data/shared/sites/$SITEBASENAME/apachelogs
+    fi
+
     if [ -f "$WEBPATH/$SITEBASENAME/.siteconfig/config.json" ]; then
         CONFIGFILE="$WEBPATH/$SITEBASENAME/.siteconfig/config.json"
     elif [ -f "$WEBPATH/$SITEBASENAME/config/pre_index.php" ]; then
@@ -42,6 +48,7 @@ for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
         # no site
         continue;
     fi
+
 
     PROXYPORT=""
     USE_TEMPLATE=$(jq -r .template "$CONFIGFILE")
