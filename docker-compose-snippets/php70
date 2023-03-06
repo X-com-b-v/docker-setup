@@ -10,7 +10,7 @@
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php70:/home/web
-      - ~/.config/docker-setup.config:/home/web/.config/docker-setup.config:ro
+      - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
       - ~/.ssh:/home/web/.ssh
     user: web
     working_dir: /data/shared/sites

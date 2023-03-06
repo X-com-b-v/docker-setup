@@ -192,26 +192,15 @@ done
 ### Personalization configuration ###
 
 cmd=(dialog --separate-output --checklist "Personalization, select options:" 22 76 16)
-options=(starship "Enable starship.rs shell prompt" "$SETUP_STARSHIP"
-         oh-my-zsh "Enable oh-my-zsh shell (conflicts with starship)" "$SETUP_ZSH"
-         welcome-message "Show PHP welcome message " "$SETUP_WELCOME"
-)
+options=(starship "Enable starship.rs shell prompt" "$SETUP_STARSHIP")
 personalizations=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 # reset personalization settings
 SETUP_STARSHIP=off
-SETUP_ZSH=off
-SETUP_WELCOME=off
 for personalization in $personalizations
 do :
     case "$personalization" in
         starship)
             SETUP_STARSHIP=on
-            ;;
-        oh-my-zsh)
-            SETUP_ZSH=on
-            ;;
-        welcome)
-            SETUP_WELCOME=on
             ;;
         *)
             # continue without personalization
@@ -233,8 +222,7 @@ do :
     if [ ! -d "$folder" ]; then
         mkdir -p $folder
         if [ $? -ne 0 ] ; then
-            sudo mkdir -p $folder
-            sudo chown $USER:$USER $folder
+            mkdir -p $folder
         fi
     fi
 done
@@ -312,43 +300,14 @@ do :
     # use printf to assign php value 
     # https://stackoverflow.com/a/55331060
     printf -v "${path^^}" '%s' 'on'
+    
     if [ ! -d "$installdir/data/home/$path" ]; then
         mkdir -p "$installdir/data/home/$path"
-        cp -R /etc/skel/. $installdir/data/home/$path
-        echo "alias m2='magerun2'" >> $installdir/data/home/$path/.bash_aliases
-        echo "alias ls='ls --color=auto -lrth --group-directories-first'" >> $installdir/data/home/$path/.bash_aliases
     fi
-
-    # give me a fresh bashrc --and zshrc file--
-    #cp /etc/skel/.bashrc $installdir/data/home/$path
-    #cp dep/zshrc $installdir/data/home/$path/.zshrc
-    
-    if ! grep -q "export TERM=xterm" $installdir/data/home/$path/.bashrc; then
-        echo "export TERM=xterm" >> $installdir/data/home/$path/.bashrc
-    fi
-    if ! grep -q "\$HOME/bin" $installdir/data/home/$path/.bashrc; then
-        echo "PATH=\$HOME/bin:\$PATH" >> $installdir/data/home/$path/.bashrc
-    fi
-    if grep -q "SKIP_CONFIGURATOR" $installdir/data/home/$path/.bashrc; then
-        sed -i '/SKIP_CONFIGURATOR/d' $installdir/data/home/$path/.bashrc
-    fi
-    if [ $SKIP_CONFIGURATOR == "on" ]; then
-        echo "export SKIP_CONFIGURATOR=1" >> $installdir/data/home/$path/.bashrc
-    fi
-
-    # TODO check if starship is marked for installation, export result to .bashrc 
-    # and then check the run command to see if starship needs to be downloaded and installed
-    #if [ ! -f "/home/web/bin/starship" ]; then
-    #    sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- --bin-dir /home/web/bin --force
-    #    echo 'eval "$(starship init bash)"' >> /home/web/.bashrc
-    #fi
 
     if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
         cp dep/git-autocomplete.sh $installdir/data/home/$path/
         chmod +x $installdir/data/home/$path/git-autocomplete.sh
-    fi
-    if [ ! -d "$installdir/data/home/$path/bin" ]; then
-        mkdir -p "$installdir/data/home/$path/bin"
     fi
     if [ -f docker-compose-snippets/$path ]; then
         cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml

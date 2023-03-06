@@ -3,7 +3,7 @@ FROM php:8.1-fpm-bullseye
 RUN useradd -u 1000 -s /bin/bash web
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils sudo nano nullmailer zlib1g-dev libpng-dev git git-flow libonig-dev libffi-dev libicu-dev libxml2-dev \
-libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev lsb-release apt-transport-https ca-certificates toilet libzip-dev libxslt-dev autoconf pkg-config libssl-dev libmagickwand-dev
+libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev lsb-release apt-transport-https ca-certificates libzip-dev libxslt-dev autoconf pkg-config libssl-dev libmagickwand-dev
 RUN echo 'web ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 RUN echo 'Version 1.0.0' > /etc/xcom_docker_version
 RUN echo mailtrap > /etc/nullmailer/remotes

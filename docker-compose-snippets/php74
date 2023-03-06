@@ -1,5 +1,5 @@
   php74:
-    # build: php74
+    #build: php74
     image: xcommagento/docker-php74:latest
     # restart: always
     volumes:
@@ -8,7 +8,7 @@
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php74:/home/web
-      - ~/.config/docker-setup.config:/home/web/.config/docker-setup.config:ro
+      - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
       - ~/.ssh:/home/web/.ssh
       - ./php74/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
       - ./php74/conf.d/php.ini:/usr/local/etc/php/php.ini
