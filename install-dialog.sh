@@ -222,7 +222,8 @@ do :
     if [ ! -d "$folder" ]; then
         mkdir -p $folder
         if [ $? -ne 0 ] ; then
-            mkdir -p $folder
+            sudo mkdir -p $folder
+            sudo chown -r $USER:$USER $folder
         fi
     fi
 done
