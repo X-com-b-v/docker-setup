@@ -5,8 +5,15 @@
 #WEBPATH=`jq -r .sitesroot /opt/devserver/config.json`
 #WEBPATHESCAPED=$(jq -r .sitesroot /opt/devserver/config.json | sed 's/\//\\\//g')
 
-XCOMUSER=$(cat /etc/xcomuser)
-DOMAIN=".$XCOMUSER.o.xotap.nl"
+
+
+CONFIGFILE="/root/.config/docker-setup.config"
+USERNAME=""
+if [ -f "$CONFIGFILE" ]; then
+    . $CONFIGFILE
+fi
+
+DOMAIN=".$USERNAME.o.xotap.nl"
 DEFAULT_PHP="7.2"
 WEBPATH="/data/shared/sites"
 WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
@@ -77,7 +84,7 @@ for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
             sed -i "s/##DOMAIN##/$DOMAIN/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
             sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
             sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
-            sed -i "s/##XCOMUSER##/$XCOMUSER/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
+            sed -i "s/##XCOMUSER##/$USERNAME/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
         fi  
     fi
 done

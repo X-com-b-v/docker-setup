@@ -104,7 +104,11 @@ update_hosts () {
         HOSTS="/mnt/c/Windows/System32/drivers/etc/hosts"
         IPADDR=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
     fi
-    XCOMUSER=$(cat /etc/xcomuser)
+    CONFIGFILE="/home/$USER/.config/docker-setup.config"
+    USERNAME=""
+    if [ -f "$CONFIGFILE" ]; then
+        . $CONFIGFILE
+    fi
     TMPHOSTS="/tmp/hosts"
     if [ ! -f $TMPHOSTS ]; then
         touch $TMPHOSTS
@@ -115,7 +119,7 @@ update_hosts () {
     echo "#START XCOM HOSTS" >> $TMPHOSTS
     for d in `find -L $INSTALLDIR/data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         SITEBASENAME=`basename $d`
-        echo $IPADDR $SITEBASENAME.$XCOMUSER.o.xotap.nl>> $TMPHOSTS
+        echo $IPADDR $SITEBASENAME.$USERNAME.o.xotap.nl>> $TMPHOSTS
     done
     echo $IPADDR "devserver" >> $TMPHOSTS
     echo "#END XCOM HOSTS" >> $TMPHOSTS

@@ -2,7 +2,7 @@ all: run
 
 run:
 	chmod +x ./install-dialog.sh
-	sudo ./install-dialog.sh
+	./install-dialog.sh
 
 prepare:
 	sudo apt-get update -qq

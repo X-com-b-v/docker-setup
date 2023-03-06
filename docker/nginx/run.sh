@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-XCOMUSER=$(cat /etc/xcomuser)
+CONFIGFILE="/root/.config/docker-setup.config"
+USERNAME=""
+if [ -f "$CONFIGFILE" ]; then
+    . $CONFIGFILE
+fi
 
 DEFAULT_PHP="7.4"
 
@@ -67,7 +71,7 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     elif [ -f "/data/shared/sites/$SITEBASENAME/bin/magento" ]; then
         # Lijkt op magento 2
         CONFIG='{"template":"magento2","webserver":"nginx","php_version":"7.4"}'
-        handleParams "$SITEBASENAME" "$XCOMUSER"
+        handleParams "$SITEBASENAME" "$USERNAME"
         handleMedia "$SITEBASENAME"
     elif [ -d "/data/shared/sites/$SITEBASENAME/htdocs/wire" ]; then
         # Lijkt processwire
@@ -107,7 +111,7 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     INCLUDE_PARAMS=""
     if [ -f "/data/shared/sites/$SITEBASENAME/.siteconfig/params.conf" ]; then
         INCLUDE_PARAMS="include \/data\/shared\/sites\/$SITEBASENAME\/.siteconfig\/params.conf;"
-    fi
+    fi;
 
     if [ -f "/data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf" && $USE_WEBSERVER == "nginx" ]; then
         # Custom nginx found, don't care what the config is, uses this one.
@@ -137,7 +141,7 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     sed -i "s/##PROXYPORT##/$PROXYPORT/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
     sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
     sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
-    sed -i "s/##XCOMUSER##/$XCOMUSER/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
+    sed -i "s/##XCOMUSER##/$USERNAME/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
     sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
 done
 

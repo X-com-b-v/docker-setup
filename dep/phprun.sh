@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-XCOMUSER=`cat /etc/xcomuser`
-export XCOM_SERVERUSER=$XCOMUSER
+CONFIGFILE="/home/web/.config/docker-setup.config"
+USERNAME=
+if [ -f "$CONFIGFILE" ]; then
+    . $CONFIGFILE
+fi
+export XCOM_SERVERUSER=$USERNAME
 export XCOM_SERVERTYPE=dev
 
 sudo /etc/init.d/nullmailer start
@@ -11,8 +15,8 @@ if [ $? -ne 0 ]; then
 fi
 
 if ! grep -q "export XCOM_SERVERUSER" /home/web/.bashrc; then
-  echo "export XCOM_SERVERTYPE=dev" >> /home/web/.bashrc
-  echo "export XCOM_SERVERUSER=`cat /etc/xcomuser`" >> /home/web/.bashrc
+  echo "export XCOM_SERVERTYPE=$XCOM_SERVERTYPE" >> /home/web/.bashrc
+  echo "export XCOM_SERVERUSER=$XCOM_SERVERUSER" >> /home/web/.bashrc
 fi
 
 echo "toilet -w 100 -F gay X-Com PHP" > /home/web/.toilet

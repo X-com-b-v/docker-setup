@@ -1,35 +1,32 @@
 #!/usr/bin/env bash
 
-if [ "$EUID" -ne 0 ]; then
-    dialog --title "Root" --msgbox 'Please run this file as root' 8 44
-    clear
-    exit 1
-fi
+# if [ "$EUID" -ne 0 ]; then
+#     dialog --title "Root" --msgbox 'Please run this file as root' 8 44
+#     clear
+#     exit 1
+# fi
 
-CONFIGFILE="/home/$SUDO_USER/.config/docker-setup.config"
+CONFIGFILE="/home/$USER/.config/docker-setup.config"
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
 
-if [ ! -f "/etc/xcomuser" ]; then
-    while [[ -z $xcomuser ]]; do
-        exec 3>&1
-        xcomuser=$(dialog --title "/etc/xcomuser" --inputbox "Enter your name for /etc/xcomuser" 6 60 $SUDO_USER 2>&1 1>&3)
-        exitcode=$?;
-        exec 3>&-;
-    done
-    echo $xcomuser > /etc/xcomuser
-fi
+while [[ -z $USERNAME ]]; do
+    exec 3>&1
+    USERNAME=$(dialog --title "username" --inputbox "Enter your username" 6 60 $USERNAME 2>&1 1>&3)
+    exitcode=$?;
+    exec 3>&-;
+done
 
 FIRSTRUN=1
 originstalldir=
 while [[ -z $originstalldir ]]; do
     exec 3>&1
-    origdir="/home/$SUDO_USER/x-com"
+    origdir="/home/$USER/x-com"
     if [ ! -z "$installdir" ]; then
         origdir=$installdir
     fi
-    originstalldir=$(dialog --inputbox "Full path to install directory \nLeave empty to use root /" 8 60 $origdir 2>&1 1>&3)
+    originstalldir=$(dialog --inputbox "Full path to install directory \n" 8 60 $origdir 2>&1 1>&3)
     exitcode=$?;
     exec 3>&-;
     if [ ! $exitcode = "0" ]; then
@@ -51,16 +48,16 @@ elif [ -d $installdir ]; then
     FIRSTRUN=0
 fi
 
-if [ ! -d "/home/$SUDO_USER/.ssh" ] ; then
-    mkdir -p "/home/$SUDO_USER/.ssh"
+if [ ! -d "/home/$USER/.ssh" ] ; then
+    mkdir -p "/home/$USER/.ssh"
 fi
 
 setup_devctl () {
-    cp dep/devctl /usr/local/bin/devctl
-    cp dep/enter /usr/local/bin/enter
-    sed -i -e 's:installdirectory:'"$installdir"':g' /usr/local/bin/devctl
-    chmod +x /usr/local/bin/devctl
-    chmod +x /usr/local/bin/enter
+    cp dep/devctl ~/.local/bin/devctl
+    cp dep/enter ~/.local/bin/enter
+    sed -i -e 's:installdirectory:'"$installdir"':g' ~/.local/bin/devctl
+    chmod +x ~/.local/bin/devctl
+    chmod +x ~/.local/bin/enter
 }
 
 setup_gitconfig () {
@@ -230,11 +227,15 @@ fi
 ### End Personalization configuration ###
 
 # Prepare paths
-folders=( "$installdir/docker" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" )
+folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" )
 for folder in ${folders[@]}
 do :
     if [ ! -d "$folder" ]; then
         mkdir -p $folder
+        if [ $? -ne 0 ] ; then
+            sudo mkdir -p $folder
+            sudo chown $USER:$USER $folder
+        fi
     fi
 done
 
@@ -401,11 +402,6 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
     sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
 fi
 
-chown $SUDO_USER:$SUDO_USER $installdir
-chown $SUDO_USER:$SUDO_USER $installdir/data/shared/sites
-chown -R $SUDO_USER:$SUDO_USER $installdir/data/home/*
-chown -R $SUDO_USER:$SUDO_USER $installdir/docker
-
 if [ ! $FIRSTRUN = "0" ]; then
     # set max_map_count for sonarqube
     # sysctl -w vm.max_map_count=262144
@@ -419,6 +415,7 @@ fi
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash
 {
   echo installdir=$installdir >&3
+  echo USERNAME=$USERNAME >&3
   echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >&3
   echo SETUP_RESTART=$SETUP_RESTART >&3
   echo SETUP_XDEBUG=$SETUP_XDEBUG >&3
@@ -439,7 +436,6 @@ fi
   echo PHP81=$PHP81 >&3
 } 3>$CONFIGFILE
 
-sudo chown $SUDO_USER:$SUDO_USER $CONFIGFILE
 clear
 cleanup
 
