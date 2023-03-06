@@ -1,4 +1,21 @@
-## 0.0.11 (2023-01-29)
+## 0.0.12 (2023-03-06)
+
+
+*  Bump version to 0.0.12 and update the way config file is written to
+*  php72 with ioncube
+*  Update magento2-varnish nginx template so listen 443 ssl works
+*  Update varnish compose snippet
+*  mysql56 legacy for yoeri
+*  fix gitconfig
+*  remove readonly from ssh volume mapping so container can write to known_hosts
+*  add ulimits for mysql to limit mem usage on arch
+*  Add apache logs to project in apachelogs dir. When apache is set in siteconfig config.json always use proxy template despite what nginx.conf says
+*  DEVENV-9 allow installer to be run without root/sudo
+*  DEVENV-9 optimizations to installer, created new images because phprun script got updated
+
+
+
+## 0.0.11 (2023-01-30)
 
 
 *  Rework some docker snippets, updates to nginx run
