@@ -65,7 +65,7 @@ setup_gitconfig () {
         mkdir -p $installdir/docker/dependencies
     fi
     cp ./dep/gitconfig $installdir/docker/dependencies/
-    name=
+    name=$USER
     email=
     # open fd
     exec 3>&1
