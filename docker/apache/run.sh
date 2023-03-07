@@ -32,9 +32,9 @@ for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
     CONFIGFILE="$WEBPATH/$SITEBASENAME/.siteconfig/config.json.example"
 
     # check if logging dir exists
-    if [ ! -d "/data/shared/sites/$SITEBASENAME/apachelogs"  ]; then
-        mkdir -p /data/shared/sites/$SITEBASENAME/apachelogs
-        chown -R web.web /data/shared/sites/$SITEBASENAME/apachelogs
+    if [ ! -d "/data/shared/sites/$SITEBASENAME/logs"  ]; then
+        mkdir -p /data/shared/sites/$SITEBASENAME/logs
+        chown -R web.web /data/shared/sites/$SITEBASENAME/logs
     fi
 
     if [ -f "$WEBPATH/$SITEBASENAME/.siteconfig/config.json" ]; then
