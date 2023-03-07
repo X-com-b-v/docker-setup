@@ -5,7 +5,6 @@
       - "138:138/udp"
       - 139:139
       - 445:445
-      - "445:445/udp"
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
     networks:
