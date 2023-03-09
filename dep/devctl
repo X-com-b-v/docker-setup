@@ -145,8 +145,7 @@ case "$1" in
         docker compose ps -a
         ;;
     build)
-        docker compose pull ${@:2}
-        docker compose build ${@:2}
+        docker compose build --no-cache ${@:2}
         ;;
     hostversions)
         get_versions ${@:2}
