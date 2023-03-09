@@ -113,7 +113,7 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         INCLUDE_PARAMS="include \/data\/shared\/sites\/$SITEBASENAME\/.siteconfig\/params.conf;"
     fi;
 
-    if [ -f "/data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf" && $USE_WEBSERVER == "nginx" ]; then
+    if [ -f "/data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf" ] && [ $USE_WEBSERVER == "nginx" ]; then
         # Custom nginx found, don't care what the config is, uses this one.
         cp /data/shared/sites/$SITEBASENAME/.siteconfig/nginx.conf /etc/nginx/sites-enabled/$SITEBASENAME.conf
     # https://stackoverflow.com/questions/43158140/way-to-create-multiline-comments-in-bash
