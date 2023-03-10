@@ -6,6 +6,10 @@ if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
 
+WEBPATH="$installdir/data/shared/sites"
+DOMAIN=".$USERNAME.o.xotap.nl"
+WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
+
 DEFAULT_PHP="7.4"
 
 # handle media part, only for magento
@@ -45,7 +49,7 @@ fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $1.be.
 EOF
 }
 
-rm /etc/nginx/sites-enabled/*
+rm /etc/nginx/sites-enabled/*.conf
 for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     SITEBASENAME=`basename $d`
 

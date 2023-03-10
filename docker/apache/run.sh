@@ -5,17 +5,15 @@
 #WEBPATH=`jq -r .sitesroot /opt/devserver/config.json`
 #WEBPATHESCAPED=$(jq -r .sitesroot /opt/devserver/config.json | sed 's/\//\\\//g')
 
-
-
 CONFIGFILE="/root/.config/docker-setup.config"
 USERNAME=""
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
 
+WEBPATH="$installdir/data/shared/sites"
 DOMAIN=".$USERNAME.o.xotap.nl"
 DEFAULT_PHP="7.2"
-WEBPATH="/data/shared/sites"
 WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
 
 createSiteConfigDir()  {
