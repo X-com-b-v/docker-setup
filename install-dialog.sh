@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-# if [ "$EUID" -ne 0 ]; then
-#     dialog --title "Root" --msgbox 'Please run this file as root' 8 44
-#     clear
-#     exit 1
-# fi
-
 CONFIGFILE="/home/$USER/.config/docker-setup.config"
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
@@ -65,7 +59,7 @@ setup_gitconfig () {
         mkdir -p $installdir/docker/dependencies
     fi
     cp ./dep/gitconfig $installdir/docker/dependencies/
-    name=$USER
+    name=${USER^}
     email=
     # open fd
     exec 3>&1
@@ -137,6 +131,7 @@ settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$settings" ]; then
     clear
     echo "No settings provided, or cancelled"
+    cleanup
     exit 1
 fi
 for setting in $settings
@@ -182,6 +177,7 @@ do :
         *)
             clear
             echo "No settings provided"
+            cleanup
             exit 1;
             ;;
     esac        
@@ -294,6 +290,7 @@ paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$paths" ]; then
     clear
     echo "No paths provided, or cancelled"
+    cleanup
     exit 1
 fi
 for path in $paths
