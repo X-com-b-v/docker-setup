@@ -16,7 +16,7 @@ FIRSTRUN=1
 originstalldir=
 while [[ -z $originstalldir ]]; do
     exec 3>&1
-    origdir="/home/$USER/x-com"
+    origdir="$HOME/x-com"
     if [ ! -z "$installdir" ]; then
         origdir=$installdir
     fi
