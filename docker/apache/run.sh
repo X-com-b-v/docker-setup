@@ -5,13 +5,18 @@
 #WEBPATH=`jq -r .sitesroot /opt/devserver/config.json`
 #WEBPATHESCAPED=$(jq -r .sitesroot /opt/devserver/config.json | sed 's/\//\\\//g')
 
-CONFIGFILE="/root/.config/docker-setup.config"
+CONFIGFILE="/etc/docker-setup.config"
 USERNAME=""
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
 
-WEBPATH="$installdir/data/shared/sites"
+if [ -z $USERNAME ]; then
+    echo 'Username not set, cannot continue creating hosts'
+    exit 1
+fi
+
+WEBPATH="/data/shared/sites"
 DOMAIN=".$USERNAME.o.xotap.nl"
 DEFAULT_PHP="7.2"
 WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
