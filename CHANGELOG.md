@@ -1,3 +1,18 @@
+## 0.0.14 (2023-03-13)
+
+
+*  Rename apachelogs to logs so we have a single log dir
+*  Prefill gitconfig username with $USER
+*  update samba config
+*  DEVENV-9 fix nginx run.sh
+*  devctl build specific contains with no-cache
+*  DEVENV-9 prepare nginx webpath, update apache run.sh to use $installdir as well
+*  Cleanup directories when exiting script early
+*  Set default installdir to $HOME/x-com
+*  DEVENV-24 fixes voor apache
+
+
+
 ## 0.0.13 (2023-03-06)
 
 
