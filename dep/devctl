@@ -177,7 +177,8 @@ case "$1" in
     reload)
         update_hosts
         cd $(get_dockerdir)
-        docker compose restart nginx apache
+        docker compose restart nginx
+        docker compose restart apache
         ;;
     *)
         usage
