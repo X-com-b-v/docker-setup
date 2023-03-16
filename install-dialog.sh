@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
+. "./version.sh"
 CONFIGFILE="$HOME/.config/docker-setup.config"
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
+
 
 while [[ -z $USERNAME ]]; do
     exec 3>&1
@@ -380,6 +382,7 @@ fi
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash
 {
   echo installdir=$installdir >&3
+  echo VERSION=$VERSION >&3
   echo USERNAME=$USERNAME >&3
   echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >&3
   echo SETUP_RESTART=$SETUP_RESTART >&3
