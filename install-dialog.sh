@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIGFILE="/home/$USER/.config/docker-setup.config"
+CONFIGFILE="$HOME/.config/docker-setup.config"
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
@@ -47,6 +47,9 @@ if [ ! -d "/home/$USER/.ssh" ] ; then
 fi
 
 setup_devctl () {
+    if [ ! -d ~/.local/bin ]; then
+        mkdir -p ~/.local/bin
+    fi
     cp dep/devctl ~/.local/bin/devctl
     cp dep/enter ~/.local/bin/enter
     sed -i -e 's:installdirectory:'"$installdir"':g' ~/.local/bin/devctl
@@ -368,6 +371,9 @@ if [ ! $FIRSTRUN = "0" ]; then
     sysctl -p --system
 fi
 
+if [ ! -d ~/.config ]; then
+    mkdir -p ~/.config
+fi
 # clear config file and write settings to it
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash
 {
