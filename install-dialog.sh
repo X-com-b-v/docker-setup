@@ -300,7 +300,9 @@ for path in $paths
 do :
     # use printf to assign php value 
     # https://stackoverflow.com/a/55331060
-    printf -v "${path^^}" '%s' 'on'
+    # macos compatibility
+    UPATH=$(echo ${path} | awk '{print toupper($0)}')
+    printf -v "${UPATH}" '%s' 'on'
     
     if [ ! -d "$installdir/data/home/$path" ]; then
         mkdir -p "$installdir/data/home/$path"
