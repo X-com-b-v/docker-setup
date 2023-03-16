@@ -44,8 +44,9 @@ elif [ -d $installdir ]; then
     FIRSTRUN=0
 fi
 
-if [ ! -d "/home/$USER/.ssh" ] ; then
-    mkdir -p "/home/$USER/.ssh"
+# This is volume mapped, so directory should exist
+if [ ! -d "$HOME/.ssh" ] ; then
+    mkdir -p "$HOME/.ssh"
 fi
 
 setup_devctl () {
