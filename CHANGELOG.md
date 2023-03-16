@@ -1,3 +1,14 @@
+## 0.0.15 (2023-03-16)
+
+
+*  devctl reload restarts apache on a new line to prevent docker compose exiting with statuscode because apache does not exist
+*  Create ~/.local/bin if dir doesnt exist
+*  Refer to $HOME for devctl updatehosts and also update install dialog to get php path to uppercase
+*  Use awk to uppercase the first letter for $USER as default username
+*  Write current devenv version to config file so I know what version is used when needing to debug something
+
+
+
 ## 0.0.14 (2023-03-13)
 
 
