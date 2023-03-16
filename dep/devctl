@@ -95,6 +95,20 @@ update_varnish_acl () {
     fi
 }
 
+get_configfile () {
+    CONFIGFILE="$HOME/.config/docker-setup.config"
+    if [ -f "$CONFIGFILE" ]; then
+        . $CONFIGFILE
+    fi
+}
+
+get_installversion () {
+    get_configfile
+    if [ ! -z $VERSION ]; then
+        echo $VERSION
+    fi   
+}
+
 update_hosts () {
     INSTALLDIR=$(get_installdir)
     HOSTS="/etc/hosts"
@@ -106,9 +120,7 @@ update_hosts () {
     fi
     CONFIGFILE="$HOME/.config/docker-setup.config"
     USERNAME=""
-    if [ -f "$CONFIGFILE" ]; then
-        . $CONFIGFILE
-    fi
+    get_configfile
     TMPHOSTS="/tmp/hosts"
     if [ ! -f $TMPHOSTS ]; then
         touch $TMPHOSTS
@@ -179,6 +191,9 @@ case "$1" in
         cd $(get_dockerdir)
         docker compose restart nginx
         docker compose restart apache
+        ;;
+    version)
+        get_installversion
         ;;
     *)
         usage
