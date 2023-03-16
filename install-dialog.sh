@@ -62,7 +62,7 @@ setup_gitconfig () {
         mkdir -p $installdir/docker/dependencies
     fi
     cp ./dep/gitconfig $installdir/docker/dependencies/
-    name=${USER^}
+    name=$(echo ${USER} | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
     email=
     # open fd
     exec 3>&1
@@ -300,7 +300,7 @@ for path in $paths
 do :
     # use printf to assign php value 
     # https://stackoverflow.com/a/55331060
-    # macos compatibility
+    # macos compa
     UPATH=$(echo ${path} | awk '{print toupper($0)}')
     printf -v "${UPATH}" '%s' 'on'
     
