@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-# load current version
-. "./version.sh"
-
 CONFIGFILE="$HOME/.config/docker-setup.config"
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
 
+# load current version
+. "./version.sh"
 
 while [[ -z $USERNAME ]]; do
     exec 3>&1
@@ -15,8 +14,6 @@ while [[ -z $USERNAME ]]; do
     exitcode=$?;
     exec 3>&-;
 done
-
-FIRSTRUN=1
 
 originstalldir=
 while [[ -z $originstalldir ]]; do
@@ -40,9 +37,14 @@ if [ -z "$installdir" ]; then
     installdir="/"
 fi
 
-# create installdir if it does not exist
+FIRSTRUN=1
+# create installdir if it does not exist, elevate permissions if necessary
 if [ ! -d $installdir ] ; then
     mkdir -p $installdir
+    if [ $? -ne 0 ] ; then
+        sudo mkdir -p $installdir
+        sudo chown -r $USER:$USER $installdir
+    fi
 elif [ -d $installdir ]; then
     FIRSTRUN=0
 fi
@@ -115,7 +117,6 @@ setup_projectslug () {
     fi
     echo $PROJECTSLUG
 }
-
 
 cleanup () {
     # cleanup as there's no need for this anymore
@@ -331,7 +332,7 @@ for path in $paths
 do :
     # use printf to assign php value 
     # https://stackoverflow.com/a/55331060
-    # macos compa
+    # macos compatibility.
     UPATH=$(echo ${path} | awk '{print toupper($0)}')
     printf -v "${UPATH}" '%s' 'on'
     
@@ -403,9 +404,10 @@ if [ ! $FIRSTRUN = "0" ]; then
     sysctl -p --system
 fi
 
-if [ ! -d ~/.config ]; then
-    mkdir -p ~/.config
+if [ ! -d $HOME/.config ]; then
+    mkdir -p $HOME/.config
 fi
+
 # clear config file and write settings to it
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash
 {
