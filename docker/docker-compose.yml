@@ -21,7 +21,7 @@ services:
       - installdirectory/data/shared/sites:/data/shared/sites
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
-      - ~/.config/docker-setup.config:/root/.config/docker-setup.config:ro
+      - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
     networks:
       - xcom_network
   mysql57:

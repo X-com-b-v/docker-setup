@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIGFILE="/root/.config/docker-setup.config"
+CONFIGFILE="/etc/docker-setup.config"
 USERNAME=""
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
