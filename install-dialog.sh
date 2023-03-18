@@ -453,15 +453,14 @@ dialog_status=$?
 if [ "$dialog_status" -eq 0 ]; then
     # The previous dialog was answered Yes
     clear
-    cd $installdir/docker && docker compose build && docker compose up -d
+    cd $installdir/docker && docker compose up --build -d
     exit $dialogstatus
 else
   # The previous dialog was answered No or interrupted with <C-c>
     dialog --title "Complete" --msgbox "Installation prepared \n 
     Config is written to ~/.config/docker-setup.config\n
     - cd to $installdir/docker\n
-    - Run docker compose build\n
-    - Run docker compose up -d\n
+    - Run docker compose up --build -d\n
     " 13 60
 fi 
 
