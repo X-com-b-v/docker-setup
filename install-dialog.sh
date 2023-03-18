@@ -140,6 +140,7 @@ options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
          mongo "Mongo" "$SETUP_MONGO"
+         syncthing "Syncthing configurations" "$SETUP_SYNCTHING"
          samba "Samba configurations (Deprecated)" "$SETUP_SAMBA"
          mysql56 "Setup mysql56 (Deprecated)" "$SETUP_MYSQL56"
 )
@@ -157,6 +158,7 @@ SETUP_MONGO=off
 SETUP_MYSQL56=off
 SETUP_GITCONFIG=off
 SETUP_PROJECTSLUG=off
+SETUP_SYNCTHING=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$settings" ]; then
@@ -199,6 +201,9 @@ do :
             ;;
         apache)
             SETUP_APACHE=on
+            ;;
+        syncthing)
+            SETUP_SYNCTHING=on
             ;;
         samba)
             SETUP_SAMBA=on
@@ -282,6 +287,10 @@ fi
 if [ $SETUP_MYSQL56 == "on" ] && [ -f docker-compose-snippets/mysql56 ]; then
     cat docker-compose-snippets/mysql56 >> $installdir/docker/docker-compose.yml
     services+=( "mysql56" )
+fi
+if [ $SETUP_SYNCTHING == "on" ] && [ -f docker-compose-snippets/syncthing ]; then
+    cat docker-compose-snippets/syncthing >> $installdir/docker/docker-compose.yml
+    services+=( "syncthing" )
 fi
 
 for service in "${services[@]}"
@@ -413,6 +422,7 @@ fi
   echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
   echo SETUP_APACHE=$SETUP_APACHE >&3
   echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3
+  echo SETUP_SYNCTHING=$SETUP_SYNCTHING >&3
   echo SETUP_SAMBA=$SETUP_SAMBA >&3
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
