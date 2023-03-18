@@ -65,14 +65,14 @@ if [ -z $PROJECTSLUG ]; then
 fi
 
 setup_devctl () {
-    if [ ! -d ~/.local/bin ]; then
-        mkdir -p ~/.local/bin
+    if [ ! -d $HOME/.local/bin ]; then
+        mkdir -p $HOME/.local/bin
     fi
-    cp dep/devctl ~/.local/bin/devctl
-    cp dep/enter ~/.local/bin/enter
-    sed -i -e 's:installdirectory:'"$installdir"':g' ~/.local/bin/devctl
-    chmod +x ~/.local/bin/devctl
-    chmod +x ~/.local/bin/enter
+    cp dep/devctl $HOME/.local/bin/devctl
+    cp dep/enter $HOME/.local/bin/enter
+    sed -i -e 's:installdirectory:'"$installdir"':g' $HOME/.local/bin/devctl
+    chmod +x $HOME/.local/bin/devctl
+    chmod +x $HOME/.local/bin/enter
 }
 
 setup_gitconfig () {
@@ -217,11 +217,9 @@ do :
             ;;
     esac        
 done
-
 ### End Global configuration ###
 
 ### Personalization configuration ###
-
 cmd=(dialog --separate-output --checklist "Personalization, select options:" 22 55 16)
 options=(starship "Enable starship.rs shell prompt" "$SETUP_STARSHIP")
 personalizations=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
@@ -238,12 +236,6 @@ do :
             ;;
     esac        
 done
-
-# if ohmyzsh is enabled, disable starship
-if [ $SETUP_ZSH == "on" ]; then
-    SETUP_STARSHIP=off
-fi
-
 ### End Personalization configuration ###
 
 # Prepare paths
@@ -262,7 +254,6 @@ done
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
 cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
-# cp -r ./docker/* $installdir/docker/
 
 # make sure other services are not forgotten, these are not updated every run
 services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" )
@@ -441,15 +432,10 @@ fi
 clear
 cleanup
 
-# dialog --title "Complete" --backtitle "Run docker compose build and up?" --yesno --defaultno
-
 dialog --stdout --title "Complete" \
   --backtitle "Completed installation" \
   --yesno "Run docker compose build and up?" 7 60
 dialog_status=$?
-
-# Do something
-
 if [ "$dialog_status" -eq 0 ]; then
     # The previous dialog was answered Yes
     clear
@@ -458,7 +444,7 @@ if [ "$dialog_status" -eq 0 ]; then
 else
   # The previous dialog was answered No or interrupted with <C-c>
     dialog --title "Complete" --msgbox "Installation prepared \n 
-    Config is written to ~/.config/docker-setup.config\n
+    Config is written to $HOME/.config/docker-setup.config\n
     - cd to $installdir/docker\n
     - Run docker compose up --build -d\n
     " 13 60
