@@ -1,3 +1,17 @@
+## 0.0.16 (2023-03-18)
+
+
+*  Create .ssh directory in $HOME instead of /home/$USER for cross platform compatibility
+*  Updated readme file
+*  "devctl version" now shows current installed version
+*  Save gitconfig information to config file as well
+*  Allow to change project slug as some modules allow development at .local domains
+*  Installer cleanup, make sure correct project version is used and use $HOME instead of ~
+*  When complete, run docker compose up --build -d to build an daemonize containers
+*  Nginx volume map docker-setup.config to different location
+
+
+
 ## 0.0.15 (2023-03-16)
 
 
