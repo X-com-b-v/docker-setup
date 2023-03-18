@@ -439,7 +439,7 @@ dialog_status=$?
 if [ "$dialog_status" -eq 0 ]; then
     # The previous dialog was answered Yes
     clear
-    cd $installdir/docker && docker compose up --build -d
+    cd $installdir/docker && docker compose up --remove-orphans --build -d
     exit $dialogstatus
 else
   # The previous dialog was answered No or interrupted with <C-c>
