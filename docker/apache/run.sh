@@ -16,8 +16,12 @@ if [ -z $USERNAME ]; then
     exit 1
 fi
 
+if [ -z $PROJECTSLUG ]; then
+    PROJECTSLUG=".o.xotap.nl"
+fi
+
 WEBPATH="/data/shared/sites"
-DOMAIN=".$USERNAME.o.xotap.nl"
+DOMAIN=".${USERNAME}${PROJECTSLUG}"
 DEFAULT_PHP="7.2"
 WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
 
