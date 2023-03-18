@@ -6,8 +6,12 @@ if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
 fi
 
+if [ -z $PROJECTSLUG ]; then
+    $PROJECTSLUG=".o.xotap.nl"
+fi
+
 WEBPATH="$installdir/data/shared/sites"
-DOMAIN=".$USERNAME.o.xotap.nl"
+DOMAIN=".${USERNAME}${PROJECTSLUG}"
 WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
 
 DEFAULT_PHP="7.4"
@@ -36,16 +40,16 @@ handleMedia () {
 
 handleParams () {
     cat << EOF > "/data/shared/sites/$1/.siteconfig/params.conf.example"
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://$1.$2.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://$1.$2.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://$1.$2.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://$1.$2.o.xotap.nl/;
-fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN $1.$2.o.xotap.nl;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://$1.be.$2.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://$1.be.$2.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://$1.be.$2.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://$1.be.$2.o.xotap.nl/;
-fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $1.be.$2.o.xotap.nl;
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://$1.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://$1.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_LINK_URL https://$1.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_LINK_URL https://$1.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__DEFAULT__WEB_COOKIE_COOKIE_DOMAIN $1.$2${PROJECTSLUG};
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_URL https://$1.be.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_URL https://$1.be.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__UNSECURE__BASE_LINK_URL https://$1.be.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL https://$1.be.$2${PROJECTSLUG}/;
+fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $1.be.$2${PROJECTSLUG};
 EOF
 }
 
@@ -146,6 +150,7 @@ for d in `find -L /data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
     sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
     sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
     sed -i "s/##XCOMUSER##/$USERNAME/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
+    sed -i "s/##PROJECTSLUG##/$PROJECTSLUG/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
     sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/nginx/sites-enabled/$SITEBASENAME.conf
 done
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+# load current version
 . "./version.sh"
+
 CONFIGFILE="$HOME/.config/docker-setup.config"
 if [ -f "$CONFIGFILE" ]; then
     . $CONFIGFILE
@@ -15,6 +17,7 @@ while [[ -z $USERNAME ]]; do
 done
 
 FIRSTRUN=1
+
 originstalldir=
 while [[ -z $originstalldir ]]; do
     exec 3>&1
@@ -52,6 +55,11 @@ fi
 # This is volume mapped, so directory should exist
 if [ ! -d "$HOME/.ssh" ] ; then
     mkdir -p "$HOME/.ssh"
+fi
+
+# set default project slug
+if [ -z $PROJECTSLUG ]; then
+    PROJECTSLUG=".o.xotap.nl"
 fi
 
 setup_devctl () {
@@ -96,6 +104,18 @@ setup_gitconfig () {
     sed -i -e 's:user@email.com:'"$GIT_EMAIL"':g' $installdir/docker/dependencies/gitconfig
 }
 
+setup_projectslug () {
+    exec 3>&1
+    PROJECTSLUG=$(dialog --inputbox "Change project slug \n" 8 60 $PROJECTSLUG 2>&1 1>&3)
+    exitcode=$?;
+    exec 3>&-;
+    if [ ! $exitcode = "0" ]; then
+        clear
+        exit $exitcode
+    fi
+    echo $PROJECTSLUG
+}
+
 
 cleanup () {
     # cleanup as there's no need for this anymore
@@ -111,15 +131,16 @@ setup_devctl
 cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 76 16)
 options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
+         projectslug "Change project slug [$PROJECTSLUG]" "$SETUP_PROJECTSLUG"
          varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
          elasticsearch "Use Elasticsearch (Magento)" "$SETUP_ELASTICSEARCH"
-         configurator "Skip magento configurator" "$SKIP_CONFIGURATOR"
+         configurator "Skip configurator (Magento)" "$SKIP_CONFIGURATOR"
          xdebug "Enable Xdebug" "$SETUP_XDEBUG"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
-         mysql56 "Setup legacy mysql56" "$SETUP_MYSQL56"
-         samba "Samba configurations, for Itix" "$SETUP_SAMBA"
-         mongo "Mongo containers, for Itix" "$SETUP_MONGO"
+         mongo "Mongo" "$SETUP_MONGO"
+         samba "Samba configurations (Deprecated)" "$SETUP_SAMBA"
+         mysql56 "Setup mysql56 (Deprecated)" "$SETUP_MYSQL56"
 )
 
 # reset basic variables after they've been shown in options list
@@ -134,6 +155,7 @@ SETUP_SAMBA=off
 SETUP_MONGO=off
 SETUP_MYSQL56=off
 SETUP_GITCONFIG=off
+SETUP_PROJECTSLUG=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$settings" ]; then
@@ -151,6 +173,10 @@ do :
         gitconfig)
             setup_gitconfig
             SETUP_GITCONFIG=on
+            ;;
+        projectslug)
+            setup_projectslug
+            SETUP_PROJECTSLUG=on
             ;;
         ssh)
             SETUP_SSH=on
@@ -195,7 +221,7 @@ done
 
 ### Personalization configuration ###
 
-cmd=(dialog --separate-output --checklist "Personalization, select options:" 22 76 16)
+cmd=(dialog --separate-output --checklist "Personalization, select options:" 22 55 16)
 options=(starship "Enable starship.rs shell prompt" "$SETUP_STARSHIP")
 personalizations=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 # reset personalization settings
@@ -276,7 +302,7 @@ done
 
 ### PHP Configurations ###
 
-cmd=(dialog --separate-output --checklist "Select PHP versions:" 22 76 16)
+cmd=(dialog --separate-output --checklist "Select PHP versions:" 16 35 16)
 options=(php70 "PHP 7.0" "$PHP70" # any option can be set to default to "on"
          php72 "PHP 7.2" "$PHP72"
          php73 "PHP 7.3" "$PHP73"
@@ -356,7 +382,6 @@ do :
     if [ $SETUP_GITCONFIG == "on" ]; then
         cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
     fi
-
 done
 ### End PHP Configurations ###
 
@@ -402,6 +427,7 @@ fi
   echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
   echo GIT_USER=$GIT_USER >&3
   echo GIT_EMAIL=$GIT_EMAIL >&3
+  echo PROJECTSLUG=$PROJECTSLUG >&3
   echo PHP70=$PHP70 >&3
   echo PHP72=$PHP72 >&3
   echo PHP73=$PHP73 >&3

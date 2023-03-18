@@ -131,7 +131,7 @@ update_hosts () {
     echo "#START XCOM HOSTS" >> $TMPHOSTS
     for d in `find -L $INSTALLDIR/data/shared/sites -mindepth 1 -maxdepth 1 -type d`; do
         SITEBASENAME=`basename $d`
-        echo $IPADDR $SITEBASENAME.$USERNAME.o.xotap.nl>> $TMPHOSTS
+        echo $IPADDR $SITEBASENAME.$USERNAME$PROJECTSLUG >> $TMPHOSTS
     done
     echo $IPADDR "devserver" >> $TMPHOSTS
     echo "#END XCOM HOSTS" >> $TMPHOSTS
