@@ -44,6 +44,11 @@ elif [ -d $installdir ]; then
     FIRSTRUN=0
 fi
 
+# always enable gitconfig when it's the first run
+if [ $FIRSTRUN == "1" ]; then
+   SETUP_GITCONFIG=on
+fi
+
 # This is volume mapped, so directory should exist
 if [ ! -d "$HOME/.ssh" ] ; then
     mkdir -p "$HOME/.ssh"
@@ -65,26 +70,30 @@ setup_gitconfig () {
         mkdir -p $installdir/docker/dependencies
     fi
     cp ./dep/gitconfig $installdir/docker/dependencies/
-    name=$(echo ${USER} | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
-    email=
+    if [ -z $GIT_USER ]; then
+        GIT_USER=$(echo ${USER} | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+    fi
+    user=$GIT_USER
+    email=$GIT_EMAIL
     # open fd
     exec 3>&1
-    dialog --separate-widget $'\n' --ok-label "Submit" \
+    # Store data to $VALUES variable
+    VALUES=$(dialog --ok-label "Submit" \
         --backtitle "Gitconfig" \
         --title "Gitconfig" \
-        --form "Add user information" \
+        --form "Add git user information" \
     15 50 0 \
-        "Name   :" 1 1	"$name" 	1 10 39 0 \
-        "E-mail :"    2 1	"$email"  	2 10 40 0 \
-    2>&1 1>&3 | { 
-        read -r name
-        read -r email
-        sed -i -e 's:username:'"$name"':g' $installdir/docker/dependencies/gitconfig
-        sed -i -e 's:user@email.com:'"$email"':g' $installdir/docker/dependencies/gitconfig
-    }
-
+        "Name:" 1 1	"$GIT_USER" 	1 10 39 0 \
+        "E-mail:"   2 1	"$GIT_EMAIL"  	2 10 40 0 \
+    2>&1 1>&3)
     # close fd
     exec 3>&-
+    # convert values to array
+    GIT_DATA=($VALUES)
+    GIT_USER=${GIT_DATA[0]}
+    GIT_EMAIL=${GIT_DATA[1]}
+    sed -i -e 's:username:'"$GIT_USER"':g' $installdir/docker/dependencies/gitconfig
+    sed -i -e 's:user@email.com:'"$GIT_EMAIL"':g' $installdir/docker/dependencies/gitconfig
 }
 
 
@@ -94,14 +103,6 @@ cleanup () {
         rm -r $installdir/docker/dependencies
     fi
 }
-
-# enable gitconfig when it's the first run
-SETUP_GITCONFIG=off
-SETUP_PREINSTALL=off
-if [ ! $FIRSTRUN = "0" ]; then
-   SETUP_GITCONFIG=on
-   SETUP_PREINSTALL=on
-fi
 
 # update devctl script
 setup_devctl
@@ -132,6 +133,7 @@ SETUP_APACHE=off
 SETUP_SAMBA=off
 SETUP_MONGO=off
 SETUP_MYSQL56=off
+SETUP_GITCONFIG=off
 
 settings=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 if [ -z "$settings" ]; then
@@ -397,6 +399,9 @@ fi
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
   echo SETUP_ZSH=$SETUP_ZSH >&3
+  echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
+  echo GIT_USER=$GIT_USER >&3
+  echo GIT_EMAIL=$GIT_EMAIL >&3
   echo PHP70=$PHP70 >&3
   echo PHP72=$PHP72 >&3
   echo PHP73=$PHP73 >&3
