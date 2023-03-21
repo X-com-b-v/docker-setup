@@ -2,10 +2,12 @@
 
 CONFIGFILE="$HOME"/.config/docker-setup.config
 if [ -f "$CONFIGFILE" ]; then
+    # shellcheck disable=SC1090
     . "$CONFIGFILE"
 fi
 
 # load current version
+# shellcheck disable=SC1091
 . "./version.sh"
 
 while [[ -z "$USERNAME" ]]; do
@@ -31,6 +33,7 @@ while [[ -z $originstalldir ]]; do
     fi
 done
 
+#shellcheck disable=SC2001
 installdir=$(echo "$originstalldir" | sed 's:/*$::')
 
 if [ -z "$installdir" ]; then
@@ -40,7 +43,7 @@ fi
 FIRSTRUN=1
 # create installdir if it does not exist, elevate permissions if necessary
 if [ ! -d "$installdir" ] ; then
-    if [ ! mkdir -p "$installdir" ] ; then
+    if ! mkdir -p "$installdir"; then
         sudo mkdir -p "$installdir"
         sudo chown -r "$USER":"$USER" "$installdir"
     fi
@@ -238,10 +241,10 @@ done
 
 # Prepare paths
 folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" )
-for folder in ${folders[@]}
+for folder in "${folders[@]}"
 do :
     if [ ! -d "$folder" ]; then
-        if [ ! mkdir -p "$folder" ] ; then
+        if ! mkdir -p "$folder" ; then
             sudo mkdir -p "$folder"
             sudo chown -r "$USER":"$USER" "$folder"
         fi
@@ -414,7 +417,7 @@ fi
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
   echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
-  echo GIT_USER=\"${GIT_USER}\" >&3
+  echo GIT_USER=\""${GIT_USER}"\" >&3
   echo GIT_EMAIL="$GIT_EMAIL" >&3
   echo PROJECTSLUG="$PROJECTSLUG" >&3
   echo PHP70=$PHP70 >&3
