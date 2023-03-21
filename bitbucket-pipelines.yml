@@ -3,6 +3,11 @@ clone:
   depth: full
 definitions:
   steps:
+    - step: &shell-check
+        name: Shell checker
+        image: koalaman/shellcheck-alpine:latest
+        script: 
+          - shellcheck install.sh
     - step: &check-tag
         name: Check tag
         script:
@@ -25,11 +30,17 @@ definitions:
           - git tag -a $VERSION -m "$dt - Version $VERSION"
           - git push --tags
 pipelines:
+
   pull-requests:
     'develop': # this will run on any PR from develop to target (usually main)
       - step:
           <<: *check-tag
   branches:
+    '*':
+      - step:
+          <<: *shell-check
     'main':
+      - step:
+          <<: *shell-check
       - step:
           <<: *tag
