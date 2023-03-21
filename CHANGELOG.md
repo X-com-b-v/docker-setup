@@ -1,3 +1,20 @@
+## 0.0.17 (2023-03-21)
+
+
+*  Apache also has to adhere to optional project slug change
+*  Bump version to 0.0.17
+*  Remove all ~/ references and replace them with $HOME
+*  docker compose up also removes orphans in case you deselected a previous option, helps keeping things clean
+*  DEVENV-30 add syncthing as a possible replacement for samba, so tortoiseSVN can maybe be used again
+*  Revert "DEVENV-30 add syncthing as a possible replacement for samba, so tortoiseSVN can maybe be used again"
+*  Rename install-dialog to just install as it is the only installer now
+*  Use shellcheck.net to fix shell syntax issues
+*  Write gitconfig username with quotes so it is interpreted as string
+*  DEVENV-31 update bitbucket-pipelines
+*  DEVENV-31 syntax fixes in install script
+
+
+
 ## 0.0.16 (2023-03-18)
 
 
