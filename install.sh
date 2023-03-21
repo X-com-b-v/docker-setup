@@ -2,15 +2,15 @@
 
 CONFIGFILE="$HOME/.config/docker-setup.config"
 if [ -f "$CONFIGFILE" ]; then
-    . $CONFIGFILE
+    . "$CONFIGFILE"
 fi
 
 # load current version
 . "./version.sh"
 
-while [[ -z $USERNAME ]]; do
+while [[ -z "$USERNAME" ]]; do
     exec 3>&1
-    USERNAME=$(dialog --title "username" --inputbox "Enter your username" 6 60 $USERNAME 2>&1 1>&3)
+    USERNAME=$(dialog --title "username" --inputbox "Enter your username" 6 60 "$USERNAME" 2>&1 1>&3)
     exitcode=$?;
     exec 3>&-;
 done
@@ -19,10 +19,10 @@ originstalldir=
 while [[ -z $originstalldir ]]; do
     exec 3>&1
     origdir="$HOME/x-com"
-    if [ ! -z "$installdir" ]; then
+    if [ -n "$installdir" ]; then
         origdir=$installdir
     fi
-    originstalldir=$(dialog --inputbox "Full path to install directory \n" 8 60 $origdir 2>&1 1>&3)
+    originstalldir=$(dialog --inputbox "Full path to install directory \n" 8 60 "$origdir" 2>&1 1>&3)
     exitcode=$?;
     exec 3>&-;
     if [ ! $exitcode = "0" ]; then
@@ -31,7 +31,7 @@ while [[ -z $originstalldir ]]; do
     fi
 done
 
-installdir=$(echo $originstalldir | sed 's:/*$::')
+installdir=$(echo "$originstalldir" | sed 's:/*$::')
 
 if [ -z "$installdir" ]; then
     installdir="/"
@@ -39,13 +39,12 @@ fi
 
 FIRSTRUN=1
 # create installdir if it does not exist, elevate permissions if necessary
-if [ ! -d $installdir ] ; then
-    mkdir -p $installdir
-    if [ $? -ne 0 ] ; then
-        sudo mkdir -p $installdir
-        sudo chown -r $USER:$USER $installdir
+if [ ! -d "$installdir" ] ; then
+    if [ ! mkdir -p "$installdir" ] ; then
+        sudo mkdir -p "$installdir"
+        sudo chown -r "$USER":"$USER" "$installdir"
     fi
-elif [ -d $installdir ]; then
+elif [ -d "$installdir" ]; then
     FIRSTRUN=0
 fi
 
@@ -60,31 +59,30 @@ if [ ! -d "$HOME/.ssh" ] ; then
 fi
 
 # set default project slug
-if [ -z $PROJECTSLUG ]; then
+if [ -z "$PROJECTSLUG" ]; then
     PROJECTSLUG=".o.xotap.nl"
 fi
 
 setup_devctl () {
-    if [ ! -d $HOME/.local/bin ]; then
-        mkdir -p $HOME/.local/bin
+    if [ ! -d "$HOME/.local/bin" ]; then
+        mkdir -p "$HOME/.local/bin"
     fi
-    cp dep/devctl $HOME/.local/bin/devctl
-    cp dep/enter $HOME/.local/bin/enter
-    sed -i -e 's:installdirectory:'"$installdir"':g' $HOME/.local/bin/devctl
-    chmod +x $HOME/.local/bin/devctl
-    chmod +x $HOME/.local/bin/enter
+    cp dep/devctl "$HOME/.local/bin/devctl"
+    cp dep/enter "$HOME/.local/bin/enter"
+    sed -i -e 's:installdirectory:'"$installdir"':g' "$HOME/.local/bin/devctl"
+    chmod +x "$HOME/.local/bin/devctl"
+    chmod +x "$HOME/.local/bin/enter"
 }
 
 setup_gitconfig () {
     if [ ! -d "$installdir/docker/dependencies" ]; then
-        mkdir -p $installdir/docker/dependencies
+        mkdir -p "$installdir/docker/dependencies"
     fi
-    cp ./dep/gitconfig $installdir/docker/dependencies/
-    if [ -z $GIT_USER ]; then
-        GIT_USER=$(echo ${USER} | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+    cp ./dep/gitconfig "$installdir/docker/dependencies/"
+
+    if [ -z "$GIT_USER" ]; then
+        GIT_USER=$(echo "${USER}" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
     fi
-    user=$GIT_USER
-    email=$GIT_EMAIL
     # open fd
     exec 3>&1
     # Store data to $VALUES variable
@@ -99,29 +97,32 @@ setup_gitconfig () {
     # close fd
     exec 3>&-
     # convert values to array
-    GIT_DATA=($VALUES)
-    GIT_USER=${GIT_DATA[0]}
-    GIT_EMAIL=${GIT_DATA[1]}
-    sed -i -e 's:username:'"$GIT_USER"':g' $installdir/docker/dependencies/gitconfig
-    sed -i -e 's:user@email.com:'"$GIT_EMAIL"':g' $installdir/docker/dependencies/gitconfig
+    i=0
+    while read -r line; do
+        ((i++))
+        declare GIT_DATA$i="${line}"
+    done <<< "${VALUES}"
+    GIT_USER=${GIT_DATA1}
+    GIT_EMAIL=${GIT_DATA2}
+    sed -i -e 's:username:'"$GIT_USER"':g' "$installdir/docker/dependencies/gitconfig"
+    sed -i -e 's:user@email.com:'"$GIT_EMAIL"':g' "$installdir/docker/dependencies/gitconfig"
 }
 
 setup_projectslug () {
     exec 3>&1
-    PROJECTSLUG=$(dialog --inputbox "Change project slug \n" 8 60 $PROJECTSLUG 2>&1 1>&3)
+    PROJECTSLUG=$(dialog --inputbox "Change project slug \n" 8 60 "$PROJECTSLUG" 2>&1 1>&3)
     exitcode=$?;
     exec 3>&-;
     if [ ! $exitcode = "0" ]; then
         clear
         exit $exitcode
     fi
-    echo $PROJECTSLUG
 }
 
 cleanup () {
     # cleanup as there's no need for this anymore
     if [ -d "$installdir/docker/dependencies" ]; then
-        rm -r $installdir/docker/dependencies
+        rm -r "$installdir"/docker/dependencies
     fi
 }
 
@@ -179,9 +180,6 @@ do :
             setup_projectslug
             SETUP_PROJECTSLUG=on
             ;;
-        ssh)
-            SETUP_SSH=on
-            ;;
         autostart)
             SETUP_RESTART=on
             ;;
@@ -215,7 +213,7 @@ do :
             cleanup
             exit 1;
             ;;
-    esac        
+    esac
 done
 ### End Global configuration ###
 
@@ -234,7 +232,7 @@ do :
         *)
             # continue without personalization
             ;;
-    esac        
+    esac
 done
 ### End Personalization configuration ###
 
@@ -243,53 +241,52 @@ folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites
 for folder in ${folders[@]}
 do :
     if [ ! -d "$folder" ]; then
-        mkdir -p $folder
-        if [ $? -ne 0 ] ; then
-            sudo mkdir -p $folder
-            sudo chown -r $USER:$USER $folder
+        if [ ! mkdir -p "$folder" ] ; then
+            sudo mkdir -p "$folder"
+            sudo chown -r "$USER":"$USER" "$folder"
         fi
     fi
 done
 
 # replace existing docker compose with new to update settings after a second install
-cp ./docker/docker-compose.yml $installdir/docker/docker-compose.yml
-cp ./docker/sonarqube.yml $installdir/docker/sonarqube.yml
+cp ./docker/docker-compose.yml "$installdir"/docker/docker-compose.yml
+cp ./docker/sonarqube.yml "$installdir"/docker/sonarqube.yml
 
 # make sure other services are not forgotten, these are not updated every run
 services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" )
 
 if [ $SETUP_VARNISH == "on" ] && [ -f docker-compose-snippets/varnish ]; then
-    sed -i -e 's/- 80:80/- 8080:80/g' $installdir/docker/docker-compose.yml
-    cat docker-compose-snippets/varnish >> $installdir/docker/docker-compose.yml
+    sed -i -e 's/- 80:80/- 8080:80/g' "$installdir"/docker/docker-compose.yml
+    cat docker-compose-snippets/varnish >> "$installdir"/docker/docker-compose.yml
     services+=( "varnish" )
 fi
 if [ $SETUP_APACHE == "on" ] && [ -f docker-compose-snippets/apache ]; then
-    cat docker-compose-snippets/apache >> $installdir/docker/docker-compose.yml
+    cat docker-compose-snippets/apache >> "$installdir"/docker/docker-compose.yml
     services+=( "apache" )
 fi
 if [ $SETUP_SAMBA == "on" ] && [ -f docker-compose-snippets/samba ]; then
-    cat docker-compose-snippets/samba >> $installdir/docker/docker-compose.yml
+    cat docker-compose-snippets/samba >> "$installdir"/docker/docker-compose.yml
     services+=( "samba" )
 fi
 if [ $SETUP_MONGO == "on" ] && [ -f docker-compose-snippets/mongo ]; then
-    cat docker-compose-snippets/mongo >> $installdir/docker/docker-compose.yml
+    cat docker-compose-snippets/mongo >> "$installdir"/docker/docker-compose.yml
     services+=( "mongo" )
 fi
 if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearch ]; then
-    cat docker-compose-snippets/elasticsearch >> $installdir/docker/docker-compose.yml
+    cat docker-compose-snippets/elasticsearch >> "$installdir"/docker/docker-compose.yml
     services+=( "elasticsearch" )
 fi
 if [ $SETUP_MYSQL56 == "on" ] && [ -f docker-compose-snippets/mysql56 ]; then
-    cat docker-compose-snippets/mysql56 >> $installdir/docker/docker-compose.yml
+    cat docker-compose-snippets/mysql56 >> "$installdir"/docker/docker-compose.yml
     services+=( "mysql56" )
 fi
 
 for service in "${services[@]}"
 do :
-    if [ ! -d $installdir/docker/$service ]; then
-        mkdir -p $installdir/docker/$service
+    if [ ! -d "$installdir"/docker/"$service" ]; then
+        mkdir -p "$installdir"/docker/"$service"
     fi
-    cp -r ./docker/$service/* $installdir/docker/$service
+    cp -r ./docker/"$service"/* "$installdir"/docker/"$service"
 done
 
 ### PHP Configurations ###
@@ -321,69 +318,69 @@ if [ -z "$paths" ]; then
 fi
 for path in $paths
 do :
-    # use printf to assign php value 
+    # use printf to assign php value
     # https://stackoverflow.com/a/55331060
     # macos compatibility.
-    UPATH=$(echo ${path} | awk '{print toupper($0)}')
+    UPATH=$(echo "${path}" | awk '{print toupper($0)}')
     printf -v "${UPATH}" '%s' 'on'
-    
+
     if [ ! -d "$installdir/data/home/$path" ]; then
         mkdir -p "$installdir/data/home/$path"
     fi
 
     if [ ! -f "$installdir/data/home/$path/git-autocomplete.sh" ]; then
-        cp dep/git-autocomplete.sh $installdir/data/home/$path/
-        chmod +x $installdir/data/home/$path/git-autocomplete.sh
+        cp dep/git-autocomplete.sh "$installdir"/data/home/"$path"/
+        chmod +x "$installdir"/data/home/"$path"/git-autocomplete.sh
     fi
-    if [ -f docker-compose-snippets/$path ]; then
-        cat docker-compose-snippets/$path >> $installdir/docker/docker-compose.yml
+    if [ -f docker-compose-snippets/"$path" ]; then
+        cat docker-compose-snippets/"$path" >> "$installdir"/docker/docker-compose.yml
     fi
-    cp -r ./docker/$path $installdir/docker/
+    cp -r ./docker/"$path" "$installdir"/docker/
 
     if [[ ! -d $installdir/docker/$path/conf.d || ! -f $installdir/docker/$path/conf.d/xdebug.ini ]]; then
-        mkdir -p $installdir/docker/$path/conf.d
+        mkdir -p "$installdir"/docker/"$path"/conf.d
     fi
 
     # copy configs
-    cp ./dep/xdebug.ini $installdir/docker/$path/conf.d/
-    cp ./dep/opcache.ini $installdir/docker/$path/conf.d/
+    cp ./dep/xdebug.ini "$installdir"/docker/"$path"/conf.d/
+    cp ./dep/opcache.ini "$installdir"/docker/"$path"/conf.d/
 
     if [ $SETUP_XDEBUG == "off" ]; then
-        sed -i -e 's/xdebug.mode=debug,develop/;xdebug.mode=debug,develop/g' $installdir/docker/$path/conf.d/xdebug.ini
-        sed -i -e 's/;xdebug.mode=off/xdebug.mode=off/g' $installdir/docker/$path/conf.d/xdebug.ini
+        sed -i -e 's/xdebug.mode=debug,develop/;xdebug.mode=debug,develop/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed -i -e 's/;xdebug.mode=off/xdebug.mode=off/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
     fi
 
     if [ $SETUP_XDEBUG_TRIGGER == "on" ]; then
-        sed -i -e 's/xdebug.start_with_request=yes/;xdebug.start_with_request=yes/g' $installdir/docker/$path/conf.d/xdebug.ini
-        sed -i -e 's/;xdebug.start_with_request=trigger/xdebug.start_with_request=trigger/g' $installdir/docker/$path/conf.d/xdebug.ini
+        sed -i -e 's/xdebug.start_with_request=yes/;xdebug.start_with_request=yes/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed -i -e 's/;xdebug.start_with_request=trigger/xdebug.start_with_request=trigger/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
     fi
 
     position=4
     phpversion="$path"
     phpversion="${phpversion:0:position}.${phpversion:position}"
-    
+
     if [[ ! -d $installdir/docker/$path/php-fpm.d || ! -f $installdir/docker/$path/php-fpm.d/zz-docker.conf ]]; then
-        mkdir -p $installdir/docker/$path/php-fpm.d
+        mkdir -p "$installdir"/docker/"$path"/php-fpm.d
     fi
 
-    cp ./dep/phprun.sh $installdir/docker/$path/run.sh
-    cp ./dep/zz-docker.conf $installdir/docker/$path/php-fpm.d/zz-docker.conf
-    sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/run.sh
-    sed -i "s/##PHPVERSION##/$phpversion/g" $installdir/docker/$path/php-fpm.d/zz-docker.conf
+    cp ./dep/phprun.sh "$installdir"/docker/"$path"/run.sh
+    cp ./dep/zz-docker.conf "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
+    sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
+    sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
 
     if [ $SETUP_GITCONFIG == "on" ]; then
-        cp $installdir/docker/dependencies/gitconfig $installdir/data/home/$path/.gitconfig
+        cp "$installdir"/docker/dependencies/gitconfig "$installdir"/data/home/"$path"/.gitconfig
     fi
 done
 ### End PHP Configurations ###
 
 if [ $SETUP_RESTART == "on" ]; then
-    sed -i -e 's/# restart: always/restart: always/g' $installdir/docker/docker-compose.yml
+    sed -i -e 's/# restart: always/restart: always/g' "$installdir"/docker/docker-compose.yml
 fi
 
 if [ -f "$installdir/docker/docker-compose.yml" ]; then
     #echo "Setting up correct values for docker-compose based on your given installdir"
-    sed -i -e 's:installdirectory:'"$installdir"':g' $installdir/docker/docker-compose.yml
+    sed -i -e 's:installdirectory:'"$installdir"':g' "$installdir"/docker/docker-compose.yml
 fi
 
 if [ ! $FIRSTRUN = "0" ]; then
@@ -395,16 +392,16 @@ if [ ! $FIRSTRUN = "0" ]; then
     sysctl -p --system
 fi
 
-if [ ! -d $HOME/.config ]; then
-    mkdir -p $HOME/.config
+if [ ! -d "$HOME"/.config ]; then
+    mkdir -p "$HOME"/.config
 fi
 
 # clear config file and write settings to it
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash
 {
-  echo installdir=$installdir >&3
-  echo VERSION=$VERSION >&3
-  echo USERNAME=$USERNAME >&3
+  echo installdir="$installdir" >&3
+  echo VERSION="$VERSION" >&3
+  echo USERNAME="$USERNAME" >&3
   echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >&3
   echo SETUP_RESTART=$SETUP_RESTART >&3
   echo SETUP_XDEBUG=$SETUP_XDEBUG >&3
@@ -416,18 +413,18 @@ fi
   echo SETUP_SAMBA=$SETUP_SAMBA >&3
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
-  echo SETUP_ZSH=$SETUP_ZSH >&3
+  echo SETUP_ZSH="$SETUP_ZSH" >&3
   echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
-  echo GIT_USER=$GIT_USER >&3
-  echo GIT_EMAIL=$GIT_EMAIL >&3
-  echo PROJECTSLUG=$PROJECTSLUG >&3
+  echo GIT_USER="$GIT_USER" >&3
+  echo GIT_EMAIL="$GIT_EMAIL" >&3
+  echo PROJECTSLUG="$PROJECTSLUG" >&3
   echo PHP70=$PHP70 >&3
   echo PHP72=$PHP72 >&3
   echo PHP73=$PHP73 >&3
   echo PHP74=$PHP74 >&3
   echo PHP80=$PHP80 >&3
   echo PHP81=$PHP81 >&3
-} 3>$CONFIGFILE
+} 3>"$CONFIGFILE"
 
 clear
 cleanup
@@ -439,16 +436,16 @@ dialog_status=$?
 if [ "$dialog_status" -eq 0 ]; then
     # The previous dialog was answered Yes
     clear
-    cd $installdir/docker && docker compose up --remove-orphans --build -d
-    exit $dialogstatus
+    cd "$installdir/docker" && docker compose up --remove-orphans --build -d
+    exit "$dialog_status"
 else
   # The previous dialog was answered No or interrupted with <C-c>
-    dialog --title "Complete" --msgbox "Installation prepared \n 
+    dialog --title "Complete" --msgbox "Installation prepared \n
     Config is written to $HOME/.config/docker-setup.config\n
     - cd to $installdir/docker\n
     - Run docker compose up --build -d\n
     " 13 60
-fi 
+fi
 
 clear
 exit 0
