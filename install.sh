@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIGFILE="$HOME/.config/docker-setup.config"
+CONFIGFILE="$HOME"/.config/docker-setup.config
 if [ -f "$CONFIGFILE" ]; then
     . "$CONFIGFILE"
 fi
@@ -102,8 +102,8 @@ setup_gitconfig () {
         ((i++))
         declare GIT_DATA$i="${line}"
     done <<< "${VALUES}"
-    GIT_USER=${GIT_DATA1}
-    GIT_EMAIL=${GIT_DATA2}
+    GIT_USER="${GIT_DATA1}"
+    GIT_EMAIL="${GIT_DATA2}"
     sed -i -e 's:username:'"$GIT_USER"':g' "$installdir/docker/dependencies/gitconfig"
     sed -i -e 's:user@email.com:'"$GIT_EMAIL"':g' "$installdir/docker/dependencies/gitconfig"
 }
@@ -413,9 +413,8 @@ fi
   echo SETUP_SAMBA=$SETUP_SAMBA >&3
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
-  echo SETUP_ZSH="$SETUP_ZSH" >&3
   echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
-  echo GIT_USER="$GIT_USER" >&3
+  echo GIT_USER=\"${GIT_USER}\" >&3
   echo GIT_EMAIL="$GIT_EMAIL" >&3
   echo PROJECTSLUG="$PROJECTSLUG" >&3
   echo PHP70=$PHP70 >&3
