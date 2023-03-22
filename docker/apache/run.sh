@@ -8,40 +8,41 @@
 CONFIGFILE="/etc/docker-setup.config"
 USERNAME=""
 if [ -f "$CONFIGFILE" ]; then
-    . $CONFIGFILE
+    # shellcheck disable=SC1090
+    . "$CONFIGFILE"
 fi
 
-if [ -z $USERNAME ]; then
+if [ -z "$USERNAME" ]; then
     echo 'Username not set, cannot continue creating hosts'
     exit 1
 fi
 
-if [ -z $PROJECTSLUG ]; then
+if [ -z "$PROJECTSLUG" ]; then
     PROJECTSLUG=".o.xotap.nl"
 fi
 
 WEBPATH="/data/shared/sites"
 DOMAIN=".${USERNAME}${PROJECTSLUG}"
-DEFAULT_PHP="7.2"
-WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
+DEFAULT_PHP="7.4"
+WEBPATHESCAPED=$(echo "$WEBPATH" | sed 's/\//\\\//g')
 
 createSiteConfigDir()  {
-  mkdir -p $1/.siteconfig
-  chown -R web.web $1/.siteconfig
+    if [ ! -d "$1"/.siteconfig ]; then
+        mkdir -p "$1"/.siteconfig
+        chown -R web.web "$1"/.siteconfig
+    fi
 }
 
 rm /etc/apache2/sites-enabled/*
-
-for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
-    SITEBASENAME=`basename $d`
-    
-    HOSTFOUND="0"
+while IFS= read -r d
+do
+    SITEBASENAME=$(basename "$d")
     CONFIGFILE="$WEBPATH/$SITEBASENAME/.siteconfig/config.json.example"
 
     # check if logging dir exists
     if [ ! -d "/data/shared/sites/$SITEBASENAME/logs"  ]; then
-        mkdir -p /data/shared/sites/$SITEBASENAME/logs
-        chown -R web.web /data/shared/sites/$SITEBASENAME/logs
+        mkdir -p /data/shared/sites/"$SITEBASENAME"/logs
+        chown -R web.web /data/shared/sites/"$SITEBASENAME"/logs
     fi
 
     if [ -f "$WEBPATH/$SITEBASENAME/.siteconfig/config.json" ]; then
@@ -64,8 +65,7 @@ for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
     fi
 
 
-    PROXYPORT=""
-    USE_TEMPLATE=$(jq -r .template "$CONFIGFILE")
+    PROXYPORT="8888"
     USE_WEBSERVER=$(jq -r .webserver "$CONFIGFILE")
     USE_PHPVERSION=$(jq -r .php_version "$CONFIGFILE")
 
@@ -81,24 +81,23 @@ for d in `find -L $WEBPATH -mindepth 1 -maxdepth 1 -type d`; do
         # Nginx is not needed, just forward traffic to next webserver
         # only create vhosts for apache when it is actually necessary
         if [ "$USE_WEBSERVER" = "apache" ]; then
-            PROXYPORT="8888"
-            cp /etc/apache/site-templates/default.conf $WEBPATH/$SITEBASENAME/.siteconfig/apache.conf.example
-            cp /etc/apache/site-templates/default.conf /etc/apache2/sites-enabled/$SITEBASENAME.conf
+            cp /etc/apache/site-templates/default.conf "$WEBPATH"/"$SITEBASENAME"/.siteconfig/apache.conf.example
+            cp /etc/apache/site-templates/default.conf /etc/apache2/sites-enabled/"$SITEBASENAME".conf
 
-            sed -i "s/##PROXYPORT##/$PROXYPORT/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
-            sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
-            sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
-            sed -i "s/##DOMAIN##/$DOMAIN/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
-            sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
-            sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
-            sed -i "s/##XCOMUSER##/$USERNAME/g" /etc/apache2/sites-enabled/$SITEBASENAME.conf 2> /dev/null
+            sed -i "s/##PROXYPORT##/$PROXYPORT/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+            sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+            sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+            sed -i "s/##DOMAIN##/$DOMAIN/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+            sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+            sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+            sed -i "s/##XCOMUSER##/$USERNAME/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
         fi  
     fi
-done
+done <   <(find -L "$WEBPATH" -mindepth 1 -maxdepth 1 -type d)
 
 service apache2 restart
 
-if [ $? -eq 0 ];then
+if service apache2 restart; then
     tail -f /var/log/apache2/error.log
 else
     tail -n 100 /var/log/apache2/error.log

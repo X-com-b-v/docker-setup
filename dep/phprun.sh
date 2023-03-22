@@ -2,17 +2,14 @@
 
 CONFIGFILE="/etc/docker-setup.config"
 USERNAME=
-if [ -f "$CONFIGFILE" ]; then
+if [ ! -f "$CONFIGFILE" ]; then
+    # shellcheck disable=SC1090
     . $CONFIGFILE
 fi
 export XCOM_SERVERUSER=$USERNAME
 export XCOM_SERVERTYPE=dev
 
 sudo /etc/init.d/nullmailer start
-
-if [ $? -ne 0 ]; then
-  exit $?
-fi
 
 if [ ! -f "/home/web/.bashrc" ]; then
     cp -R /etc/skel/. /home/web/
@@ -38,7 +35,7 @@ if ! grep -q "export TERM=xterm" /home/web/.bashrc; then
 fi
 
 echo "export SKIP_CONFIGURATOR=0" > /home/web/.skip_configurator
-if [ $SKIP_CONFIGURATOR == "on" ]; then
+if [ "$SKIP_CONFIGURATOR" == "on" ]; then
     echo "export SKIP_CONFIGURATOR=1" > /home/web/.skip_configurator
 fi
 if ! grep -q "source /home/web/.skip_configurator" /home/web/.bashrc; then
@@ -59,16 +56,17 @@ array[symfony]=https://symfony.com/installer
 for i in "${!array[@]}"
 do
     if [ ! -f "$BIN_DIR/$i" ]; then
-        curl -LsS ${array[$i]} -o $BIN_DIR/$i
-        chmod +x $BIN_DIR/$i
+        curl -LsS "${array[$i]}" -o "$BIN_DIR"/"$i"
+        chmod +x "$BIN_DIR"/"$i"
     fi
 done
 
 echo '' > /home/web/.starship
-if [ $SETUP_STARSHIP ]; then
+if [ "$SETUP_STARSHIP" ]; then
     if [ ! -f "/home/web/bin/starship" ]; then
         sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- --bin-dir /home/web/bin --force
     fi
+    # shellcheck disable=SC2016
     echo 'eval "$(starship init bash)"' > /home/web/.starship
 fi
 if ! grep -q "source /home/web/.starship" /home/web/.bashrc; then
