@@ -147,9 +147,12 @@ case "$1" in
         ;;
     reload)
         update_hosts
+        get_configfile
         cd "$(get_dockerdir)" || return
         docker compose restart nginx
-        docker compose restart apache
+        if [ "$SETUP_APACHE" == "on" ]; then
+            docker compose restart apache
+        fi
         ;;
     version)
         get_installversion

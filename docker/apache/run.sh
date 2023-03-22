@@ -69,29 +69,23 @@ do
     USE_WEBSERVER=$(jq -r .webserver "$CONFIGFILE")
     USE_PHPVERSION=$(jq -r .php_version "$CONFIGFILE")
 
-    if [ "$USE_PHPVERSION" = "default" ]; then
-      USE_PHPVERSION="$DEFAULT_PHP"
-    fi
-
-    if ! [[ $USE_PHPVERSION =~ ^([0-9]+\.[0-9]+)$ ]]; then
+    if [ "$USE_PHPVERSION" = "latest" ] || ! [[ $USE_PHPVERSION =~ ^([0-9]+\.[0-9]+)$ ]]; then
       USE_PHPVERSION="$DEFAULT_PHP"
     fi
     
-    if [ "$USE_WEBSERVER" != "nginx" ]; then
+    if [ "$USE_WEBSERVER" != "nginx" ] && [ "$USE_WEBSERVER" == "apache" ]; then
         # Nginx is not needed, just forward traffic to next webserver
         # only create vhosts for apache when it is actually necessary
-        if [ "$USE_WEBSERVER" = "apache" ]; then
-            cp /etc/apache/site-templates/default.conf "$WEBPATH"/"$SITEBASENAME"/.siteconfig/apache.conf.example
-            cp /etc/apache/site-templates/default.conf /etc/apache2/sites-enabled/"$SITEBASENAME".conf
+        cp /etc/apache/site-templates/default.conf "$WEBPATH"/"$SITEBASENAME"/.siteconfig/apache.conf.example
+        cp /etc/apache/site-templates/default.conf /etc/apache2/sites-enabled/"$SITEBASENAME".conf
 
-            sed -i "s/##PROXYPORT##/$PROXYPORT/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
-            sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
-            sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
-            sed -i "s/##DOMAIN##/$DOMAIN/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
-            sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
-            sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
-            sed -i "s/##XCOMUSER##/$USERNAME/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
-        fi  
+        sed -i "s/##PROXYPORT##/$PROXYPORT/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+        sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+        sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+        sed -i "s/##DOMAIN##/$DOMAIN/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+        sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+        sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
+        sed -i "s/##XCOMUSER##/$USERNAME/g" /etc/apache2/sites-enabled/"$SITEBASENAME".conf 2> /dev/null
     fi
 done <   <(find -L "$WEBPATH" -mindepth 1 -maxdepth 1 -type d)
 

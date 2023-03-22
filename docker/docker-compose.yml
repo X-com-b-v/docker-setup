@@ -17,7 +17,7 @@ services:
       - 443:443
     working_dir: /etc/nginx/sites-enabled
     volumes:
-      - ./nginx/site-templates:/etc/nginx/site-templates:ro
+      - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro
       - installdirectory/data/shared/sites:/data/shared/sites
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
