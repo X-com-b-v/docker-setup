@@ -20,7 +20,7 @@ flushredis [db]         | Flush redis completely, or a single db
 flushvarnish [url]      | Flush varnish url
 tail [container]        | Tail container logs
 updatehosts             | Update hostfile
-reload                  | Updates hostfile and restarts nginx
+reload                  | Updates hostfile and reloads nginx [optionally apache]
 EOF
 }
 
@@ -154,7 +154,9 @@ case "$1" in
             docker compose exec nginx service nginx reload
         fi
         if [ "$SETUP_APACHE" == "on" ]; then
-            docker compose restart apache
+            if docker compose exec apache apachectl -t; then
+                docker compose exec apache service apache2 reload
+            fi
         fi
         ;;
     version)

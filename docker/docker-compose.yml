@@ -24,40 +24,6 @@ services:
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
     networks:
       - xcom_network
-  mysql57:
-    image: mysql:5.7
-    # restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=xcom
-    ports:
-      - 3306:3306
-    volumes:
-      - installdirectory/data/mysql57:/var/lib/mysql
-      - ./mysql57/conf.d:/etc/mysql/conf.d:ro
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 26677
-        hard: 46677
-    networks:
-      - xcom_network
-  mysql80:
-    image: mysql:8.0
-    # restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=xcom
-    ports:
-      - 3308:3306
-    volumes:
-      - installdirectory/data/mysql80:/var/lib/mysql
-      - ./mysql80/conf.d:/etc/mysql/conf.d:ro
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 26677
-        hard: 46677
-    networks:
-      - xcom_network
   redis:
     image: redis:6.2-alpine
     # restart: always

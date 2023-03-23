@@ -1,0 +1,17 @@
+  mysql57:
+    image: mysql:5.7
+    # restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=xcom
+    ports:
+      - 3306:3306
+    volumes:
+      - installdirectory/data/mysql57:/var/lib/mysql
+      - ./mysql57/conf.d:/etc/mysql/conf.d:ro
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
+    networks:
+      - xcom_network

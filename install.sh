@@ -51,9 +51,11 @@ elif [ -d "$installdir" ]; then
     FIRSTRUN=0
 fi
 
-# always enable gitconfig when it's the first run
+# always enable gitconfig and mysql when it's the first run
 if [ $FIRSTRUN == "1" ]; then
    SETUP_GITCONFIG=on
+   SETUP_MYSQL57=on
+   SETUP_MYSQL80=on
 fi
 
 # This is volume mapped, so directory should exist
@@ -138,6 +140,8 @@ setup_devctl
 cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 76 16)
 options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
+         mysql57 "Setup mysql 5.7" "$SETUP_MYSQL57"
+         mysql80 "Setup mysql 8.0" "$SETUP_MYSQL80"
          projectslug "Change project slug [$PROJECTSLUG]" "$SETUP_PROJECTSLUG"
          varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
          elasticsearch "Use Elasticsearch (Magento)" "$SETUP_ELASTICSEARCH"
@@ -146,7 +150,7 @@ options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
          mongo "Mongo" "$SETUP_MONGO"
-         mysql56 "Setup mysql56 (Deprecated)" "$SETUP_MYSQL56"
+         mysql56 "Setup mysql 5.6 (Deprecated)" "$SETUP_MYSQL56"
 )
 
 # reset basic variables after they've been shown in options list

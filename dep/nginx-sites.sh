@@ -18,8 +18,10 @@ WEBPATH="/data/shared/sites"
 DOMAIN=".${USERNAME}${PROJECTSLUG}"
 WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
 PROXYPORT="8888"
-SITESENABLED="$(devctl dockerdir)"/nginx/sites-enabled
-SITETEMPLATES="$(devctl dockerdir)"/nginx/site-templates
+NGINX_SITES_ENABLED="$(devctl dockerdir)"/nginx/sites-enabled
+NGINX_SITE_TEMPLATES="$(devctl dockerdir)"/nginx/site-templates
+APACHE_SITES_ENABLED="$(devctl dockerdir)"/apache/sites-enabled
+APACHE_SITE_TEMPLATES="$(devctl dockerdir)"/apache/site-templates
 
 createSiteConfigDir()  {
     if [ ! -d "$1"/.siteconfig ]; then
@@ -42,7 +44,7 @@ getFrameworkAndConfig() {
         CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.2"}'
     elif [ -d "$1"/htdocs/wire ]; then
         FRAMEWORK=processwire
-        CONFIG='{"template":"processwire","webserver":"nginx", "php_version":"7.4"}'
+        CONFIG='{"template":"default","webserver":"apache", "php_version":"7.4"}'
     fi
 }
 writeSampleConfig() {
@@ -65,43 +67,89 @@ fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB__SECURE__BASE_LINK_URL http
 fastcgi_param CONFIG__WEBSITES__MY_WEBSITE_CODE__WEB_COOKIE_COOKIE_DOMAIN $1.be${DOMAIN};
 EOF
 }
-handleNginxConfig() {
+handleConfigs() {
     NGINXSAMPLEFILE="$d"/.siteconfig/nginx.conf.example
-    NGINXCONFIGFILE="$SITESENABLED"/"$1".conf
-    # remove old sample file because permissions
-    rm "$NGINXSAMPLEFILE" 2>/dev/null
+    NGINXCONFIGFILE="$NGINX_SITES_ENABLED"/"$SITEBASENAME".conf
+    APACHESAMPLEFILE="$d"/.siteconfig/apache.conf.example
+    APACHECONFIGFILE="$APACHE_SITES_ENABLED"/"$SITEBASENAME".conf
+    # remove existing (sample) file because permissions and cleanup
+    rm "$NGINXSAMPLEFILE" "$NGINX_SITES_ENABLED"/* 2>/dev/null
+    rm "$APACHESAMPLEFILE" "$APACHE_SITES_ENABLED"/* 2>/dev/null
+    handleNginxConfig
+}
+handleNginxConfig() {
+    # remove existing (sample) file because permissions and cleanup
+    rm "$NGINXSAMPLEFILE" "$NGINXCONFIGFILE" 2>/dev/null
     # https://stackoverflow.com/questions/18488651/how-to-break-out-of-a-loop-in-bash
     while : ; do
         # if webserver isnt nginx, always use the proxy configuration
-        if [ "$USE_WEBSERVER" != "nginx" ]; then
-            cp "$SITETEMPLATES"/proxy.conf "$NGINXCONFIGFILE"
-            handleApacheConfig "$d"
-            break
-        fi
-        # check if an existing template is available
-        if [ -f "$SITETEMPLATES"/"$USE_TEMPLATE".conf ]; then
-            cp "$SITETEMPLATES"/"$USE_TEMPLATE".conf "$NGINXCONFIGFILE"
+        if [ "$USE_WEBSERVER" != "nginx" ] && [ "$SETUP_APACHE" == "on" ]; then
+            cp "$NGINX_SITE_TEMPLATES"/proxy.conf "$NGINXCONFIGFILE"
+            handleApacheConfig
             break
         fi
         # if nginx.conf is not example, always use this config
         if [ -f "$d"/.siteconfig/nginx.conf ]; then
             cp "$d"/.siteconfig/nginx.conf "$NGINXCONFIGFILE"
+            break
         fi
+        # check if an existing template is available
+        if [ -f "$NGINX_SITE_TEMPLATES"/"$USE_TEMPLATE".conf ]; then
+            cp "$NGINX_SITE_TEMPLATES"/"$USE_TEMPLATE".conf "$NGINXCONFIGFILE"
+            break
+        fi
+        # check if an existing template is available
+        if [ -f "$NGINX_SITE_TEMPLATES"/default.conf ]; then
+            cp "$NGINX_SITE_TEMPLATES"/default.conf "$NGINXCONFIGFILE"
+            break
+        fi
+        # nothing to do
         break
     done
     
-    cp "$NGINXCONFIGFILE" "$NGINXSAMPLEFILE"
-
-    # replace placeholder values
-    sed -i "s/##PROXYPORT##/$PROXYPORT/g" "$NGINXCONFIGFILE"
-    sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$NGINXCONFIGFILE"
-    sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" "$NGINXCONFIGFILE"
-    sed -i "s/##XCOMUSER##/$USERNAME/g" "$NGINXCONFIGFILE"
-    sed -i "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$NGINXCONFIGFILE"
-    sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$NGINXCONFIGFILE"
+    if [ -f "$NGINXCONFIGFILE" ]; then
+        cp "$NGINXCONFIGFILE" "$NGINXSAMPLEFILE"
+        replacePlaceholderValues "$NGINXCONFIGFILE"
+    fi
 }
 handleApacheConfig() {
-    echo 'Handle apache' "$1"
+    # https://stackoverflow.com/questions/18488651/how-to-break-out-of-a-loop-in-bash
+    while : ; do
+        # if webserver isnt nginx, always use the proxy configuration
+        if [ "$USE_WEBSERVER" == "apache" ]; then
+            # if apache.conf is not example, always use this config
+            if [ -f "$d"/.siteconfig/apache.conf ]; then
+                cp "$d"/.siteconfig/apache.conf "$APACHECONFIGFILE"
+                break
+            fi
+            # check if an existing template is available
+            if [ -f "$APACHE_SITE_TEMPLATES"/"$USE_TEMPLATE".conf ]; then
+                cp "$APACHE_SITE_TEMPLATES"/"$USE_TEMPLATE".conf "$APACHECONFIGFILE"
+                break
+            fi
+            # fall back to default config 
+            if [ -f "$APACHE_SITE_TEMPLATES"/default.conf ]; then
+                cp "$APACHE_SITE_TEMPLATES"/default.conf "$APACHECONFIGFILE"
+                break
+            fi
+        fi
+        # do nothing
+        break
+    done
+    if [ -f "$APACHECONFIGFILE" ]; then
+        cp "$APACHECONFIGFILE" "$APACHESAMPLEFILE"
+        replacePlaceholderValues "$APACHECONFIGFILE"
+    fi
+}
+replacePlaceholderValues() {
+    sed -i "s/##PROXYPORT##/$PROXYPORT/g" "$1"
+    sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
+    sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
+    sed -i "s/##XCOMUSER##/$USERNAME/g" "$1"
+    sed -i "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
+    sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
+    sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
+    sed -i "s/##DOMAIN##/$DOMAIN/g" "$1"
 }
 
 while IFS= read -r d
@@ -123,6 +171,6 @@ do
     fi
     
     read -r USE_TEMPLATE USE_WEBSERVER USE_PHPVERSION <<< "$(jq -r '.template, .webserver, .php_version' "$CONFIGFILE" | xargs)"
-    handleNginxConfig "$SITEBASENAME"
+    handleConfigs
 
 done <   <(find -L "$installdir"/data/shared/sites -mindepth 1 -maxdepth 1 -type d)

@@ -3,7 +3,7 @@
     # restart: always
     working_dir: /etc/apache2/sites-enabled
     volumes:
-      - ./apache/site-templates:/etc/apache/site-templates:ro
+      - ./apache/sites-enabled:/etc/apache2/sites-enabled:ro
       - installdirectory/data/shared/sites:/data/shared/sites
       - installdirectory/data/shared/sockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
