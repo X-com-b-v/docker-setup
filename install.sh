@@ -72,9 +72,11 @@ setup_devctl () {
     fi
     cp dep/devctl "$HOME/.local/bin/devctl"
     cp dep/enter "$HOME/.local/bin/enter"
+    cp dep/nginx-sites.sh "$HOME/.local/bin/nginx-sites.sh"
     sed -i -e 's:installdirectory:'"$installdir"':g' "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/enter"
+    chmod +x "$HOME/.local/bin/nginx-sites.sh"
 }
 
 setup_gitconfig () {
@@ -144,7 +146,6 @@ options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
          xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
          apache "Apache configurations, for Itix" "$SETUP_APACHE"
          mongo "Mongo" "$SETUP_MONGO"
-         samba "Samba configurations (Deprecated)" "$SETUP_SAMBA"
          mysql56 "Setup mysql56 (Deprecated)" "$SETUP_MYSQL56"
 )
 
@@ -156,9 +157,10 @@ SETUP_VARNISH=off
 SETUP_ELASTICSEARCH=off
 SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
-SETUP_SAMBA=off
 SETUP_MONGO=off
 SETUP_MYSQL56=off
+SETUP_MYSQL57=off
+SETUP_MYSQL80=off
 SETUP_GITCONFIG=off
 SETUP_PROJECTSLUG=off
 
@@ -201,14 +203,17 @@ do :
         apache)
             SETUP_APACHE=on
             ;;
-        samba)
-            SETUP_SAMBA=on
-            ;;
         mongo)
             SETUP_MONGO=on
             ;;
         mysql56)
             SETUP_MYSQL56=on
+            ;;
+        mysql57)
+            SETUP_MYSQL57=on
+            ;;
+        mysql80)
+            SETUP_MYSQL80=on
             ;;
         *)
             clear
@@ -267,10 +272,6 @@ if [ $SETUP_APACHE == "on" ] && [ -f docker-compose-snippets/apache ]; then
     cat docker-compose-snippets/apache >> "$installdir"/docker/docker-compose.yml
     services+=( "apache" )
 fi
-if [ $SETUP_SAMBA == "on" ] && [ -f docker-compose-snippets/samba ]; then
-    cat docker-compose-snippets/samba >> "$installdir"/docker/docker-compose.yml
-    services+=( "samba" )
-fi
 if [ $SETUP_MONGO == "on" ] && [ -f docker-compose-snippets/mongo ]; then
     cat docker-compose-snippets/mongo >> "$installdir"/docker/docker-compose.yml
     services+=( "mongo" )
@@ -282,6 +283,14 @@ fi
 if [ $SETUP_MYSQL56 == "on" ] && [ -f docker-compose-snippets/mysql56 ]; then
     cat docker-compose-snippets/mysql56 >> "$installdir"/docker/docker-compose.yml
     services+=( "mysql56" )
+fi
+if [ $SETUP_MYSQL57 == "on" ] && [ -f docker-compose-snippets/mysql57 ]; then
+    cat docker-compose-snippets/mysql57 >> "$installdir"/docker/docker-compose.yml
+    services+=( "mysql80" )
+fi
+if [ $SETUP_MYSQL80 == "on" ] && [ -f docker-compose-snippets/mysql80 ]; then
+    cat docker-compose-snippets/mysql80 >> "$installdir"/docker/docker-compose.yml
+    services+=( "mysql80" )
 fi
 
 for service in "${services[@]}"
@@ -413,7 +422,8 @@ fi
   echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
   echo SETUP_APACHE=$SETUP_APACHE >&3
   echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3
-  echo SETUP_SAMBA=$SETUP_SAMBA >&3
+  echo SETUP_MYSQL57=$SETUP_MYSQL57 >&3
+  echo SETUP_MYSQL80=$SETUP_MYSQL80 >&3
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
   echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3

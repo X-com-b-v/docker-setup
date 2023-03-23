@@ -149,7 +149,10 @@ case "$1" in
         update_hosts
         get_configfile
         cd "$(get_dockerdir)" || return
-        docker compose restart nginx
+        nginx-sites.sh
+        if docker compose exec nginx nginx -t; then
+            docker compose exec nginx service nginx reload
+        fi
         if [ "$SETUP_APACHE" == "on" ]; then
             docker compose restart apache
         fi

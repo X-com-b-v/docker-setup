@@ -51,7 +51,7 @@ writeSampleConfig() {
     CONFIGFILE="$d"/.siteconfig/config.json.example
 }
 handleParams () {
-    rm "$2"/.siteconfig/params.conf.example
+    rm "$2"/.siteconfig/params.conf.example 2>/dev/null
     cat << EOF > "$2/.siteconfig/params.conf.example"
 fastcgi_param CONFIG__DEFAULT__WEB__UNSECURE__BASE_URL https://$1${DOMAIN}/;
 fastcgi_param CONFIG__DEFAULT__WEB__SECURE__BASE_URL https://$1${DOMAIN}/;
@@ -69,7 +69,7 @@ handleNginxConfig() {
     NGINXSAMPLEFILE="$d"/.siteconfig/nginx.conf.example
     NGINXCONFIGFILE="$SITESENABLED"/"$1".conf
     # remove old sample file because permissions
-    rm "$NGINXSAMPLEFILE"
+    rm "$NGINXSAMPLEFILE" 2>/dev/null
     # https://stackoverflow.com/questions/18488651/how-to-break-out-of-a-loop-in-bash
     while : ; do
         # if webserver isnt nginx, always use the proxy configuration
