@@ -48,7 +48,7 @@ getFrameworkAndConfig() {
     fi
 }
 writeSampleConfig() {
-    rm "$d"/.siteconfig/config.json.example
+    rm "$d"/.siteconfig/config.json.example 2>/dev/null
     echo "$1" > "$d"/.siteconfig/config.json.example
     CONFIGFILE="$d"/.siteconfig/config.json.example
 }
@@ -78,8 +78,6 @@ handleConfigs() {
     handleNginxConfig
 }
 handleNginxConfig() {
-    # remove existing (sample) file because permissions and cleanup
-    rm "$NGINXSAMPLEFILE" "$NGINXCONFIGFILE" 2>/dev/null
     # https://stackoverflow.com/questions/18488651/how-to-break-out-of-a-loop-in-bash
     while : ; do
         # if webserver isnt nginx, always use the proxy configuration
@@ -98,7 +96,7 @@ handleNginxConfig() {
             cp "$NGINX_SITE_TEMPLATES"/"$USE_TEMPLATE".conf "$NGINXCONFIGFILE"
             break
         fi
-        # check if an existing template is available
+        # if no existing template is available, resort to default
         if [ -f "$NGINX_SITE_TEMPLATES"/default.conf ]; then
             cp "$NGINX_SITE_TEMPLATES"/default.conf "$NGINXCONFIGFILE"
             break
