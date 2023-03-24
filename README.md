@@ -4,8 +4,6 @@ The development environment as provided works crossplatform on WSL2 (Debian-base
 
 # Installation
 
-_TODO describe ssh-keygen if not done so, clone project and run the installer_
-
 The following chapters describe on how to install the development environment on Linux. It is a lot like the process on WSL, but there is no virtualization layer as Docker is natively available for Linux.
 
 ## WSL
@@ -71,6 +69,13 @@ Mailtrap is used to catch mail locally. Unless an SMTP server is configured for 
 In order to run basic commands against the development environment, there are `enter` and `devctl` scripts. `devctl` is short for development control, whereas `enter` will let you log in to any of the running containers and give you a shell.
 
 ## Scripts
+Scripts are placed in `$HOME/.local/bin` and if you see the notice `devctl` or `enter` commands are not found, please add the following to your `$HOME/.bashrc` file:
+```sh
+if [ -d $HOME/.local/bin ]; then
+    PATH="$PATH:$HOME/.local/bin"
+fi
+```
+
 ### Devctl
 When running `devctl` without any parameters, the help function will be displayed:
 
