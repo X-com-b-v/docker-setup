@@ -407,7 +407,7 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
     sed -i -e 's:installdirectory:'"$installdir"':g' "$installdir"/docker/docker-compose.yml
 fi
 
-if [ ! $FIRSTRUN = "0" ]; then
+if [ ! "$FIRSTRUN" = "0" ]; then
     # set max_map_count for sonarqube
     # sysctl -w vm.max_map_count=262144
     # make it permanent
