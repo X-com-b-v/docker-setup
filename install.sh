@@ -4,7 +4,16 @@ CONFIGFILE="$HOME"/.config/docker-setup.config
 if [ -f "$CONFIGFILE" ]; then
     # shellcheck disable=SC1090
     . "$CONFIGFILE"
+else
+    FIRSTRUN=1
 fi
+
+dialog --title "Welcome" --msgbox "Welcome to the docker-setup \n
+This installer will provide you with options \n
+to select different services. Please read carefully. \n
+Read the docs at https://xcom-nl.atlassian.net/wiki/spaces/DEVENV/ \n
+Or in the README.md provided in the root dir of this project. \n
+" 13 60
 
 # load current version
 # shellcheck disable=SC1091
@@ -40,7 +49,6 @@ if [ -z "$installdir" ]; then
     installdir="/"
 fi
 
-FIRSTRUN=1
 # create installdir if it does not exist, elevate permissions if necessary
 if [ ! -d "$installdir" ] ; then
     if ! mkdir -p "$installdir"; then
@@ -52,7 +60,7 @@ elif [ -d "$installdir" ]; then
 fi
 
 # always enable gitconfig and mysql when it's the first run
-if [ $FIRSTRUN == "1" ]; then
+if [ "$FIRSTRUN" == "1" ]; then
    SETUP_GITCONFIG=on
    SETUP_MYSQL57=on
    SETUP_MYSQL80=on
@@ -464,4 +472,5 @@ else
 fi
 
 clear
+echo "Read the docs at https://xcom-nl.atlassian.net/wiki/spaces/DEVENV"
 exit 0
