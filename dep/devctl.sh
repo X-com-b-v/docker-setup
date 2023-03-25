@@ -2,6 +2,7 @@
 
 usage () {
 cat <<EOF
+Devenv version: $(get_installversion)
 Usage: $0 [options]
 All commands are executed in context of installdirectory/docker
 Options:
