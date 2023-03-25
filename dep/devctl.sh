@@ -149,7 +149,7 @@ case "$1" in
         update_hosts
         get_configfile
         cd "$(get_dockerdir)" || return
-        nginx-sites.sh
+        nginx-sites
         if docker compose exec nginx nginx -t; then
             docker compose exec nginx service nginx reload
         fi

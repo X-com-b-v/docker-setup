@@ -80,9 +80,9 @@ setup_devctl () {
     if [ ! -d "$HOME/.local/bin" ]; then
         mkdir -p "$HOME/.local/bin"
     fi
-    cp dep/devctl "$HOME/.local/bin/devctl"
-    cp dep/enter "$HOME/.local/bin/enter"
-    cp dep/nginx-sites.sh "$HOME/.local/bin/nginx-sites.sh"
+    cp dep/devctl.sh "$HOME/.local/bin/devctl"
+    cp dep/enter.sh "$HOME/.local/bin/enter"
+    cp dep/nginx-sites.sh "$HOME/.local/bin/nginx-sites"
     sed -i -e 's:installdirectory:'"$installdir"':g' "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/enter"
