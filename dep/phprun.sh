@@ -2,9 +2,9 @@
 
 CONFIGFILE="/etc/docker-setup.config"
 USERNAME=
-if [ ! -f "$CONFIGFILE" ]; then
+if [ -f "$CONFIGFILE" ]; then
     # shellcheck disable=SC1090
-    . $CONFIGFILE
+    . "$CONFIGFILE"
 fi
 export XCOM_SERVERUSER=$USERNAME
 export XCOM_SERVERTYPE=dev
