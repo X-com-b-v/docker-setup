@@ -6,8 +6,8 @@ definitions:
     - step: &shell-check
         name: Shell checker
         image: koalaman/shellcheck-alpine:latest
-        script: 
-          - shellcheck install.sh
+        script:
+          - shellcheck $(find . -type f -name "*.sh" | xargs)
     - step: &check-tag
         name: Check tag
         script:
