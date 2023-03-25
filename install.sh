@@ -256,6 +256,19 @@ do :
 done
 ### End Personalization configuration ###
 
+dialog --stdout --title "Prepare" \
+  --backtitle "Cleanup" \
+  --defaultno \
+  --yesno "Clean up old home directories?" 7 60
+dialog_status=$?
+if [ "$dialog_status" -eq 0 ]; then
+    clear
+    while IFS= read -r d
+    do
+        rm -r "$d"
+    done <   <(find -L "$installdir"/data/home -mindepth 1 -maxdepth 1 -type d)
+fi
+
 # Prepare paths
 folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" )
 for folder in "${folders[@]}"
