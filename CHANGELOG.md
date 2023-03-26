@@ -1,3 +1,18 @@
+## 0.0.19 (2023-03-26)
+
+
+* 015e9a7 Updates to php80 and php81, push php80 image to registry
+* c6ea8e9 Bump version to 0.0.19
+* 8c60e23 Pull latest images after install
+* efb41c9 Ask for cleanup of php home directories, defaults to no
+* 2a5ea9b Update bitbucket pipelines to include all *.sh shell scripts
+* 17e3fac move devctl and enter scripts to their .sh file types so shellcheck checks them too
+* b01608f Show devenv version when running devctl without args
+* ed22179 Update devctl to also include pull command
+* 219e6e3 Added gitlab ci file, will not work yet
+
+
+
 ## 0.0.18 (2023-03-24)
 
 
