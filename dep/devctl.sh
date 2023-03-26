@@ -9,10 +9,11 @@ Options:
                         | Show this help
 up [containers]         | Create and daemonize containers. Start existing containers
 restart [containers]    | Restart containers
-stop [containers]       | Stop containers.
+stop [containers]       | Stop containers
 start                   | Start all built containers
 status|ps               | Shows running status of all containers managed by this docker-compose file (ps -a)
-build [containers]      | Build containers in docker-compose file
+build [containers]      | Build images in docker-compose file
+pull [containers]       | Pull images in docker-compose file
 installdir              | Shows current install directory
 dockerdir               | Shows current docker directory
 sonarqube [options]     | Manage sonarqube and postgres instances
@@ -121,6 +122,9 @@ case "$1" in
         ;;
     build)
         docker compose build --no-cache "${@:2}"
+        ;;
+    pull)
+        docker compose pull "${@:2}"
         ;;
     installdir)
         get_installdir
