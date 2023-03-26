@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-export VERSION=0.0.19
+export VERSION=0.1.0
