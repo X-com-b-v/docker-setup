@@ -23,6 +23,9 @@ NGINX_SITE_TEMPLATES="$(devctl dockerdir)"/nginx/site-templates
 APACHE_SITES_ENABLED="$(devctl dockerdir)"/apache/sites-enabled
 APACHE_SITE_TEMPLATES="$(devctl dockerdir)"/apache/site-templates
 
+# clear sites enabled
+rm "$NGINX_SITES_ENABLED"/* "$APACHE_SITES_ENABLED"/* 2>/dev/null
+
 createSiteConfigDir()  {
     if [ ! -d "$1"/.siteconfig ]; then
         mkdir -p "$1"/.siteconfig
@@ -73,8 +76,8 @@ handleConfigs() {
     APACHESAMPLEFILE="$d"/.siteconfig/apache.conf.example
     APACHECONFIGFILE="$APACHE_SITES_ENABLED"/"$SITEBASENAME".conf
     # remove existing (sample) file because permissions and cleanup
-    rm "$NGINXSAMPLEFILE" "$NGINX_SITES_ENABLED"/* 2>/dev/null
-    rm "$APACHESAMPLEFILE" "$APACHE_SITES_ENABLED"/* 2>/dev/null
+    rm "$NGINXSAMPLEFILE" 2>/dev/null
+    rm "$APACHESAMPLEFILE" 2>/dev/null
     handleNginxConfig
 }
 handleNginxConfig() {
@@ -167,8 +170,6 @@ do
     if [ -f "$d"/.siteconfig/config.json ]; then 
         CONFIGFILE="$d"/.siteconfig/config.json
     fi
-    
     read -r USE_TEMPLATE USE_WEBSERVER USE_PHPVERSION <<< "$(jq -r '.template, .webserver, .php_version' "$CONFIGFILE" | xargs)"
     handleConfigs
-
 done <   <(find -L "$installdir"/data/shared/sites -mindepth 1 -maxdepth 1 -type d)

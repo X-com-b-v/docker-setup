@@ -270,7 +270,7 @@ if [ "$dialog_status" -eq 0 ]; then
 fi
 
 # Prepare paths
-folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" )
+folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" "$installdir/docker/nginx/sites-enabled" )
 for folder in "${folders[@]}"
 do :
     if [ ! -d "$folder" ]; then
