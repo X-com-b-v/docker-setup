@@ -1,3 +1,11 @@
+## 0.1.0 (2023-03-27)
+
+
+* aed2de5 Bump version to 0.1.0 as this version is pretty complete functionality-wise
+* 219c211 Update nginx-sites, remove existing configs before loop so I do not end up with only 1 site enabled
+
+
+
 ## 0.0.19 (2023-03-26)
 
 
