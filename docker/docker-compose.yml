@@ -1,12 +1,7 @@
 version: "3"
-
 networks:
   xcom_network:
     driver: bridge
-
-volumes:
-  elasticsearch:
-
 services:
   nginx:
     build: nginx

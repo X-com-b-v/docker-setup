@@ -9,5 +9,7 @@
     environment:
       - discovery.type=single-node
       - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
+      - http.max_content_length=2147483647b
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
     networks:
       - xcom_network

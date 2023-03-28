@@ -420,6 +420,10 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
     sed -i -e 's:installdirectory:'"$installdir"':g' "$installdir"/docker/docker-compose.yml
 fi
 
+if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearch-volume ]; then
+    cat docker-compose-snippets/elasticsearch-volume >> "$installdir"/docker/docker-compose.yml
+fi
+
 if [ ! "$FIRSTRUN" = "0" ]; then
     # set max_map_count for sonarqube
     # sysctl -w vm.max_map_count=262144
