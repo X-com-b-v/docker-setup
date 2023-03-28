@@ -1,3 +1,10 @@
+## 0.1.1 (2023-03-28)
+
+
+* 108a55c Add elasticsearch env variables and only add volume if elasticsearch is selected
+
+
+
 ## 0.1.0 (2023-03-27)
 
 
