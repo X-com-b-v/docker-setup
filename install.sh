@@ -256,10 +256,11 @@ do :
 done
 ### End Personalization configuration ###
 
-dialog --stdout --title "Prepare" \
+# run cleanup - make sure this is executed before the docker-compose file is replaced with new stuff
+dialog --stdout --title "Cleanup" \
   --backtitle "Cleanup" \
   --defaultno \
-  --yesno "Clean up old home directories?" 7 60
+  --yesno "Clean up dev environment? Removes old home directories and containers" 7 60
 dialog_status=$?
 if [ "$dialog_status" -eq 0 ]; then
     clear
@@ -267,6 +268,7 @@ if [ "$dialog_status" -eq 0 ]; then
     do
         rm -r "$d" 2>/dev/null
     done <   <(find -L "$installdir"/data/home -mindepth 1 -maxdepth 1 -type d)
+    cd "$installdir/docker" && docker compose down
 fi
 
 # Prepare paths
