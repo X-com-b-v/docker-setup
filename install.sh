@@ -265,7 +265,7 @@ if [ "$dialog_status" -eq 0 ]; then
     clear
     while IFS= read -r d
     do
-        rm -r "$d"
+        rm -r "$d" 2>/dev/null
     done <   <(find -L "$installdir"/data/home -mindepth 1 -maxdepth 1 -type d)
 fi
 
