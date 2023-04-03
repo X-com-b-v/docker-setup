@@ -327,7 +327,7 @@ do :
 done
 
 ### PHP Configurations ###
-
+PHPLATEST=
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 16 35 16)
 options=(php70 "PHP 7.0" "$PHP70" # any option can be set to default to "on"
          php72 "PHP 7.2" "$PHP72"
@@ -395,6 +395,7 @@ do :
     position=4
     phpversion="$path"
     phpversion="${phpversion:0:position}.${phpversion:position}"
+    PHPLATEST="${phpversion/php/}" # substring remove "php" with nothing
 
     if [[ ! -d $installdir/docker/$path/php-fpm.d || ! -f $installdir/docker/$path/php-fpm.d/zz-docker.conf ]]; then
         mkdir -p "$installdir"/docker/"$path"/php-fpm.d
@@ -459,12 +460,13 @@ fi
   echo GIT_USER=\""${GIT_USER}"\" >&3
   echo GIT_EMAIL="$GIT_EMAIL" >&3
   echo PROJECTSLUG="$PROJECTSLUG" >&3
-  echo PHP70=$PHP70 >&3
-  echo PHP72=$PHP72 >&3
-  echo PHP73=$PHP73 >&3
-  echo PHP74=$PHP74 >&3
-  echo PHP80=$PHP80 >&3
-  echo PHP81=$PHP81 >&3
+  echo PHP70="$PHP70" >&3
+  echo PHP72="$PHP72" >&3
+  echo PHP73="$PHP73" >&3
+  echo PHP74="$PHP74" >&3
+  echo PHP80="$PHP80" >&3
+  echo PHP81="$PHP81" >&3
+  echo PHPLATEST="$PHPLATEST" >&3
 } 3>"$CONFIGFILE"
 
 clear

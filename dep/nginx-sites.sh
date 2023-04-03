@@ -38,13 +38,16 @@ createLogDir() {
 }
 getFrameworkAndConfig() {
     FRAMEWORK=none
-    CONFIG='{"template":"default","webserver":"nginx","php_version":"7.4"}'
+    CONFIG='{"template":"default","webserver":"nginx","php_version":"latest"}'
     if [ -f "$1"/bin/magento ]; then
         FRAMEWORK=magento
         CONFIG='{"template":"magento2","webserver":"nginx","php_version":"7.4"}'
     elif [ -f "$1"/app/etc/local.xml ]; then
         FRAMEWORK=magento
         CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.2"}'
+    elif [ -d "$1"/htdocs ]; then
+        FRAMEWORK=none
+        CONFIG='{"template":"default","webserver":"apache", "php_version":"latest"}'
     elif [ -d "$1"/htdocs/wire ]; then
         FRAMEWORK=processwire
         CONFIG='{"template":"default","webserver":"apache", "php_version":"7.4"}'
@@ -78,6 +81,10 @@ handleConfigs() {
     # remove existing (sample) file because permissions and cleanup
     rm "$NGINXSAMPLEFILE" 2>/dev/null
     rm "$APACHESAMPLEFILE" 2>/dev/null
+
+    if [ "$USE_PHPVERSION" == "latest" ]; then
+        USE_PHPVERSION="$PHPLATEST" # PHPLATEST is written to config file
+    fi
     handleNginxConfig
 }
 handleNginxConfig() {
@@ -107,7 +114,6 @@ handleNginxConfig() {
         # nothing to do
         break
     done
-    
     if [ -f "$NGINXCONFIGFILE" ]; then
         cp "$NGINXCONFIGFILE" "$NGINXSAMPLEFILE"
         replacePlaceholderValues "$NGINXCONFIGFILE"
