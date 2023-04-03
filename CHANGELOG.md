@@ -1,3 +1,10 @@
+## 0.1.3 (2023-04-03)
+
+
+* 3215750 With the change for docker-compose stack name, added the option to cleanup old docker containers using docker compose down
+
+
+
 ## 0.1.2 (2023-04-03)
 
 
