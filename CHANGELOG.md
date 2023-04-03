@@ -1,3 +1,12 @@
+## 0.1.2 (2023-04-03)
+
+
+* 01ca999 Change docker-compose stack name to "x-com". This requires running "docker compose down" before running the installer again, so containers in the old "docker" stack are removed
+* 3aa83d0 Echo error output of rm dir cmd to /dev/null
+* be5b74d Write latest php version to config and use that version if config file contains php version latest
+
+
+
 ## 0.1.1 (2023-03-28)
 
 
