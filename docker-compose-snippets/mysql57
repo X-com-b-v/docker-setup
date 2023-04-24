@@ -1,6 +1,7 @@
   mysql57:
     image: mysql:5.7
     # restart: always
+    platform: linux/amd64
     environment:
       - MYSQL_ROOT_PASSWORD=xcom
     ports:

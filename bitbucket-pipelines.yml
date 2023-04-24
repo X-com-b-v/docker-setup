@@ -30,7 +30,6 @@ definitions:
           - git tag -a $VERSION -m "$dt - Version $VERSION"
           - git push --tags
 pipelines:
-
   pull-requests:
     'develop': # this will run on any PR from develop to target (usually main)
       - step:

@@ -2,6 +2,7 @@
     #build: php81
     image: xcommagento/docker-php81:latest
     # restart: always
+    platform: linux/amd64
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
       - installdirectory/data/shared/modules:/data/shared/modules
