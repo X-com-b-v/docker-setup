@@ -59,6 +59,12 @@ elif [ -d "$installdir" ]; then
     FIRSTRUN=0
 fi
 
+# set correct permissions if installdir is /
+if [ "$installdir" == "/" ]; then
+    sudo mkdir -p "$installdir"/docker "$installdir"/data
+    sudo chown "$USER":"$USER" "$installdir"/docker "$installdir"/data
+fi
+
 # always enable gitconfig and mysql when it's the first run
 if [ "$FIRSTRUN" == "1" ]; then
    SETUP_GITCONFIG=on
