@@ -1,3 +1,10 @@
+## 0.1.5 (2023-05-01)
+
+
+* abc6420 Updates to firstrun, apache sites enabled permissions and global config clarification
+
+
+
 ## 0.1.4 (2023-05-01)
 
 
