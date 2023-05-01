@@ -1,3 +1,10 @@
+## 0.1.4 (2023-05-01)
+
+
+* 4c6597d When installdir is /, make sure data and docker dirs are created and permissions are set
+
+
+
 ## 0.1.3 (2023-04-03)
 
 
@@ -247,6 +254,242 @@
 
 * b24390f Add data/shared/modules for easier module development
 * 7f275cf Bump version to 0.0.2 as latest master. From here on, develop branch will be used for active development
+
+
+
+## 0.0.1 (2022-11-09)
+
+
+* 6e4e319 init commit for linux docker setup x-com
+* 3f8d828 cleanup of install script and updated readme
+* 14724f2 new docker compose
+* 1924518 replace absolute paths with installdirectory to be replaced during install
+* f5c9ed4 set max_map_count for sonarqube
+* 9d4c7ed replace absolute dir with installdirectory
+* ff3328e cannot change directory for enduser from within script, as it runs in their own subprocess
+* 92ca2bb cleanup and move files into docker directory which makes it easier to copy/paste
+* efd80dc installdirectory somehow got renamed again
+* 1880640 copy docker-compose to installdir first before replacing values
+* 5b1d60d Option to automatically restart docker containers every reboot
+* 9601027 cleanup apache containers as we dont use that for magento2
+* 7c2aa18 add enter script which will make it easier to access containers
+* 8d9dc8e general fixes to install script to optimize it more and adjustment to nginx siteconfig
+* c5bcc19 renamed install to install.sh
+* 750e2ee gitconfig will be copied into container
+* 437fde5 syntax error fix
+* 8e5624a ssh support
+* 17d15f8 prompt automatic docker install
+* 1996814 updates to automatic docker install
+* 7b42114 move gitconfig to dep folder
+* 0eabbc3 added section comments and also included ssh config if found
+* b8ff78c added upzip and ubuntu check to installer
+* afef8bd Skip configurator git hooks, enabled xdebug for every php7 container
+* a2a6e22 Add devctl as global executable which supports docker-compose from any directory
+* 2e182d3 Just prompt sudo password if not part of docker group
+* ec187ef typo for devctl copy
+* cad8a3b add git autocomplete for branches and stuff
+* 8a2127b get a list of php versions for hosts so its easier to enter container
+* 2479955 add hostversions to devctl script
+* 149fe3b Updated readme
+* 763ab5f add welcoming message when entering container
+* 447bf76 new docker compose version and eoan is now supported
+* 66745ed make sudo user owner of docker after completion
+* a0971ef make sysctl max map count permanent for sonarqube
+* 39fc273 set inotify for phpstorm
+* 97eac97 Add dependencies for Magesuite to container
+* ac574f0 Add php7.4 docker support
+* 50ffeb2 add to installer as well
+* b27e824 add redis-cli to home path
+* c758094 add phonetic plugin to elasticsearch
+* b97f0b7 new docker-compose version
+* 0070a56 add stop/start commands with multiple arg support
+* 0abdb8c fix devctl sed, should also fix installer for systems other than ubuntu
+* 103dfee add redis start as optional
+* 271deff fix devctl restart, add containers as argument
+* 0fbde9b fix redis-cli
+* 9e7cebd copy X-com keys if found
+* 17415c3 disable unused docker containers
+* 3085c22 Use newer elasticsearch version as 6.* is supported by Magento and is needed for search
+* f6ba917 copy xcom key and added toilet to php73 home
+* 02b0f83 Update install.sh
+* 697e1ba let mysql run on port 3306
+* 1571248 keep 56 compatibility ON
+* cda6229 set execute permission on docker compose
+* a205a96 php74 container
+* 258604b map media to directory so we can symlink it
+* 074109b fix enter script, didnt work if user was part of docker group
+* 93bd511 another fix for enter script
+* 820b4e6 adds mysql allowed packet size
+* 41b052f fix run.sh scripts for php
+* e9fada8 [: -neq: binary operator expected
+* 0bd599d add media folder to be used in pub/media symlink
+* f67c72e some maintenance
+* 0ccb79c enable php74
+* e9d51a6 fix /etc/skel for paths
+* 3d0d9be fix typo and add buffer sizes
+* 41b6865 add xdebug max nesting level 512 for all php versions
+* 8387a21 Added sqlsrv for mssql connection, only php72 and php73
+* 8427534 Update dockerfiles for php72 and php73 to correctly install sqlsrv and update xdebug for xdebug version 3 - rebuild container for this
+* 71a8ace need unixodbc-dev to use pecl
+* 3ccbb5c set develop and debug modes for xdebug
+* 267d3d4 xdebug 3 for php72 and php73
+* 498de96 install oh-my-zsh and specifiy (pdo_)sqlsrv version for php72
+* cd073aa elasticsearch port and network mode host do not work togeter
+* b369e90 set mysql default charset
+* 616ef96 gitconfig alias
+* 2ff210c prune on fetch
+* 566b3bc use debian buster instead of stretch
+* 9dca57d oh my zsh support
+* e33e0e2 Fixes for oh-my-zsh and new enter file
+* 33ff925 multiple fixes for oh-my-zsh
+* 7cf8757 php7.3 somehow installed 8.0, run update-alternatives to set to php73
+* 3cdaed2 add ES7 container and move ES6
+* ab2c672 Prepare php80
+* 0b42b06 updated readme
+* 0278181 improvements to installer
+* 5d7e183 php80 support should now work
+* bfcfaa8 removed php56 and php70 from paths as those php versions are deprecated
+* d3cc8c8 Create a dialog installer
+* b8e56ef fixes to dialog installer
+* a7d3cea A few more improvements
+* bcf15a6 Make inputbox cancellable
+* bca03e9 fix php paths
+* 57d13a3 Seperate docker php snippets and append them to docker-compose.yml later after selection
+* e33827a install.sh deprecated, docker-compose still version 2
+* 1e6a795 dialog improvements
+* 333e4f5 cleanup unnecessary services and make sure nginx is part of services as well
+* 31940a0 some improvements to nginx conf
+* e8dfd82 textual improvements to install dialog
+* 08bd531 get rid of redis-cli, redis-cli is part of redis container
+* 9a9134e update redis to 6.2
+* 81dbc73 run update-alternatives in php73, after install it defaults to 8.0
+* 2d14bec reset nginx client buffer sizes
+* 89c5e6c Provide a fresh bashrc file for each install to account for changed options
+* abc5e41 Long due changes to devctl
+* 50c952d devctl update usage
+* 431e4ea post-installation message
+* 8b164bf Changes to nginx run.sh
+* 9ac3efc updates to readme
+* fabab24 multiple improvements, include sonarqube, add sonarqube to devctl and also fixes to installer (option to overwrite devctl if it already exists)
+* 8360862 always reset permissions. Previous commit added .editorconfig
+* b76e136 added mysql80 build
+* 5b6c170 fix devctl syntax
+* 57afe8d remove old non-dialog installscript
+* e6e69ab allow arguments to docker-compose
+* e5666b5 Revert "allow arguments to docker-compose"
+* afc0362 do not reset permissions recursively, that might take a very long time
+* c493912 update xdebug for php74 and php80
+* 6f96d29 xdebug port can be 9003 for multiple php instances
+* eb5945a add rsync to containers
+* 08b33fe sonarqube.yml should be moved too
+* b71382c numerous fixes, allow devctl up parameters
+* 4d13883 prefer bash over zsh
+* 1656fd4 use decent ls command
+* cc399c8 update welcome message
+* 1a9649d cleanup unnecessary files
+* d345af4 update magento nginx template site basename
+* a58cbb9 prepare shopware
+* 623dfdd update shopware nginx conf - untested
+* 1e6cb34 replace enter script as well, useful if there possibly are changes
+* a72214f updated docker installation
+* ed7a728 make use of /data/shared/sites/media so project media does not get removed after project removal
+* 1876b0d reset ownership and media dir created elsewhere
+* 5562962 force remove
+* e45c694 devctl flushredis
+* 33ef57b add alias to sign commits
+* 1f460f1 hostversions specific project
+* ba0ecaf flushredis now accepts db number
+* b9c6427 update usage, flushredis accepts a param
+* c75ccb1 combine status and ps patterns
+* 1913df1 update devctl for dockerdir
+* 9c80e44 remove skip configurator instead of giving me a completely new blank file, as nvm would be missing after reinstallation
+* 7d2e0e7 updated shopware nginx configuration
+* 3190ac8 updated readme
+* b94220b loop folders to be created
+* 0a998f4 indents
+* 78b2f0a nginx config dir loop
+* 58de4a0 do not need site-configs anymore, I think
+* bd5f366 xdebug can be the same for all php containers
+* e86505f uniformity between all enabled php containers, set run.sh for each selected containers. Manage run.sh from one spot now
+* 1a623f2 add starship to bashrc
+* 9286b11 php80 should use 8.0 sock
+* 147cce3 php80 should use correct home folder
+* 4ed044a replace debian buster with alpine image, this is insanely fast
+* c14bd77 added playings folder, this is where I tinker around with alpine images
+* b2dda09 alpine playins, php74 functional but no nullmailer yet
+* 274ccd5 update playings, cleanup php74
+* cd6c77d stop nginx before starting it
+* cebe731 set permissions on nginx to prevent 500
+* 01b52a3 update to debian bullseye-slim
+* aa3be20 php72 on bullseye-slim has issues with mssql tools. Disable mssql tools for php73 for now as we do not need it
+* 69eb6b6 always copy latest Dockerfiles to php install dir
+* 509a703 update docker-compose.yml to version 3
+* bb5207d log4j format msg no lookups vulnerability fix
+* a83f77b Remove elasticsearch6, only use 7
+* b2e6aba nginx Dockerfile update to prevent permission denied sometimes thrown in magento admin when saving config
+* cf71bcb Revert installdirectory and add elasticsearch volume so we do not miss data
+* 9e5a6c3 added docker-compose elasticsearch volume so data is persistent after recreation of container
+* 4e76964 Disable twofact auth on development server by default
+* d791fb1 Use xcom_network as custom network, bridged, so all hosts can be reached by hostname
+* da7205b add extra host for host.docker.internal via host-gateway (supported from docker v20.04 and up)
+* 7fbc873 use host-gateway instead of docker0 ip
+* 2f15964 Set mailtrap as nullmailer remote
+* 3b57153 Run update-alternatives for php74
+* 71f77ac Varnish support
+* e2bc4e7 Fix magento caching application config value. 2 is Varnish
+* 31499a8 Update enter script to accomodate for other shells
+* 1826d4e always copy files in services to their respective folders
+* 81fd776 create service directory if it does not yet exist
+* 4fb3b66 Added php74-new based on php7.4fpm bullseye image from official php dockerhub, process changes in our own setup. Set XCOM_SERVERTYPE as fastcgi_param $_SERVER var so no magic has to be done in php fpm
+* 305c58e Added php73-new based on php73 fpm bullseye image
+* 7452dbb Update necessary scripts related to preparing dev environment, php72 73 and 74 now use php-fpm-bullseye or buster image, instead of debian based with extra repositories
+* 5ec31f4 remove old playings
+* c9a9855 Update dockerfiles, extensions used were insufficient for some php versions
+* 2400e0d php81
+* d6e5be2 Update php73 dockerfile to include sqlsrv for mssql connections
+* c9dbaad fixes for php73 mssql drivers
+* ebaf937 opcache.ini resulted in everything being heavily cached
+* e66a62c added sqlsrv.ini to php73
+* 9681391 Add xdebug.output_dir as fastcgi param so profiling can be done on a per-project basis. Just enable xdebug.mode=profile and it should work
+* a218bda xdebug profiler output name so request uri is visible, makes it easy to find correct cachegrind file
+* 6a2034f update nginx config, set php74 as default
+* abf0ccf php73 install imagick
+* 754c2b1 run mysql80 on port 3306 as well, map 3308 to 3306 via compose
+* bb0d620 update devctl to include "tail" so container logs can be tailed
+* 91cf4d1 Updated readme as dialog is a required dependency and allow for "/" to be set as install directory
+* e368fcb update hosts via devctl
+* 6cc2bd0 Move nginx to official nginx:stable image
+* 9d9004f change nginx pid
+* e8ea203 update fastcgi so https is always on, this fixes redirect issues in magento admin
+* dd9aa5e remove backslash from processwire template definition
+* 4b2fba1 processwire nginx config uses sitebasename/htdocs as site root
+* 426648a update_hosts to use tmp hosts for edits
+* e37a9f2 Add new reload command to update /etc/hosts and restart nginx, useful when adding new projects
+* 6d4b668 always add  devserver to /etc/hosts for react projects
+* 2752f67 changes to devctl update_hosts, introduce reload functionality to update hosts and restart nginx, overall quality of life improvements to devctl.
+* 844b947 Install dialog saves values to sudo user .config/docker-setup.config file to read for a second run with existing values
+* 67f07b9 Devctl close reload case
+* 73a8cd3 replace docker-compose with docker compose as compose is a docker argument now
+* a59f0e6 Rework of install dialog so user is prompted less with inputs, simply use a checklist to gather necessary information
+* ac406e1 Prepare settings for varnish and xdebug
+* fb099fe Handle config file with defaults correctly
+* 6a12fba Mass updates to installer, now also writes selected php version to config
+* ee7b723 Update devctl usage to include varnishacl
+* a5b89e3 updates to phprun and xdebug
+* 7e52164 varnish vcl acl set to ip which can be updated via devctl
+* 6c157af Update gitconfig to push current and create/track remote branch if not exist
+* b72b513 move git config to function and add xdebug start with trigger
+* 3dd69a2 nvm new version
+* 4d8d7af changes to nginx run.sh, cleanup the file a bit
+* 728b25e QoL improvements to devctl
+* 05ea8e5 Prompt user for /etc/xcomuser if file is not found
+* 03936a4 echo subnet for varnishacl for the case it needs to be adjusted manually
+* fca2a21 xdebug is default yes
+* 8aa66fb python2 is still required by some processwire projects
+* e0dad11 officially saying goodbye to php56, php70 and php71 as no projects use these anymore
+* ff795a7 DEVENV-12 Check if logging dir exists per site enabled
+* e712e47 Add mongodb extension to php
+* 8c3e98c Added script version
 
 
 
