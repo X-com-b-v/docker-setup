@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+FIRSTRUN=0
 CONFIGFILE="$HOME"/.config/docker-setup.config
 if [ -f "$CONFIGFILE" ]; then
     # shellcheck disable=SC1090
@@ -55,8 +56,6 @@ if [ ! -d "$installdir" ] ; then
         sudo mkdir -p "$installdir"
         sudo chown -r "$USER":"$USER" "$installdir"
     fi
-elif [ -d "$installdir" ]; then
-    FIRSTRUN=0
 fi
 
 # set correct permissions if installdir is /
@@ -67,9 +66,11 @@ fi
 
 # always enable gitconfig and mysql when it's the first run
 if [ "$FIRSTRUN" == "1" ]; then
+   SETUP_RESTART=on
    SETUP_GITCONFIG=on
    SETUP_MYSQL57=on
    SETUP_MYSQL80=on
+   PHP74=on
 fi
 
 # This is volume mapped, so directory should exist
@@ -151,20 +152,21 @@ cleanup () {
 setup_devctl
 
 ### Global configuration ###
-cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 76 16)
-options=(autostart "Start docker containers automatically" "$SETUP_RESTART"
-         gitconfig "Configure gitconfig" "$SETUP_GITCONFIG"
-         mysql57 "Setup mysql 5.7" "$SETUP_MYSQL57"
-         mysql80 "Setup mysql 8.0" "$SETUP_MYSQL80"
-         projectslug "Change project slug [$PROJECTSLUG]" "$SETUP_PROJECTSLUG"
-         varnish "Use Varnish (Magento)" "$SETUP_VARNISH"
-         elasticsearch "Use Elasticsearch (Magento)" "$SETUP_ELASTICSEARCH"
-         configurator "Skip configurator (Magento)" "$SKIP_CONFIGURATOR"
-         xdebug "Enable Xdebug" "$SETUP_XDEBUG"
-         xdebug-trigger "Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
-         apache "Apache configurations, for Itix" "$SETUP_APACHE"
-         mongo "Mongo" "$SETUP_MONGO"
-         mysql56 "Setup mysql 5.6 (Deprecated)" "$SETUP_MYSQL56"
+cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 86 16)
+options=(autostart "[both] Start docker containers automatically" "$SETUP_RESTART"
+         gitconfig "[both] Configure gitconfig" "$SETUP_GITCONFIG"
+         mysql57 "[both] Setup mysql 5.7" "$SETUP_MYSQL57"
+         mysql80 "[both] Setup mysql 8.0" "$SETUP_MYSQL80"
+         percona "[both] Setup percona 8.0" "$SETUP_PERCONA"
+         projectslug "[both] Change project slug [currently $PROJECTSLUG]" "$SETUP_PROJECTSLUG"
+         varnish "[ecom] Use Varnish (Magento)" "$SETUP_VARNISH"
+         elasticsearch "[ecom] Setup Elasticsearch instance" "$SETUP_ELASTICSEARCH"
+         configurator "[ecom] Skip ctidigital/configurator on branch switch" "$SKIP_CONFIGURATOR"
+         xdebug "[both] Enable Xdebug" "$SETUP_XDEBUG"
+         xdebug-trigger "[both] Xdebug start_with_request" "$SETUP_XDEBUG_TRIGGER"
+         apache "[itix] Apache configurations" "$SETUP_APACHE"
+         mongo "[itix] Mongo database instance" "$SETUP_MONGO"
+         mysql56 "[both] Setup mysql 5.6 (Deprecated)" "$SETUP_MYSQL56"
 )
 
 # reset basic variables after they've been shown in options list
@@ -179,6 +181,7 @@ SETUP_MONGO=off
 SETUP_MYSQL56=off
 SETUP_MYSQL57=off
 SETUP_MYSQL80=off
+SETUP_PERCONA=off
 SETUP_GITCONFIG=off
 SETUP_PROJECTSLUG=off
 
@@ -216,6 +219,7 @@ do :
             SETUP_XDEBUG=on
             ;;
         xdebug-trigger)
+            SETUP_XDEBUG=on
             SETUP_XDEBUG_TRIGGER=on
             ;;
         apache)
@@ -232,6 +236,11 @@ do :
             ;;
         mysql80)
             SETUP_MYSQL80=on
+            ;;
+        percona)
+            SETUP_PERCONA=on
+            # cant have mysql80 and percona at the same time
+            SETUP_MYSQL80=off
             ;;
         *)
             clear
@@ -278,7 +287,7 @@ if [ "$dialog_status" -eq 0 ]; then
 fi
 
 # Prepare paths
-folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" "$installdir/docker/nginx/sites-enabled" )
+folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" "$installdir/docker/nginx/sites-enabled" "$installdir/docker/apache/sites-enabled" )
 for folder in "${folders[@]}"
 do :
     if [ ! -d "$folder" ]; then
@@ -319,12 +328,24 @@ if [ $SETUP_MYSQL56 == "on" ] && [ -f docker-compose-snippets/mysql56 ]; then
 fi
 if [ $SETUP_MYSQL57 == "on" ] && [ -f docker-compose-snippets/mysql57 ]; then
     cat docker-compose-snippets/mysql57 >> "$installdir"/docker/docker-compose.yml
-    services+=( "mysql80" )
+    services+=( "mysql57" )
 fi
 if [ $SETUP_MYSQL80 == "on" ] && [ -f docker-compose-snippets/mysql80 ]; then
     cat docker-compose-snippets/mysql80 >> "$installdir"/docker/docker-compose.yml
     services+=( "mysql80" )
 fi
+if [ $SETUP_PERCONA == "on" ] && [ -f docker-compose-snippets/percona ]; then
+    cat docker-compose-snippets/percona >> "$installdir"/docker/docker-compose.yml
+    if [ ! -d "$installdir"/data/mysql80 ]; then
+        mkdir -p "$installdir"/data/mysql80
+    fi
+    # CONTAINERUID=$(docker run --rm -t percona:ps-8.0 sh -c 'id -u')
+    # if ! chown "$CONTAINERUID":"$CONTAINERUID" -R "$installdir"/data/mysql80; then
+        # sudo chown "$CONTAINERUID":"$CONTAINERUID" -R "$installdir"/data/mysql80
+    # fi
+    services+=( "mysql80" )
+fi
+
 
 for service in "${services[@]}"
 do :
@@ -462,6 +483,7 @@ fi
   echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3
   echo SETUP_MYSQL57=$SETUP_MYSQL57 >&3
   echo SETUP_MYSQL80=$SETUP_MYSQL80 >&3
+  echo SETUP_PERCONA=$SETUP_PERCONA >&3
   echo SETUP_MONGO=$SETUP_MONGO >&3
   echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
   echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
