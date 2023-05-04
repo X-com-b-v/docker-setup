@@ -23,6 +23,7 @@ flushvarnish [url]      | Flush varnish url
 tail [container]        | Tail container logs
 updatehosts             | Update hostfile
 reload                  | Updates hostfile and reloads nginx [optionally apache]
+recreate [containers]   | Force recreate containers. Useful after enabling/disabling Xdebug
 EOF
 }
 
@@ -125,6 +126,9 @@ case "$1" in
         ;;
     pull)
         docker compose pull "${@:2}"
+        ;;
+    recreate)
+        docker compose up -d --force-recreate "${@:2}"
         ;;
     installdir)
         get_installdir
