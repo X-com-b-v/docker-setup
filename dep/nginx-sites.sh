@@ -90,15 +90,15 @@ handleConfigs() {
 handleNginxConfig() {
     # https://stackoverflow.com/questions/18488651/how-to-break-out-of-a-loop-in-bash
     while : ; do
+        # if nginx.conf is not example, always use this config
+        if [ -f "$d"/.siteconfig/nginx.conf ]; then
+            cp "$d"/.siteconfig/nginx.conf "$NGINXCONFIGFILE"
+            break
+        fi
         # if webserver isnt nginx, always use the proxy configuration
         if [ "$USE_WEBSERVER" != "nginx" ] && [ "$SETUP_APACHE" == "on" ]; then
             cp "$NGINX_SITE_TEMPLATES"/proxy.conf "$NGINXCONFIGFILE"
             handleApacheConfig
-            break
-        fi
-        # if nginx.conf is not example, always use this config
-        if [ -f "$d"/.siteconfig/nginx.conf ]; then
-            cp "$d"/.siteconfig/nginx.conf "$NGINXCONFIGFILE"
             break
         fi
         # check if an existing template is available
