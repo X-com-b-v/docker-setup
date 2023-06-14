@@ -93,6 +93,10 @@ handleNginxConfig() {
         # if nginx.conf is not example, always use this config
         if [ -f "$d"/.siteconfig/nginx.conf ]; then
             cp "$d"/.siteconfig/nginx.conf "$NGINXCONFIGFILE"
+            if [ "$USE_WEBSERVER" != "nginx" ] && [ "$SETUP_APACHE" == "on" ]; then
+                cp "$NGINX_SITE_TEMPLATES"/proxy.conf "$NGINXSAMPLEFILE"
+                SKIPSAMPLE=1
+            fi
             break
         fi
         # if webserver isnt nginx, always use the proxy configuration
@@ -114,7 +118,7 @@ handleNginxConfig() {
         # nothing to do
         break
     done
-    if [ -f "$NGINXCONFIGFILE" ]; then
+    if [ -f "$NGINXCONFIGFILE" ] && [ -z "$SKIPSAMPLE" ]; then
         cp "$NGINXCONFIGFILE" "$NGINXSAMPLEFILE"
         replacePlaceholderValues "$NGINXCONFIGFILE"
     fi

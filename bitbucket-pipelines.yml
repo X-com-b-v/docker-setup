@@ -6,6 +6,8 @@ definitions:
     - step: &shell-check
         name: Shell checker
         image: koalaman/shellcheck-alpine:latest
+        clone:
+          depth: 1
         script:
           - shellcheck $(find . -type f -name "*.sh" | xargs)
     - step: &check-tag
@@ -32,8 +34,12 @@ definitions:
 pipelines:
   pull-requests:
     'develop': # this will run on any PR from develop to target (usually main)
-      - step:
-          <<: *check-tag
+      - parallel:
+          steps:
+            - step:
+                <<: *shell-check
+            - step:
+                <<: *check-tag
   branches:
     '*':
       - step:
