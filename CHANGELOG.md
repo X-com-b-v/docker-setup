@@ -1,3 +1,17 @@
+## 0.1.6 (2023-06-14)
+
+
+* 592e92a DEVENV-35 add percona as dropin replacement for mysql8
+* c2987f2 Updated php81 dockerfile to include rsync and mariadb-client
+* 4efd0da Update percona volume so percona correctly loads config files
+* 56a18b9 Added platform: linux/amd64 for m1 silicon compatibility (probably forces it over rosetta)
+* 8b6ff33 Force recreate containers after running installer again, this applies new xdebug settings
+* 47e8b26 Update gitconfig lg alias to display time better
+* 84838a7 DEVENV-39 prioritise use of nginx.conf if found, even if webserver is configured as apache
+* bab0155 DEVENV-39 skip sample file creation outside while loop body if we have nginx conf but apache is configured for specific host
+
+
+
 ## 0.1.5 (2023-05-01)
 
 
