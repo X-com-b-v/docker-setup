@@ -90,6 +90,7 @@ handleConfigs() {
 handleNginxConfig() {
     # https://stackoverflow.com/questions/18488651/how-to-break-out-of-a-loop-in-bash
     while : ; do
+        unset SKIPSAMPLE
         # if nginx.conf is not example, always use this config
         if [ -f "$d"/.siteconfig/nginx.conf ]; then
             cp "$d"/.siteconfig/nginx.conf "$NGINXCONFIGFILE"
