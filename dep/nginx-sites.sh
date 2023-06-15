@@ -118,8 +118,10 @@ handleNginxConfig() {
         # nothing to do
         break
     done
-    if [ -f "$NGINXCONFIGFILE" ] && [ -z "$SKIPSAMPLE" ]; then
-        cp "$NGINXCONFIGFILE" "$NGINXSAMPLEFILE"
+    if [ -f "$NGINXCONFIGFILE" ]; then
+        if [ -z "$SKIPSAMPLE" ]; then
+            cp "$NGINXCONFIGFILE" "$NGINXSAMPLEFILE"
+        fi
         replacePlaceholderValues "$NGINXCONFIGFILE"
     fi
 }
