@@ -35,15 +35,20 @@ pipelines:
   pull-requests:
     'develop': # this will run on any PR from develop to target (usually main)
       - parallel:
-          steps:
-            - step:
-                <<: *shell-check
-            - step:
-                <<: *check-tag
+        - step:
+            <<: *shell-check
+        - step:
+            <<: *check-tag
   branches:
     '*':
       - step:
           <<: *shell-check
+    'develop':
+      - parallel:
+        - step:
+            <<: *shell-check
+        - step:
+            <<: *check-tag
     'main':
       - step:
           <<: *shell-check
