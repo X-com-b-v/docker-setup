@@ -15,49 +15,18 @@ check_shell:
   script:
     - shellcheck $(find . -type f -name "*.sh" | xargs)
 
-check_tag:
-  stage: check
-  script:
-    - git remote set-url origin $CI_REPOSITORY_URL
-    - source version.sh
-    - git tag -a $VERSION -m "$CI_COMMIT_TIMESTAMP - Version $VERSION"
+# check_tag:
+#   stage: check
+#   script:
+#     - git remote set-url origin $CI_REPOSITORY_URL
+#     - source version.sh
+#     - git tag -a $VERSION -m "$CI_COMMIT_TIMESTAMP - Version $VERSION"
 
-tag:
-  stage: tag
-  script:
-    - git remote set-url origin $CI_REPOSITORY_URL
-    - dt=$(date '+%Y-%m-%d_%H%M')
-    - source version.sh
-    - curl -o changelog.sh https://bitbucket.org/!api/2.0/snippets/X-com/6EgAxn/${CHANGELOG_HASH}/files/changelog-builder.sh
-    - git tag -a $VERSION -m "$dt - Version $VERSION"
-    - sh changelog.sh > CHANGELOG.md
-    - rm changelog.sh
-    - git add CHANGELOG.md && git commit -m "[skip ci] Updated changelog for version $VERSION"
-    - git push
-    - git tag -d $VERSION
-    - git tag -a $VERSION -m "$dt - Version $VERSION"
-    - git push --tags
-
-# Define jobs to run for each pipeline
-# In this example, we only define jobs for the `main` branch
-# and for Merge Requests targeting the `main` branch
-# Jobs for other branches can be added similarly.
-# You can also add jobs to other stages if needed.
-
-merge_request:
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
-      when: always
-      allow_failure: true
-  needs: []
-  job: check_tag
-
-main:
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: always
-      allow_failure: true
-  needs: []
-  jobs:
-    - check_shell
-    - tag
+# tag:
+#   stage: tag
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == "main"
+#       when: always
+#       allow_failure: true
+#   script:
+#     - echo 'Tag'
