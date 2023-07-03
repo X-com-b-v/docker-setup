@@ -62,7 +62,7 @@ do
 done
 
 echo '' > /home/web/.starship
-if [ "$SETUP_STARSHIP" ]; then
+if [ "$SETUP_STARSHIP" == "on" ]; then
     if [ ! -f "/home/web/bin/starship" ]; then
         sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- --bin-dir /home/web/bin --force
     fi
