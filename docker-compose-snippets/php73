@@ -1,6 +1,7 @@
   php73:
     #build: php73
     image: xcommagento/docker-php73:latest
+    hostname: php73
     # restart: always
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites

@@ -1,6 +1,7 @@
   php80:
     # build: php80
     image: xcommagento/docker-php80:latest
+    hostname: php80
     # restart: always
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites

@@ -1,6 +1,7 @@
   mongo:
     image: mongo:6.0
     # restart: always
+    hostname: mongo
     ports:
       - 27017:27017
     environment:

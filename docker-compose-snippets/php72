@@ -1,6 +1,7 @@
   php72:
     #build: php72
     image: xcommagento/docker-php72:latest
+    hostname: php72
     # restart: always
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites

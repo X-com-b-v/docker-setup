@@ -1,6 +1,7 @@
   php70:
     # build: php70
     image: xcommagento/docker-php70:latest
+    hostname: php70
     # restart: always
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites

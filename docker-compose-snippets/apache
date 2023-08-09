@@ -1,6 +1,7 @@
   apache:
     build: apache
     # restart: always
+    hostname: apache
     working_dir: /etc/apache2/sites-enabled
     volumes:
       - ./apache/sites-enabled:/etc/apache2/sites-enabled:ro

@@ -1,7 +1,6 @@
   php74:
     #build: php74
     image: xcommagento/docker-php74:latest
-    container_name: php74
     hostname: php74
     # restart: always
     platform: linux/amd64

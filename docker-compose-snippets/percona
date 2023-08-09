@@ -1,6 +1,7 @@
   percona:
     image: percona:ps-8.0
     # restart: always
+    hostname: percona
     platform: linux/amd64
     environment:
       - MYSQL_ROOT_PASSWORD=xcom

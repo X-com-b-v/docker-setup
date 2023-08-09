@@ -1,8 +1,7 @@
   php81:
     #build: php81
     image: xcommagento/docker-php81:latest
-    container_name: php80
-    hostname: php80
+    hostname: php81
     # restart: always
     platform: linux/amd64
     volumes:

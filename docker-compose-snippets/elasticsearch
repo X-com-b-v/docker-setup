@@ -1,6 +1,7 @@
   elasticsearch:
     build: elasticsearch
     # restart: always
+    hostname: elasticsearch
     platform: linux/amd64
     ports:
       - 9200:9200
