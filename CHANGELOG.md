@@ -1,3 +1,13 @@
+## 0.1.9 (2023-08-09)
+
+
+* 8b2ace2 update bitbucket pipelines
+* 1a09dcc update version
+* 6745cd6 DEVENV-40 DEVENV-41 update docker compose php74 snippet to provide hostname and update phprun script to adhere to starship config
+* 589a93a DEVENV-40 set hostnames
+
+
+
 ## 0.1.8 (2023-06-15)
 
 
