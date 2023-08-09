@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# define config file location, if it is found then include it
+# if no config file is found, we know it is the first run
 CONFIGFILE="$HOME"/.config/docker-setup.config
 if [ -f "$CONFIGFILE" ]; then
     # shellcheck disable=SC1090
@@ -8,6 +10,7 @@ else
     FIRSTRUN=1
 fi
 
+# display the welcome dialog
 dialog --title "Welcome" --msgbox "Welcome to the docker-setup \n
 This installer will provide you with options \n
 to select different services. Please read carefully. \n
@@ -15,10 +18,12 @@ Read the docs at https://xcom-nl.atlassian.net/wiki/spaces/DEVENV/ \n
 Or in the README.md provided in the root dir of this project. \n
 " 13 60
 
-# load current version
+# load current version, this will be written to config file
+# its only purpose is for debugging, if users report issues then I'd like to know what version they are using
 # shellcheck disable=SC1091
 . "./version.sh"
 
+# username is part of the config file, if it is not set it will prompt the user for their username
 while [[ -z "$USERNAME" ]]; do
     exec 3>&1
     USERNAME=$(dialog --title "username" --inputbox "Enter your username" 6 60 "$USERNAME" 2>&1 1>&3)
@@ -26,6 +31,7 @@ while [[ -z "$USERNAME" ]]; do
     exec 3>&-;
 done
 
+# installdirectory will always be prompted as users have the flexibility to change this
 originstalldir=
 while [[ -z $originstalldir ]]; do
     exec 3>&1
@@ -41,10 +47,8 @@ while [[ -z $originstalldir ]]; do
         exit $exitcode
     fi
 done
-
 #shellcheck disable=SC2001
 installdir=$(echo "$originstalldir" | sed 's:/*$::')
-
 if [ -z "$installdir" ]; then
     installdir="/"
 fi
@@ -56,14 +60,13 @@ if [ ! -d "$installdir" ] ; then
         sudo chown -r "$USER":"$USER" "$installdir"
     fi
 fi
-
 # set correct permissions if installdir is /
 if [ "$installdir" == "/" ]; then
     sudo mkdir -p "$installdir"/docker "$installdir"/data
     sudo chown "$USER":"$USER" "$installdir"/docker "$installdir"/data
 fi
 
-# always enable gitconfig and mysql when it's the first run
+# always enable some settings if it is the first run
 if [ "$FIRSTRUN" == "1" ]; then
     SETUP_RESTART=on
     SETUP_GITCONFIG=on
@@ -71,17 +74,18 @@ if [ "$FIRSTRUN" == "1" ]; then
     SETUP_MYSQL80=on
     PHP74=on
 fi
-
 # This is volume mapped, so directory should exist
 if [ ! -d "$HOME/.ssh" ] ; then
     mkdir -p "$HOME/.ssh"
 fi
 
-# set default project slug
+# Users can change the project slug (saved in config file)
+# If there is no projectslug set, this code sets the default
 if [ -z "$PROJECTSLUG" ]; then
     PROJECTSLUG=".o.xotap.nl"
 fi
 
+# Function to copy devctl executable to $HOME/.local
 setup_devctl () {
     if [ ! -d "$HOME/.local/bin" ]; then
         mkdir -p "$HOME/.local/bin"
@@ -95,6 +99,7 @@ setup_devctl () {
     chmod +x "$HOME/.local/bin/nginx-sites.sh"
 }
 
+# Function to setup gitconfig which is later copied to selected php containers
 setup_gitconfig () {
     if [ ! -d "$installdir/docker/dependencies" ]; then
         mkdir -p "$installdir/docker/dependencies"
@@ -129,6 +134,7 @@ setup_gitconfig () {
     sed -i -e 's:user@email.com:'"$GIT_EMAIL"':g' "$installdir/docker/dependencies/gitconfig"
 }
 
+# Users are given the option to change the project slug during any install run
 setup_projectslug () {
     exec 3>&1
     PROJECTSLUG=$(dialog --inputbox "Change project slug \n" 8 60 "$PROJECTSLUG" 2>&1 1>&3)
@@ -140,6 +146,7 @@ setup_projectslug () {
     fi
 }
 
+# cleanup script which is always executed at the end of the script or during runtime errors
 cleanup () {
     # cleanup as there's no need for this anymore
     if [ -d "$installdir/docker/dependencies" ]; then
@@ -148,6 +155,7 @@ cleanup () {
 }
 
 # update devctl script
+# see setup_devctl ()
 setup_devctl
 
 ### Global configuration ###
@@ -416,6 +424,8 @@ do :
     fi
 
     if [ $SETUP_XDEBUG_TRIGGER == "on" ]; then
+        sed -i -e 's/;xdebug.mode=debug,develop/xdebug.mode=debug,develop/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed -i -e 's/xdebug.mode=off/;xdebug.mode=off/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
         sed -i -e 's/xdebug.start_with_request=yes/;xdebug.start_with_request=yes/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
         sed -i -e 's/;xdebug.start_with_request=trigger/xdebug.start_with_request=trigger/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
     fi
