@@ -3,9 +3,15 @@ FROM php:8.1-fpm-bullseye
 RUN useradd -u 1000 -s /bin/bash web
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils sudo nano nullmailer zlib1g-dev libpng-dev git git-flow libonig-dev libffi-dev libicu-dev libxml2-dev \
-libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev lsb-release apt-transport-https ca-certificates libzip-dev libxslt-dev autoconf pkg-config libssl-dev libmagickwand-dev python2 python-is-python2 subversion build-essential gnupg2 unzip rsync mariadb-client
+libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev lsb-release apt-transport-https ca-certificates libzip-dev libxslt-dev autoconf pkg-config libssl-dev libmagickwand-dev python2 python-is-python2 subversion build-essential gnupg2 unzip rsync mariadb-client unixodbc unixodbc-dev odbcinst odbcinst1debian2 libodbc1 libpcre3-dev
 RUN echo 'web ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 RUN echo mailtrap > /etc/nullmailer/remotes
+
+# mssql stuff
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
+RUN sudo apt-get update
+RUN ACCEPT_EULA=Y apt-get -y --no-install-recommends install msodbcsql17 mssql-tools
 
 # install modules
 RUN pecl install xdebug
@@ -16,11 +22,17 @@ RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mysqli mbstring bcmat
 # other extensions we dont need right now
 # mysqli pcntl hmop sockets sysvmsg sysvmsg sysvshm sysvsem
 
+# mssql stuff
+RUN pecl install sqlsrv-5.11.0
+RUN pecl install pdo_sqlsrv-5.11.0
+
 RUN docker-php-ext-enable xdebug 
 RUN docker-php-ext-enable mongodb 
 RUN docker-php-ext-enable imagick
 
 ADD conf.d/xdebug.ini "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"
+ADD conf.d/sqlsrv.ini "$PHP_INI_DIR/conf.d/sqlsrv.ini"
+ADD conf.d/pdo_sqlsrv.ini "$PHP_INI_DIR/conf.d/pdo_sqlsrv.ini"
 
 ADD run.sh /run.sh
 RUN chmod +x /run.sh
