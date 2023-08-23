@@ -280,9 +280,9 @@ done
 
 # run cleanup - make sure this is executed before the docker-compose file is replaced with new stuff
 dialog --stdout --title "Cleanup" \
-  --backtitle "Cleanup" \
-  --defaultno \
-  --yesno "Clean up dev environment? Removes old home directories and containers" 7 60
+    --backtitle "Cleanup" \
+    --defaultno \
+    --yesno "Clean up dev environment? Removes old home directories and containers" 7 60
 dialog_status=$?
 if [ "$dialog_status" -eq 0 ]; then
     clear
@@ -366,13 +366,13 @@ done
 PHPLATEST=
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 16 35 16)
 options=(php70 "PHP 7.0" "$PHP70" # any option can be set to default to "on"
-         php72 "PHP 7.2" "$PHP72"
-         php73 "PHP 7.3" "$PHP73"
-         php74 "PHP 7.4" "$PHP74"
-         php80 "PHP 8.0" "$PHP80"
-         php81 "PHP 8.1" "$PHP81"
-         php82 "PHP 8.2" "$PHP82"
-         )
+    php72 "PHP 7.2" "$PHP72"
+    php73 "PHP 7.3" "$PHP73"
+    php74 "PHP 7.4" "$PHP74"
+    php80 "PHP 8.0" "$PHP80"
+    php81 "PHP 8.1" "$PHP81"
+    php82 "PHP 8.2" "$PHP82"
+)
 
 # Reset PHP variables
 PHP70=off
@@ -481,34 +481,34 @@ fi
 # clear config file and write settings to it
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash
 {
-  echo installdir="$installdir" >&3
-  echo VERSION="$VERSION" >&3
-  echo USERNAME="$USERNAME" >&3
-  echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >&3
-  echo SETUP_RESTART=$SETUP_RESTART >&3
-  echo SETUP_XDEBUG=$SETUP_XDEBUG >&3
-  echo SETUP_VARNISH=$SETUP_VARNISH >&3
-  echo SETUP_ELASTICSEARCH=$SETUP_ELASTICSEARCH >&3
-  echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
-  echo SETUP_APACHE=$SETUP_APACHE >&3
-  echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3
-  echo SETUP_MYSQL57=$SETUP_MYSQL57 >&3
-  echo SETUP_MYSQL80=$SETUP_MYSQL80 >&3
-  echo SETUP_PERCONA=$SETUP_PERCONA >&3
-  echo SETUP_MONGO=$SETUP_MONGO >&3
-  echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
-  echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
-  echo GIT_USER=\""${GIT_USER}"\" >&3
-  echo GIT_EMAIL="$GIT_EMAIL" >&3
-  echo PROJECTSLUG="$PROJECTSLUG" >&3
-  echo PHP70="$PHP70" >&3
-  echo PHP72="$PHP72" >&3
-  echo PHP73="$PHP73" >&3
-  echo PHP74="$PHP74" >&3
-  echo PHP80="$PHP80" >&3
-  echo PHP81="$PHP81" >&3
-  echo PHP82="$PHP82" >&3
-  echo PHPLATEST="$PHPLATEST" >&3
+    echo installdir="$installdir" >&3
+    echo VERSION="$VERSION" >&3
+    echo USERNAME="$USERNAME" >&3
+    echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >&3
+    echo SETUP_RESTART=$SETUP_RESTART >&3
+    echo SETUP_XDEBUG=$SETUP_XDEBUG >&3
+    echo SETUP_VARNISH=$SETUP_VARNISH >&3
+    echo SETUP_ELASTICSEARCH=$SETUP_ELASTICSEARCH >&3
+    echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
+    echo SETUP_APACHE=$SETUP_APACHE >&3
+    echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3
+    echo SETUP_MYSQL57=$SETUP_MYSQL57 >&3
+    echo SETUP_MYSQL80=$SETUP_MYSQL80 >&3
+    echo SETUP_PERCONA=$SETUP_PERCONA >&3
+    echo SETUP_MONGO=$SETUP_MONGO >&3
+    echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
+    echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
+    echo GIT_USER=\""${GIT_USER}"\" >&3
+    echo GIT_EMAIL="$GIT_EMAIL" >&3
+    echo PROJECTSLUG="$PROJECTSLUG" >&3
+    echo PHP70="$PHP70" >&3
+    echo PHP72="$PHP72" >&3
+    echo PHP73="$PHP73" >&3
+    echo PHP74="$PHP74" >&3
+    echo PHP80="$PHP80" >&3
+    echo PHP81="$PHP81" >&3
+    echo PHP82="$PHP82" >&3
+    echo PHPLATEST="$PHPLATEST" >&3
 } 3>"$CONFIGFILE"
 
 clear
