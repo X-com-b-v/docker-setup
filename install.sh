@@ -3,10 +3,12 @@
 # define config file location, if it is found then include it
 # if no config file is found, we know it is the first run
 CONFIGFILE="$HOME"/.config/docker-setup.config
-if [ -f "$CONFIGFILE" ]; then
-    # shellcheck disable=SC1090
-    . "$CONFIGFILE"
-else
+if [ ! -f "$CONFIGFILE" ]; then
+    touch "$CONFIGFILE"
+fi
+# shellcheck disable=SC1090
+. "$CONFIGFILE"
+if [ -z "$FIRSTRUN" ]; then
     FIRSTRUN=1
 fi
 
@@ -26,7 +28,7 @@ Or in the README.md provided in the root dir of this project. \n
 # username is part of the config file, if it is not set it will prompt the user for their username
 while [[ -z "$USERNAME" ]]; do
     exec 3>&1
-    USERNAME=$(dialog --title "username" --inputbox "Enter your username" 6 60 "$USERNAME" 2>&1 1>&3)
+    USERNAME=$(dialog --title "username" --inputbox "Enter your username" 6 60 "$USER" 2>&1 1>&3)
     exitcode=$?;
     exec 3>&-;
 done
@@ -161,19 +163,19 @@ setup_devctl
 ### Global configuration ###
 cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 86 16)
 options=(autostart "[both] Start docker containers automatically" "$SETUP_RESTART"
-         gitconfig "[both] Configure gitconfig" "$SETUP_GITCONFIG"
-         mysql57 "[both] Setup mysql 5.7" "$SETUP_MYSQL57"
-         mysql80 "[both] Setup mysql 8.0" "$SETUP_MYSQL80"
-         percona "[both] Setup percona 8.0" "$SETUP_PERCONA"
-         projectslug "[both] Change project slug [$PROJECTSLUG]" "$SETUP_PROJECTSLUG"
-         varnish "[ecom] Use Varnish (Magento)" "$SETUP_VARNISH"
-         elasticsearch "[ecom] Use Elasticsearch (Magento)" "$SETUP_ELASTICSEARCH"
-         configurator "[ecom] Skip configurator (Magento)" "$SKIP_CONFIGURATOR"
-         xdebug "[both] Enable Xdebug" "$SETUP_XDEBUG"
-         xdebug-trigger "[both] Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
-         apache "[itix] Apache configurations, for Itix" "$SETUP_APACHE"
-         mongo "[itix] Mongo" "$SETUP_MONGO"
-         mysql56 "[both] Setup mysql 5.6 (Deprecated)" "$SETUP_MYSQL56"
+    gitconfig "[both] Configure gitconfig" "$SETUP_GITCONFIG"
+    mysql57 "[both] Setup mysql 5.7" "$SETUP_MYSQL57"
+    mysql80 "[both] Setup mysql 8.0" "$SETUP_MYSQL80"
+    percona "[both] Setup percona 8.0" "$SETUP_PERCONA"
+    projectslug "[both] Change project slug [$PROJECTSLUG]" "$SETUP_PROJECTSLUG"
+    varnish "[ecom] Use Varnish (Magento)" "$SETUP_VARNISH"
+    elasticsearch "[ecom] Use Elasticsearch (Magento)" "$SETUP_ELASTICSEARCH"
+    configurator "[ecom] Skip configurator (Magento)" "$SKIP_CONFIGURATOR"
+    xdebug "[both] Enable Xdebug" "$SETUP_XDEBUG"
+    xdebug-trigger "[both] Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
+    apache "[itix] Apache configurations, for Itix" "$SETUP_APACHE"
+    mongo "[itix] Mongo" "$SETUP_MONGO"
+    mysql56 "[both] Setup mysql 5.6 (Deprecated)" "$SETUP_MYSQL56"
 )
 
 # reset basic variables after they've been shown in options list
@@ -343,6 +345,7 @@ if [ $SETUP_MYSQL80 == "on" ] && [ -f docker-compose-snippets/mysql80 ]; then
 fi
 if [ $SETUP_PERCONA == "on" ] && [ -f docker-compose-snippets/percona ]; then
     cat docker-compose-snippets/percona >> "$installdir"/docker/docker-compose.yml
+    # percona is a drop-in replacement for mysql, so share the data folder
     if [ ! -d "$installdir"/data/mysql80 ]; then
         mkdir -p "$installdir"/data/mysql80
     fi
@@ -352,7 +355,6 @@ if [ $SETUP_PERCONA == "on" ] && [ -f docker-compose-snippets/percona ]; then
     # fi
     services+=( "mysql80" )
 fi
-
 
 for service in "${services[@]}"
 do :
@@ -465,14 +467,14 @@ if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearc
     cat docker-compose-snippets/elasticsearch-volume >> "$installdir"/docker/docker-compose.yml
 fi
 
-if [ ! "$FIRSTRUN" = "0" ]; then
+# if [ ! "$FIRSTRUN" = "0" ]; then
     # set max_map_count for sonarqube
     # sysctl -w vm.max_map_count=262144
-    # make it permanent
-    echo "vm.max_map_count=262144" > /etc/sysctl.d/sonarqube.conf
-    echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
-    sysctl -p --system
-fi
+    # make it permanent,uncomment below 3 lines
+    # echo "vm.max_map_count=262144" > /etc/sysctl.d/sonarqube.conf
+    # echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
+    # sysctl -p --system
+# fi
 
 if [ ! -d "$HOME"/.config ]; then
     mkdir -p "$HOME"/.config
@@ -509,6 +511,7 @@ fi
     echo PHP81="$PHP81" >&3
     echo PHP82="$PHP82" >&3
     echo PHPLATEST="$PHPLATEST" >&3
+    echo FIRSTRUN=0 >&3
 } 3>"$CONFIGFILE"
 
 clear
@@ -524,7 +527,7 @@ if [ "$dialog_status" -eq 0 ]; then
     cd "$installdir/docker" && docker compose pull && docker compose up --remove-orphans --build -d --force-recreate
     exit "$dialog_status"
 else
-  # The previous dialog was answered No or interrupted with <C-c>
+    # The previous dialog was answered No or interrupted with <C-c>
     dialog --title "Complete" --msgbox "Installation prepared \n
     Config is written to $HOME/.config/docker-setup.config\n
     - cd to $installdir/docker\n
