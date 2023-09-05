@@ -1,3 +1,19 @@
+## 0.1.10 (2023-09-05)
+
+
+* e1e90d3 update gitlab-ci
+* 423217f bump version to 0.1.10
+* b21fb11 DEVENV-1 add documentation to installer script
+* 4c75405 php 8.2 support
+* f1cc995 DEVENV-46 Added sqlsrv to php81
+* 32e5e25 Fix some indents
+* 9e0486a Indent fixes, rework handling of config file import
+* c69d55b update license
+* 07e691d Upgrade elasticsearch to 7.12.1, this does not seem to use 100% ram
+* b5d3b3d php82 image is pushed to dockerhub
+
+
+
 ## 0.1.9 (2023-08-09)
 
 
