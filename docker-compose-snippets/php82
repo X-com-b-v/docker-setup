@@ -1,6 +1,6 @@
   php82:
-    build: php82
-    #image: xcommagento/docker-php82:latest
+    #build: php82
+    image: xcommagento/docker-php82:latest
     hostname: php82
     # restart: always
     platform: linux/amd64
