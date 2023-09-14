@@ -49,7 +49,7 @@ flush_varnish () {
 
 update_varnish_acl () {
     # fetch subnet from docker xcom network
-    SUBNET=$(docker network inspect docker_xcom_network | jq '.[].IPAM.Config[].Subnet')
+    SUBNET=$(docker network inspect x-com_xcom_network | jq '.[].IPAM.Config[].Subnet')
     if [ -n "$SUBNET" ]; then
         echo "$SUBNET"
         cd "$(get_dockerdir)" || return
