@@ -1,3 +1,11 @@
+## 0.1.11 (2023-09-14)
+
+
+* e5e45b6 Update devctl to use varnishacl with new x-com docker network
+* 92604fc Add brotli support to nginx and create docker-nginx image, push to dockerhub
+
+
+
 ## 0.1.10 (2023-09-05)
 
 
