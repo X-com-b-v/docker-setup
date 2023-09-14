@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ "$EUID" -eq 0 ]; then
+    echo "Do not run this script as root"
+    exit 1
+fi
+
 # define config file location, if it is found then include it
 # if no config file is found, we know it is the first run
 CONFIGFILE="$HOME"/.config/docker-setup.config
@@ -59,13 +64,13 @@ fi
 if [ ! -d "$installdir" ] ; then
     if ! mkdir -p "$installdir"; then
         sudo mkdir -p "$installdir"
-        sudo chown -r "$USER":"$USER" "$installdir"
+        sudo chown -R "$USER":"$USER" "$installdir"
     fi
 fi
 # set correct permissions if installdir is /
 if [ "$installdir" == "/" ]; then
     sudo mkdir -p "$installdir"/docker "$installdir"/data
-    sudo chown "$USER":"$USER" "$installdir"/docker "$installdir"/data
+    sudo chown -R "$USER":"$USER" "$installdir"/docker "$installdir"/data
 fi
 
 # always enable some settings if it is the first run
