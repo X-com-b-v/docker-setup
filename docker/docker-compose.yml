@@ -5,8 +5,8 @@ networks:
     driver: bridge
 services:
   nginx:
-    build: nginx
-    # image: xcommagento/docker-nginx:latest
+    # build: nginx
+    image: xcommagento/docker-nginx:latest
     # restart: always
     hostname: nginx
     platform: linux/amd64
