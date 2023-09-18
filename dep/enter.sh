@@ -7,7 +7,7 @@ if [ $# -eq 0 ]; then
 fi
 
 # do not edit $FALLBACK
-FALLBACK="bash"
+FALLBACK="sh"
 SHELL="bash";
 PREPEND=
 
