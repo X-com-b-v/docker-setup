@@ -16,7 +16,6 @@ build [containers]      | Build images in docker-compose file
 pull [containers]       | Pull images in docker-compose file
 installdir              | Shows current install directory
 dockerdir               | Shows current docker directory
-sonarqube [options]     | Manage sonarqube and postgres instances
 varnishacl              | Update the varnish vcl with docker_xcom_network ip/subnet
 flushredis [db]         | Flush redis completely, or a single db
 flushvarnish [url]      | Flush varnish url
@@ -136,9 +135,6 @@ case "$1" in
     dockerdir)
         get_dockerdir
         ;;
-    sonarqube)
-        docker compose -f sonarqube.yml "${@:2}"
-	    ;;
     varnishacl)
         update_varnish_acl
         ;;

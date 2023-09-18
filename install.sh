@@ -314,7 +314,6 @@ done
 
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml "$installdir"/docker/docker-compose.yml
-cp ./docker/sonarqube.yml "$installdir"/docker/sonarqube.yml
 
 # make sure other services are not forgotten, these are not updated every run
 services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" )
@@ -473,10 +472,6 @@ if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearc
 fi
 
 # if [ ! "$FIRSTRUN" = "0" ]; then
-    # set max_map_count for sonarqube
-    # sysctl -w vm.max_map_count=262144
-    # make it permanent,uncomment below 3 lines
-    # echo "vm.max_map_count=262144" > /etc/sysctl.d/sonarqube.conf
     # echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
     # sysctl -p --system
 # fi
