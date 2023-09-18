@@ -88,6 +88,8 @@ sub vcl_recv {
         if (req.url ~ "\.(jpg|jpeg|png|gif|gz|tgz|bz2|tbz|mp3|ogg|swf|flv)$") {
             # No point in compressing these
             unset req.http.Accept-Encoding;
+        } elsif (req.http.Accept-Encoding ~ "br") {
+            set req.http.Accept-Encoding = "br";
         } elsif (req.http.Accept-Encoding ~ "gzip") {
             set req.http.Accept-Encoding = "gzip";
         } elsif (req.http.Accept-Encoding ~ "deflate" && req.http.user-agent !~ "MSIE") {
