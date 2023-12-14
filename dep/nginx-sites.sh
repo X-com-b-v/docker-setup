@@ -157,15 +157,19 @@ handleApacheConfig() {
     fi
 }
 replacePlaceholderValues() {
-    sed -i "s/##PROXYPORT##/$PROXYPORT/g" "$1"
-    sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
-    sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
-    sed -i "s/##XCOMUSER##/$USERNAME/g" "$1"
-    sed -i "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
-    sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
-    sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
-    sed -i "s/##DOMAIN##/$DOMAIN/g" "$1"
+    sed -i '' "s/##PROXYPORT##/$PROXYPORT/g" "$1"
+    sed -i '' "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
+    sed -i '' "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
+    sed -i '' "s/##XCOMUSER##/$USERNAME/g" "$1"
+    sed -i '' "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
+    sed -i '' "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
+    sed -i '' "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
+    sed -i '' "s/##DOMAIN##/$DOMAIN/g" "$1"
 }
+
+# Create a temporary file to store the output of the find command
+tmpfile=$(mktemp)
+find -L "$installdir"/data/shared/sites -mindepth 1 -maxdepth 1 -type d > "$tmpfile"
 
 while IFS= read -r d
 do
@@ -181,9 +185,12 @@ do
         fi
     fi
     writeSampleConfig "$CONFIG"
-    if [ -f "$d"/.siteconfig/config.json ]; then 
+    if [ -f "$d"/.siteconfig/config.json ]; then
         CONFIGFILE="$d"/.siteconfig/config.json
     fi
     read -r USE_TEMPLATE USE_WEBSERVER USE_PHPVERSION <<< "$(jq -r '.template, .webserver, .php_version' "$CONFIGFILE" | xargs)"
     handleConfigs
-done <   <(find -L "$installdir"/data/shared/sites -mindepth 1 -maxdepth 1 -type d)
+done < "$tmpfile"
+
+# Remove the temporary file
+rm "$tmpfile"

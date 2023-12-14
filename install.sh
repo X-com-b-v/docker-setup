@@ -77,9 +77,8 @@ fi
 if [ "$FIRSTRUN" == "1" ]; then
     SETUP_RESTART=on
     SETUP_GITCONFIG=on
-    SETUP_MYSQL57=on
     SETUP_MYSQL80=on
-    PHP74=on
+    PHP81=on
 fi
 # This is volume mapped, so directory should exist
 if [ ! -d "$HOME/.ssh" ] ; then
@@ -293,10 +292,12 @@ dialog --stdout --title "Cleanup" \
 dialog_status=$?
 if [ "$dialog_status" -eq 0 ]; then
     clear
+    find -L "$installdir"/data/home -mindepth 1 -maxdepth 1 -type d > temp_file
     while IFS= read -r d
     do
         rm -r "$d" 2>/dev/null
-    done <   <(find -L "$installdir"/data/home -mindepth 1 -maxdepth 1 -type d)
+    done < temp_file
+    rm temp_file
     cd "$installdir/docker" && docker compose down
 fi
 
@@ -449,8 +450,8 @@ do :
 
     cp ./dep/phprun.sh "$installdir"/docker/"$path"/run.sh
     cp ./dep/zz-docker.conf "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
-    sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
-    sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
+    sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
+    sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
 
     if [ $SETUP_GITCONFIG == "on" ]; then
         cp "$installdir"/docker/dependencies/gitconfig "$installdir"/data/home/"$path"/.gitconfig
@@ -471,6 +472,10 @@ if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearc
     cat docker-compose-snippets/elasticsearch-volume >> "$installdir"/docker/docker-compose.yml
 fi
 
+if [ $SETUP_ELASTICSEARCH != "on" ] && [ -f docker-compose-snippets/phpsockets-volume ]; then
+    cat docker-compose-snippets/phpsockets-volume >> "$installdir"/docker/docker-compose.yml
+fi
+
 # if [ ! "$FIRSTRUN" = "0" ]; then
     # echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
     # sysctl -p --system
@@ -479,6 +484,20 @@ fi
 if [ ! -d "$HOME"/.config ]; then
     mkdir -p "$HOME"/.config
 fi
+
+# Check system architecture
+arch=$(uname -m)
+
+if [ "$arch" = "arm64" ]; then
+    # macos
+    sed -i -e 's/# linux\/arm64/linux\/arm64/g' "$installdir"/docker/docker-compose.yml
+    echo "Configuration has been modified for an arm64 architecture."
+else
+    # linux or windows
+    sed -i -e 's/# linux\/amd64/linux\/amd64/g' "$installdir"/docker/docker-compose.yml
+    echo "Configuration has been modified for an amd64 architecture."
+fi
+
 
 # clear config file and write settings to it
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash

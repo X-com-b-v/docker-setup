@@ -3,11 +3,10 @@
     image: xcommagento/docker-php82:latest
     hostname: php82
     # restart: always
-    platform: linux/amd64
     volumes:
       - installdirectory/data/shared/sites:/data/shared/sites
       - installdirectory/data/shared/modules:/data/shared/modules
-      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - phpsockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php82:/home/web
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro

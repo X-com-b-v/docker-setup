@@ -8,7 +8,7 @@
       - installdirectory/data/shared/modules:/data/shared/modules
       - ./php70/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
       - ./php70/conf.d/php.ini:/usr/local/etc/php/php.ini
-      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - phpsockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php70:/home/web
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro

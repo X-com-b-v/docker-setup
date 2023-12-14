@@ -11,7 +11,7 @@ RUN echo mailtrap > /etc/nullmailer/remotes
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
 RUN sudo apt-get update
-RUN ACCEPT_EULA=Y apt-get -y --no-install-recommends install msodbcsql17 mssql-tools
+RUN ACCEPT_EULA=Y apt-get -y --no-install-recommends install msodbcsql18 mssql-tools18
 
 # install modules
 RUN pecl install xdebug
@@ -23,8 +23,8 @@ RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mysqli mbstring bcmat
 # mysqli pcntl hmop sockets sysvmsg sysvmsg sysvshm sysvsem
 
 # mssql stuff
-RUN pecl install sqlsrv-5.11.0
-RUN pecl install pdo_sqlsrv-5.11.0
+RUN pecl install sqlsrv
+RUN pecl install pdo_sqlsrv
 
 RUN docker-php-ext-enable xdebug 
 RUN docker-php-ext-enable mongodb 

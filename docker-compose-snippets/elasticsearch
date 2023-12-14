@@ -1,8 +1,7 @@
   elasticsearch:
-    build: elasticsearch
+    image: xcommagento/docker-elasticsearch:latest
     # restart: always
     hostname: elasticsearch
-    platform: linux/amd64
     ports:
       - 9200:9200
       - 9300:9300

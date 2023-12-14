@@ -1,2 +1,3 @@
-FROM elasticsearch:7.12.1
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-phonetic
+FROM elasticsearch:7.17.16
+RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-phonetic analysis-icu
+

@@ -5,11 +5,11 @@ networks:
     driver: bridge
 services:
   nginx:
-    # build: nginx
     image: xcommagento/docker-nginx:latest
     # restart: always
+    # platform: linux/arm64
+    # platform: linux/amd64
     hostname: nginx
-    platform: linux/amd64
     ports:
       - 80:80
       - 443:443
@@ -17,7 +17,7 @@ services:
     volumes:
       - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro
       - installdirectory/data/shared/sites:/data/shared/sites
-      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - phpsockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
     networks:
@@ -35,8 +35,9 @@ services:
   mailtrap:
     image: xcommagento/docker-mailtrap:latest
     # restart: always
+    # platform: linux/arm64
+    # platform: linux/amd64
     hostname: mailtrap
-    platform: linux/amd64
     ports:
       - 8085:80
       - 0.0.0.0:25:25
