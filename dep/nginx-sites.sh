@@ -96,6 +96,7 @@ handleNginxConfig() {
             cp "$d"/.siteconfig/nginx.conf "$NGINXCONFIGFILE"
             if [ "$USE_WEBSERVER" != "nginx" ] && [ "$SETUP_APACHE" == "on" ]; then
                 cp "$NGINX_SITE_TEMPLATES"/proxy.conf "$NGINXSAMPLEFILE"
+                handleApacheConfig
                 SKIPSAMPLE=1
             fi
             break
