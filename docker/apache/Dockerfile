@@ -1,10 +1,10 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 # Main
-RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
+RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list.d/debian.sources
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install \
-    nano jq gnupg build-essential bzip2 software-properties-common libapache2-mod-fcgid apache2
+    vim nano jq gnupg build-essential bzip2 software-properties-common libapache2-mod-fcgid apache2
 
 RUN getent passwd 1000 || useradd -u 1000 -m -s /bin/bash web
 ADD run.sh /run.sh

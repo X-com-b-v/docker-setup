@@ -168,18 +168,18 @@ setup_devctl
 cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 86 16)
 options=(autostart "[both] Start docker containers automatically" "$SETUP_RESTART"
     gitconfig "[both] Configure gitconfig" "$SETUP_GITCONFIG"
-    mysql57 "[both] Setup mysql 5.7" "$SETUP_MYSQL57"
+    mongo "[itix] Mongo" "$SETUP_MONGO"
+    mysql56 "[both] Setup mysql 5.6 (Deprecated)" "$SETUP_MYSQL56"
+    mysql57 "[both] Setup mysql 5.7 (Deprecated)" "$SETUP_MYSQL57"
     mysql80 "[both] Setup mysql 8.0" "$SETUP_MYSQL80"
-    percona "[both] Setup percona 8.0" "$SETUP_PERCONA"
     projectslug "[both] Change project slug [$PROJECTSLUG]" "$SETUP_PROJECTSLUG"
     varnish "[ecom] Use Varnish (Magento)" "$SETUP_VARNISH"
-    elasticsearch "[ecom] Use Elasticsearch (Magento)" "$SETUP_ELASTICSEARCH"
+    elasticsearch7 "[ecom] Use Elasticsearch7 (Magento <= 2.4.6-p3)" "$SETUP_ELASTICSEARCH7"
+    elasticsearch8 "[ecom] Use Elasticsearch8 (Magento >= 2.4.6)" "$SETUP_ELASTICSEARCH8"
     configurator "[ecom] Skip configurator (Magento)" "$SKIP_CONFIGURATOR"
     xdebug "[both] Enable Xdebug" "$SETUP_XDEBUG"
     xdebug-trigger "[both] Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
     apache "[itix] Apache configurations, for Itix" "$SETUP_APACHE"
-    mongo "[itix] Mongo" "$SETUP_MONGO"
-    mysql56 "[both] Setup mysql 5.6 (Deprecated)" "$SETUP_MYSQL56"
 )
 
 # reset basic variables after they've been shown in options list
@@ -187,14 +187,14 @@ SKIP_CONFIGURATOR=off
 SETUP_RESTART=off
 SETUP_XDEBUG=off
 SETUP_VARNISH=off
-SETUP_ELASTICSEARCH=off
+SETUP_ELASTICSEARCH7=off
+SETUP_ELASTICSEARCH8=off
 SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
 SETUP_MONGO=off
 SETUP_MYSQL56=off
 SETUP_MYSQL57=off
 SETUP_MYSQL80=off
-SETUP_PERCONA=off
 SETUP_GITCONFIG=off
 SETUP_PROJECTSLUG=off
 
@@ -225,9 +225,6 @@ do :
         varnish)
             SETUP_VARNISH=on
             ;;
-        elasticsearch)
-            SETUP_ELASTICSEARCH=on
-            ;;
         xdebug)
             SETUP_XDEBUG=on
             ;;
@@ -250,10 +247,15 @@ do :
         mysql80)
             SETUP_MYSQL80=on
             ;;
-        percona)
-            SETUP_PERCONA=on
-            # cant have mysql80 and percona at the same time
-            SETUP_MYSQL80=off
+        elasticsearch7)
+            SETUP_ELASTICSEARCH7=on
+            # cant have elasticsearch7 and elasticsearch8 at the same time
+            SETUP_ELASTICSEARCH8=off
+            ;;
+        elasticsearch8)
+            SETUP_ELASTICSEARCH8=on
+            # cant have elasticsearch7 and elasticsearch8 at the same time
+            SETUP_ELASTICSEARCH7=off
             ;;
         *)
             clear
@@ -302,7 +304,7 @@ if [ "$dialog_status" -eq 0 ]; then
 fi
 
 # Prepare paths
-folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/shared/sockets" "$installdir/data/home" "$installdir/data/elasticsearch" "$installdir/data/shared/modules" "$installdir/docker/nginx/sites-enabled" "$installdir/docker/apache/sites-enabled" )
+folders=( "$installdir/docker" "$installdir/data" "$installdir/data/shared/sites" "$installdir/data/shared/media" "$installdir/data/home" "$installdir/data/shared/modules" "$installdir/docker/nginx/sites-enabled" "$installdir/docker/apache/sites-enabled" )
 for folder in "${folders[@]}"
 do :
     if [ ! -d "$folder" ]; then
@@ -317,7 +319,7 @@ done
 cp ./docker/docker-compose.yml "$installdir"/docker/docker-compose.yml
 
 # make sure other services are not forgotten, these are not updated every run
-services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch" )
+services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch7" )
 
 if [ $SETUP_VARNISH == "on" ] && [ -f docker-compose-snippets/varnish ]; then
     sed -i -e 's/- 80:80/- 8080:80/g' "$installdir"/docker/docker-compose.yml
@@ -332,9 +334,13 @@ if [ $SETUP_MONGO == "on" ] && [ -f docker-compose-snippets/mongo ]; then
     cat docker-compose-snippets/mongo >> "$installdir"/docker/docker-compose.yml
     services+=( "mongo" )
 fi
-if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearch ]; then
-    cat docker-compose-snippets/elasticsearch >> "$installdir"/docker/docker-compose.yml
-    services+=( "elasticsearch" )
+if [ $SETUP_ELASTICSEARCH7 == "on" ] && [ -f docker-compose-snippets/elasticsearch7 ]; then
+    cat docker-compose-snippets/elasticsearch7 >> "$installdir"/docker/docker-compose.yml
+    services+=( "elasticsearch7" )
+fi
+if [ $SETUP_ELASTICSEARCH8 == "on" ] && [ -f docker-compose-snippets/elasticsearch8 ]; then
+    cat docker-compose-snippets/elasticsearch8 >> "$installdir"/docker/docker-compose.yml
+    services+=( "elasticsearch8" )
 fi
 if [ $SETUP_MYSQL56 == "on" ] && [ -f docker-compose-snippets/mysql56 ]; then
     cat docker-compose-snippets/mysql56 >> "$installdir"/docker/docker-compose.yml
@@ -346,18 +352,6 @@ if [ $SETUP_MYSQL57 == "on" ] && [ -f docker-compose-snippets/mysql57 ]; then
 fi
 if [ $SETUP_MYSQL80 == "on" ] && [ -f docker-compose-snippets/mysql80 ]; then
     cat docker-compose-snippets/mysql80 >> "$installdir"/docker/docker-compose.yml
-    services+=( "mysql80" )
-fi
-if [ $SETUP_PERCONA == "on" ] && [ -f docker-compose-snippets/percona ]; then
-    cat docker-compose-snippets/percona >> "$installdir"/docker/docker-compose.yml
-    # percona is a drop-in replacement for mysql, so share the data folder
-    if [ ! -d "$installdir"/data/mysql80 ]; then
-        mkdir -p "$installdir"/data/mysql80
-    fi
-    # CONTAINERUID=$(docker run --rm -t percona:ps-8.0 sh -c 'id -u')
-    # if ! chown "$CONTAINERUID":"$CONTAINERUID" -R "$installdir"/data/mysql80; then
-        # sudo chown "$CONTAINERUID":"$CONTAINERUID" -R "$installdir"/data/mysql80
-    # fi
     services+=( "mysql80" )
 fi
 
@@ -372,13 +366,14 @@ done
 ### PHP Configurations ###
 PHPLATEST=
 cmd=(dialog --separate-output --checklist "Select PHP versions:" 16 35 16)
-options=(php70 "PHP 7.0" "$PHP70" # any option can be set to default to "on"
-    php72 "PHP 7.2" "$PHP72"
-    php73 "PHP 7.3" "$PHP73"
-    php74 "PHP 7.4" "$PHP74"
-    php80 "PHP 8.0" "$PHP80"
+options=(php70 "PHP 7.0 (Deprecated)" "$PHP70" # any option can be set to default to "on"
+    php72 "PHP 7.2 (Deprecated)" "$PHP72"
+    php73 "PHP 7.3 (Deprecated)" "$PHP73"
+    php74 "PHP 7.4 (Deprecated)" "$PHP74"
+    php80 "PHP 8.0 (Deprecated)" "$PHP80"
     php81 "PHP 8.1" "$PHP81"
     php82 "PHP 8.2" "$PHP82"
+    php83 "PHP 8.3" "$PHP83"
 )
 
 # Reset PHP variables
@@ -389,6 +384,7 @@ PHP74=off
 PHP80=off
 PHP81=off
 PHP82=off
+PHP83=off
 
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 
@@ -468,11 +464,14 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
     sed -i -e 's:installdirectory:'"$installdir"':g' "$installdir"/docker/docker-compose.yml
 fi
 
-if [ $SETUP_ELASTICSEARCH == "on" ] && [ -f docker-compose-snippets/elasticsearch-volume ]; then
+if [ -f docker-compose-snippets/elasticsearch-volume ] &&
+   { [ "$SETUP_ELASTICSEARCH7" == "on" ] || [ "$SETUP_ELASTICSEARCH8" == "on" ]; }; then
     cat docker-compose-snippets/elasticsearch-volume >> "$installdir"/docker/docker-compose.yml
 fi
 
-if [ $SETUP_ELASTICSEARCH != "on" ] && [ -f docker-compose-snippets/phpsockets-volume ]; then
+if [ -f docker-compose-snippets/phpsockets-volume ] &&
+   [ "$SETUP_ELASTICSEARCH7" != "on" ] &&
+   [ "$SETUP_ELASTICSEARCH8" != "on" ]; then
     cat docker-compose-snippets/phpsockets-volume >> "$installdir"/docker/docker-compose.yml
 fi
 
@@ -509,13 +508,13 @@ fi
     echo SETUP_RESTART=$SETUP_RESTART >&3
     echo SETUP_XDEBUG=$SETUP_XDEBUG >&3
     echo SETUP_VARNISH=$SETUP_VARNISH >&3
-    echo SETUP_ELASTICSEARCH=$SETUP_ELASTICSEARCH >&3
+    echo SETUP_ELASTICSEARCH7=$SETUP_ELASTICSEARCH7 >&3
+    echo SETUP_ELASTICSEARCH8=$SETUP_ELASTICSEARCH8 >&3
     echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
     echo SETUP_APACHE=$SETUP_APACHE >&3
     echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3
     echo SETUP_MYSQL57=$SETUP_MYSQL57 >&3
     echo SETUP_MYSQL80=$SETUP_MYSQL80 >&3
-    echo SETUP_PERCONA=$SETUP_PERCONA >&3
     echo SETUP_MONGO=$SETUP_MONGO >&3
     echo SETUP_STARSHIP=$SETUP_STARSHIP >&3
     echo SETUP_GITCONFIG=$SETUP_GITCONFIG >&3
@@ -529,6 +528,7 @@ fi
     echo PHP80="$PHP80" >&3
     echo PHP81="$PHP81" >&3
     echo PHP82="$PHP82" >&3
+    echo PHP83="$PHP83" >&3
     echo PHPLATEST="$PHPLATEST" >&3
     echo FIRSTRUN=0 >&3
 } 3>"$CONFIGFILE"

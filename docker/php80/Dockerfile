@@ -19,8 +19,8 @@ RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mysqli mbstring bcmat
 # other extensions we dont need right now
 # mysqli pcntl hmop sockets sysvmsg sysvmsg sysvshm sysvsem
 
-RUN docker-php-ext-enable xdebug 
-RUN docker-php-ext-enable mongodb 
+RUN docker-php-ext-enable xdebug
+RUN docker-php-ext-enable mongodb
 RUN docker-php-ext-enable imagick
 
 ADD conf.d/xdebug.ini "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"

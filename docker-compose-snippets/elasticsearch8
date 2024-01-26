@@ -1,12 +1,12 @@
-  elasticsearch:
-    image: xcommagento/docker-elasticsearch:latest
+  elasticsearch8:
+    image: xcommagento/docker-elasticsearch:8
     # restart: always
     hostname: elasticsearch
     ports:
       - 9200:9200
       - 9300:9300
     volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
+      - elasticsearch:/usr/share/elasticsearch8/data
     environment:
       - discovery.type=single-node
       - LOG4J_FORMAT_MSG_NO_LOOKUPS=true

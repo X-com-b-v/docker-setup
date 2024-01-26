@@ -7,8 +7,6 @@ services:
   nginx:
     image: xcommagento/docker-nginx:latest
     # restart: always
-    # platform: linux/arm64
-    # platform: linux/amd64
     hostname: nginx
     ports:
       - 80:80
@@ -28,15 +26,11 @@ services:
     hostname: redis
     ports:
       - 6379:6379
-    volumes:
-      - installdirectory/data/redis:/data
     networks:
       - xcom_network
   mailtrap:
     image: xcommagento/docker-mailtrap:latest
     # restart: always
-    # platform: linux/arm64
-    # platform: linux/amd64
     hostname: mailtrap
     ports:
       - 8085:80

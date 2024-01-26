@@ -1,12 +1,13 @@
   apache:
-    build: apache
+    #build: apache
+    image: xcommagento/docker-apache:latest
     # restart: always
     hostname: apache
     working_dir: /etc/apache2/sites-enabled
     volumes:
       - ./apache/sites-enabled:/etc/apache2/sites-enabled:ro
       - installdirectory/data/shared/sites:/data/shared/sites
-      - installdirectory/data/shared/sockets:/data/shared/sockets
+      - phpsockets:/data/shared/sockets
       - installdirectory/data/shared/media:/data/shared/media
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
     networks:
