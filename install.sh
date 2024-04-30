@@ -446,8 +446,18 @@ do :
 
     cp ./dep/phprun.sh "$installdir"/docker/"$path"/run.sh
     cp ./dep/zz-docker.conf "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
-    sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
-    sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
+
+    # Check system architecture
+    arch=$(uname -m)
+    if [ "$arch" = "arm64" ]; then
+        # macos
+        sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
+        sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
+    else
+        # linux or windows
+        sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
+        sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
+    fi
 
     if [ $SETUP_GITCONFIG == "on" ]; then
         cp "$installdir"/docker/dependencies/gitconfig "$installdir"/data/home/"$path"/.gitconfig
