@@ -157,14 +157,30 @@ handleApacheConfig() {
     fi
 }
 replacePlaceholderValues() {
-    sed -i '' "s/##PROXYPORT##/$PROXYPORT/g" "$1"
-    sed -i '' "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
-    sed -i '' "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
-    sed -i '' "s/##XCOMUSER##/$USERNAME/g" "$1"
-    sed -i '' "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
-    sed -i '' "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
-    sed -i '' "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
-    sed -i '' "s/##DOMAIN##/$DOMAIN/g" "$1"
+    # Check system architecture
+    arch=$(uname -m)
+    if [ "$arch" = "arm64" ]; then
+        # macos
+        sed -i '' "s/##PROXYPORT##/$PROXYPORT/g" "$1"
+        sed -i '' "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
+        sed -i '' "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
+        sed -i '' "s/##XCOMUSER##/$USERNAME/g" "$1"
+        sed -i '' "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
+        sed -i '' "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
+        sed -i '' "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
+        sed -i '' "s/##DOMAIN##/$DOMAIN/g" "$1"
+    else
+        # linux or windows
+        sed -i "s/##PROXYPORT##/$PROXYPORT/g" "$1"
+        sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
+        sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
+        sed -i "s/##XCOMUSER##/$USERNAME/g" "$1"
+        sed -i "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
+        sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
+        sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
+        sed -i "s/##DOMAIN##/$DOMAIN/g" "$1"
+    fi
+
 }
 
 # Create a temporary file to store the output of the find command
