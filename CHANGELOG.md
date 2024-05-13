@@ -1,3 +1,32 @@
+## 0.1.12 (2024-04-30)
+
+
+* da07060 QoL improvements, do not allow root execution of script and recursively chown "/" installdir if set
+* 3a1f194 Update to varnish 7.3 alpine for testing purposes
+* acc41db Enable gzip and brotli at the same time, does not clash apparently
+* 4d669c6 get rid of sonarqube as it is not used and is not part of devenv
+* 796b432 enter script fallback to sh, which is usually available on the most barebone images
+* 0e0c4c1 Varnish vcl should also allow for brotli compression
+* 19596ae copy apache configs when nginx proxy is enabled
+* feae97d QoL improvements, do not allow root execution of script and recursively chown "/" installdir if set
+* 958dfb0 Update to varnish 7.3 alpine for testing purposes
+* 03a0d07 Enable gzip and brotli at the same time, does not clash apparently
+* 600b3fa get rid of sonarqube as it is not used and is not part of devenv
+* 48f2468 enter script fallback to sh, which is usually available on the most barebone images
+* ab114fe Varnish vcl should also allow for brotli compression
+* 4e0e344 performance changes performance nginx change for performance HTTP/2 support change for MacOS Sillicon
+* 0e281df DEVENV-45 Upgrade to debian 12 bookworm
+* f33eb2e performance changes performance nginx change for performance HTTP/2 support change for MacOS Sillicon
+* f7167aa DEVENV-45 Upgrade to debian 12 bookworm
+* 7e408d7 performance changes performance nginx change for performance HTTP/2 support change for MacOS Sillicon
+* adbcf6d DEVENV-45 Upgrade to debian 12 bookworm
+* b74e7ba performance changes performance nginx change for performance HTTP/2 support change for MacOS Sillicon
+* 2d89f77 DEVENV-45 Upgrade to debian 12 bookworm
+* b92a271 Fix ##PHPVERSION## Socket error
+* e23d8d8 Fix replace error
+
+
+
 ## 0.1.11 (2023-09-14)
 
 
