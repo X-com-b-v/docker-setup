@@ -1,4 +1,11 @@
-## 0.1.12 (2024-04-30)
+## 0.1.13 (2024-05-13)
+
+
+* 7019218 update ssl to .conf templates
+
+
+
+## 0.1.12 (2024-05-07)
 
 
 * da07060 QoL improvements, do not allow root execution of script and recursively chown "/" installdir if set
