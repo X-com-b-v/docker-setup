@@ -70,7 +70,7 @@ fi
 # set correct permissions if installdir is /
 if [ "$installdir" == "/" ]; then
     sudo mkdir -p "$installdir"/docker "$installdir"/data
-    sudo chown -R "$USER":"$USER" "$installdir"/docker "$installdir"/data
+    sudo chown "$USER":"$USER" "$installdir"/docker "$installdir"/data
 fi
 
 # always enable some settings if it is the first run
