@@ -17,7 +17,11 @@
     user: web
     working_dir: /data/shared/sites
     entrypoint: /run.sh
+    stdin_open: true
+    tty: true
     networks:
       - xcom_network
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    environment:
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: 1

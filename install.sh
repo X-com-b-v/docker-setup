@@ -176,14 +176,12 @@ options=(autostart "[both] Start docker containers automatically" "$SETUP_RESTAR
     varnish "[ecom] Use Varnish (Magento)" "$SETUP_VARNISH"
     elasticsearch7 "[ecom] Use Elasticsearch7 (Magento <= 2.4.6-p3)" "$SETUP_ELASTICSEARCH7"
     elasticsearch8 "[ecom] Use Elasticsearch8 (Magento >= 2.4.6)" "$SETUP_ELASTICSEARCH8"
-    configurator "[ecom] Skip configurator (Magento)" "$SKIP_CONFIGURATOR"
     xdebug "[both] Enable Xdebug" "$SETUP_XDEBUG"
     xdebug-trigger "[both] Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
     apache "[itix] Apache configurations, for Itix" "$SETUP_APACHE"
 )
 
 # reset basic variables after they've been shown in options list
-SKIP_CONFIGURATOR=off
 SETUP_RESTART=off
 SETUP_XDEBUG=off
 SETUP_VARNISH=off
@@ -208,9 +206,6 @@ fi
 for setting in $settings
 do :
     case "$setting" in
-        configurator)
-            SKIP_CONFIGURATOR=on
-            ;;
         gitconfig)
             setup_gitconfig
             SETUP_GITCONFIG=on
@@ -514,7 +509,6 @@ fi
     echo installdir="$installdir" >&3
     echo VERSION="$VERSION" >&3
     echo USERNAME="$USERNAME" >&3
-    echo SKIP_CONFIGURATOR=$SKIP_CONFIGURATOR >&3
     echo SETUP_RESTART=$SETUP_RESTART >&3
     echo SETUP_XDEBUG=$SETUP_XDEBUG >&3
     echo SETUP_VARNISH=$SETUP_VARNISH >&3

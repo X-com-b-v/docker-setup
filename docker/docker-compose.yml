@@ -1,4 +1,3 @@
-version: "3"
 name: "x-com"
 networks:
   xcom_network:
@@ -35,5 +34,15 @@ services:
     ports:
       - 8085:80
       - 0.0.0.0:25:25
+    networks:
+      - xcom_network
+  mailhog:
+    image: jcalonso/mailhog
+    restart: always
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
     networks:
       - xcom_network

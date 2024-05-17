@@ -34,15 +34,6 @@ if ! grep -q "export TERM=xterm" /home/web/.bashrc; then
     echo "export TERM=xterm" >> /home/web/.bashrc
 fi
 
-echo "export SKIP_CONFIGURATOR=0" > /home/web/.skip_configurator
-if [ "$SKIP_CONFIGURATOR" == "on" ]; then
-    echo "export SKIP_CONFIGURATOR=1" > /home/web/.skip_configurator
-fi
-if ! grep -q "source /home/web/.skip_configurator" /home/web/.bashrc; then
-  echo "source /home/web/.skip_configurator" >> /home/web/.bashrc
-fi
-
-
 if [ ! -f "/home/web/.git-completion.bash" ]; then
   bash /home/web/git-autocomplete.sh
 fi
@@ -74,7 +65,7 @@ if ! grep -q "source /home/web/.starship" /home/web/.bashrc; then
 fi
 
 if [ ! -d "/home/web/.nvm" ]; then
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 fi
 
 sudo php-fpm -R

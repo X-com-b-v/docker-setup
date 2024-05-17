@@ -41,16 +41,19 @@ getFrameworkAndConfig() {
     CONFIG='{"template":"default","webserver":"nginx","php_version":"latest"}'
     if [ -f "$1"/bin/magento ]; then
         FRAMEWORK=magento
-        CONFIG='{"template":"magento2","webserver":"nginx","php_version":"7.4"}'
+        CONFIG='{"template":"magento2","webserver":"nginx","php_version":"8.1"}'
     elif [ -f "$1"/app/etc/local.xml ]; then
         FRAMEWORK=magento
-        CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.2"}'
-    elif [ -d "$1"/htdocs ]; then
-        FRAMEWORK=none
-        CONFIG='{"template":"default","webserver":"apache", "php_version":"latest"}'
+        CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.4"}'
+    elif [ -d "$1"/web ]; then
+        FRAMEWORK=craft
+        CONFIG='{"template":"craft","webserver":"nginx", "php_version":"8.3"}'
     elif [ -d "$1"/htdocs/wire ]; then
         FRAMEWORK=processwire
-        CONFIG='{"template":"default","webserver":"apache", "php_version":"7.4"}'
+        CONFIG='{"template":"processwire","webserver":"apache", "php_version":"7.4"}'
+    elif [ -d "$1"/htdocs ]; then
+            FRAMEWORK=none
+            CONFIG='{"template":"default","webserver":"apache", "php_version":"latest"}'
     fi
 }
 writeSampleConfig() {
@@ -200,6 +203,12 @@ do
             INCLUDE_PARAMS="include $WEBPATHESCAPED\/$SITEBASENAME\/.siteconfig\/params.conf;"
         fi
     fi
+    if [ "$FRAMEWORK" == "craft" ]; then
+            handleParams "$SITEBASENAME" "$d"
+            if [ -f "$d/.siteconfig/params.conf" ]; then
+                INCLUDE_PARAMS="include $WEBPATHESCAPED\/$SITEBASENAME\/.siteconfig\/params.conf;"
+            fi
+        fi
     writeSampleConfig "$CONFIG"
     if [ -f "$d"/.siteconfig/config.json ]; then
         CONFIGFILE="$d"/.siteconfig/config.json
