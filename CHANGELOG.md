@@ -1,3 +1,10 @@
+## 0.1.15 (2024-05-17)
+
+
+* 2aff3b9 - Add craft.conf - DEVENV-50 Version is obsolete - Fix terminal commando not save after close docker terminal
+
+
+
 ## 0.1.14 (2024-05-16)
 
 
