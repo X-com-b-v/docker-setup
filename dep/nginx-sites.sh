@@ -41,16 +41,16 @@ getFrameworkAndConfig() {
     CONFIG='{"template":"default","webserver":"nginx","php_version":"latest"}'
     if [ -f "$1"/bin/magento ]; then
         FRAMEWORK=magento
-        CONFIG='{"template":"magento2","webserver":"nginx","php_version":"8.1"}'
+        CONFIG='{"template":"magento2","webserver":"nginx","php_version":"latest"}'
     elif [ -f "$1"/app/etc/local.xml ]; then
         FRAMEWORK=magento
         CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.4"}'
     elif [ -d "$1"/web ]; then
         FRAMEWORK=craft
-        CONFIG='{"template":"craft","webserver":"nginx", "php_version":"8.3"}'
+        CONFIG='{"template":"craft","webserver":"nginx", "php_version":"latest"}'
     elif [ -d "$1"/htdocs/wire ]; then
         FRAMEWORK=processwire
-        CONFIG='{"template":"processwire","webserver":"apache", "php_version":"7.4"}'
+        CONFIG='{"template":"processwire","webserver":"apache", "php_version":"latest"}'
     elif [ -d "$1"/htdocs ]; then
             FRAMEWORK=none
             CONFIG='{"template":"default","webserver":"apache", "php_version":"latest"}'

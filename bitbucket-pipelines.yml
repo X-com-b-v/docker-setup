@@ -1,56 +1,59 @@
 image: atlassian/default-image:3
 clone:
-  depth: full
+    depth: full
 definitions:
-  steps:
-    - step: &shell-check
-        name: Shell checker
-        image: koalaman/shellcheck-alpine:latest
-        clone:
-          depth: 1
-        script:
-          - shellcheck $(find . -type f -name "*.sh" | xargs)
-    - step: &check-tag
-        name: Check tag
-        script:
-          - git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN}
-          - source version.sh
-          - git tag -a $VERSION -m "$dt - Version $VERSION"
-    - step: &tag
-        name: Tag
-        script:
-          - git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN}
-          - dt=$(date '+%Y-%m-%d_%H%M');
-          - source version.sh
-          - curl -o changelog.sh https://bitbucket.org/!api/2.0/snippets/X-com/6EgAxn/${CHANGELOG_HASH}/files/changelog-builder.sh
-          - git tag -a $VERSION -m "$dt - Version $VERSION"
-          - sh changelog.sh > CHANGELOG.md
-          - rm changelog.sh
-          - git add CHANGELOG.md && git commit -m "[skip ci] Updated changelog for version $VERSION"
-          - git push
-          - git tag -d $VERSION
-          - git tag -a $VERSION -m "$dt - Version $VERSION"
-          - git push --tags
+    steps:
+        - step: &shell-check
+            name: Shell checker
+            image: koalaman/shellcheck-alpine:latest
+            clone:
+                depth: 1
+            script:
+                - shellcheck $(find . -type f -name "*.sh" | xargs)
+        - step: &check-tag
+            name: Check tag
+            script:
+                - git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN}
+                - source version.sh
+                - git tag -a $VERSION -m "$dt - Version $VERSION"
+        - step: &tag
+            name: Tag
+            script:
+                - git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN}
+                - dt=$(date '+%Y-%m-%d_%H%M');
+                - source version.sh
+                - curl -o changelog.sh https://bitbucket.org/!api/2.0/snippets/X-com/6EgAxn/${CHANGELOG_HASH}/files/changelog-builder.sh
+                - git tag -a $VERSION -m "$dt - Version $VERSION"
+                - sh changelog.sh > CHANGELOG.md
+                - rm changelog.sh
+                - git add CHANGELOG.md && git commit -m "[skip ci] Updated changelog for version $VERSION"
+                - git push
+                - git tag -d $VERSION
+                - git tag -a $VERSION -m "$dt - Version $VERSION"
+                - git push --tags
 pipelines:
-  pull-requests:
-    'develop': # this will run on any PR from develop to target (usually main)
-      - parallel:
-        - step:
-            <<: *shell-check
-        - step:
-            <<: *check-tag
-  branches:
-    '*':
-      - step:
-          <<: *shell-check
-    'develop':
-      - parallel:
-        - step:
-            <<: *shell-check
-        - step:
-            <<: *check-tag
-    'main':
-      - step:
-          <<: *shell-check
-      - step:
-          <<: *tag
+    pull-requests:
+        'develop': # this will run on any PR from develop to target (usually main)
+            - parallel:
+                - step:
+                    <<: *shell-check
+                - step:
+                    <<: *check-tag
+    branches:
+        '*':
+            - step:
+                <<: *shell-check
+        'develop':
+            - parallel:
+                - step:
+                    <<: *shell-check
+                - step:
+                    <<: *check-tag
+        'main':
+            - parallel:
+                - step:
+                    <<: *shell-check
+                - step:
+                    <<: *check-tag
+            - step:
+                <<: *tag
