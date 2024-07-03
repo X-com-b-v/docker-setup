@@ -1,3 +1,10 @@
+## 0.1.19 (2024-07-03)
+
+
+* 2a18fa0 Added vite support for nginx proxy conf
+
+
+
 ## 0.1.18 (2024-06-20)
 
 
