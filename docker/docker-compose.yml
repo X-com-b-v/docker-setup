@@ -38,7 +38,8 @@ services:
       - xcom_network
   mailhog:
     image: jcalonso/mailhog
-    restart: always
+    # restart: always
+    hostname: mailhog
     logging:
       driver: 'none'  # disable saving logs
     ports:
