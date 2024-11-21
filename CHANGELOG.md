@@ -1,3 +1,12 @@
+## 0.1.20 (2024-11-21)
+
+
+* f63df6f DEVENV-1 Documentatie bijwerken en verplaatsen
+* d4959a4 DEVENV-1 Documentatie bijwerken en verplaatsen
+* e97eb43 add version
+
+
+
 ## 0.1.19 (2024-07-03)
 
 
