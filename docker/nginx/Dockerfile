@@ -1,8 +1,6 @@
 # current nginx stable is 1.24.0
 FROM nginx:stable
 
-LABEL authors="Mycha de Vrees <mdvrees@x-com.nl>"
-
 ADD nginx.conf /etc/nginx/nginx.conf
 ADD fastcgi.conf /etc/nginx/fastcgi.conf
 ADD run.sh /run.sh
