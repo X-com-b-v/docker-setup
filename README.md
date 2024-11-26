@@ -31,9 +31,8 @@ MacOS:
 $ brew install make dialog jq
 ```
 
-## Create ssh keys and clone repository
-
-If you have not created ssh keys before, run `ssh-keygen` to generate a private/public keypair. Login to Bitbucket and upload your public key. This should allow you to use `git clone git@bitbucket.org:x-com/docker-setup.git ~/git/docker-setup` to clone the repository.
+## Clone repository
+Run `git clone git@github.com:X-com-b-v/docker-setup.git ~/git/docker-setup` to clone the repository.
 
 ## Run the installer
 
