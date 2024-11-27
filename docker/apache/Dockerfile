@@ -1,21 +1,26 @@
 FROM debian:bookworm-slim
 
-# Main
-RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list.d/debian.sources
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y install \
-    vim nano jq gnupg build-essential bzip2 software-properties-common libapache2-mod-fcgid apache2
+# Main setup
+RUN sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install \
+    vim nano jq gnupg build-essential bzip2 software-properties-common \
+    libapache2-mod-fcgid apache2 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Add user
 RUN getent passwd 1000 || useradd -u 1000 -m -s /bin/bash web
-ADD run.sh /run.sh
 
-# Apache config
-ADD files/apache2/ports.conf /etc/apache2/ports.conf
-ADD files/apache2/custom.conf /etc/apache2/conf-available/custom.conf
-RUN a2enconf custom
-RUN a2enmod remoteip rewrite expires actions fcgid alias proxy proxy_fcgi
+# Apache configuration
+COPY files/apache2/ports.conf /etc/apache2/ports.conf
+COPY files/apache2/custom.conf /etc/apache2/conf-available/custom.conf
+RUN a2enconf custom && \
+    a2enmod remoteip rewrite expires actions fcgid alias proxy proxy_fcgi
 
-# Apache vars
+# Add scripts
 RUN ["/bin/bash", "-c", "sed -i 's/www-data/web/g' /etc/apache2/envvars"]
+COPY run.sh /run.sh
 RUN chmod +x /run.sh
+
+# Default command
 CMD ["/run.sh"]

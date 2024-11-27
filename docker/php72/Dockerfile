@@ -22,7 +22,7 @@ RUN docker-php-ext-enable xdebug
 RUN docker-php-ext-enable mongodb
 RUN docker-php-ext-enable imagick
 
-ADD conf.d/xdebug.ini "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"
+#ADD conf.d/xdebug.ini "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"
 
 RUN cd /tmp \
 	&& curl -o ioncube.tar.gz https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \

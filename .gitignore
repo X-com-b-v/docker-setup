@@ -109,3 +109,9 @@ fabric.properties
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/phpstorm+all,visualstudiocode
+
+temp_file
+install
+
+docker/php*/run.sh
+
