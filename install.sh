@@ -5,6 +5,25 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
+# Set strict mode
+set -euo pipefail
+
+# Cross-platform sed in-place replacement
+# Usage: sed_in_place "search" "replace" "file"
+sed_in_place() {
+    local search=$1
+    local replace=$2
+    local file=$3
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS requires an extension argument for -i
+        sed -i '' "s:${search}:${replace}:g" "$file"
+    else
+        # Linux/WSL version
+        sed -i "s:${search}:${replace}:g" "$file"
+    fi
+}
+
 # define config file location, if it is found then include it
 # if no config file is found, we know it is the first run
 CONFIGFILE="$HOME"/.config/docker-setup.config
@@ -109,7 +128,7 @@ setup_devctl () {
     cp dep/devctl.sh "$HOME/.local/bin/devctl"
     cp dep/enter.sh "$HOME/.local/bin/enter"
     cp dep/nginx-sites.sh "$HOME/.local/bin/nginx-sites"
-    sed -i -e 's:installdirectory:'"$installdir"':g' "$HOME/.local/bin/devctl"
+    sed_in_place "installdirectory" "$installdir" "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/enter"
     chmod +x "$HOME/.local/bin/nginx-sites.sh"
@@ -146,8 +165,8 @@ setup_gitconfig () {
     done <<< "${VALUES}"
     GIT_USER="${GIT_DATA1}"
     GIT_EMAIL="${GIT_DATA2}"
-    sed -i -e 's:username:'"$GIT_USER"':g' "$installdir/docker/dependencies/gitconfig"
-    sed -i -e 's:user@email.com:'"$GIT_EMAIL"':g' "$installdir/docker/dependencies/gitconfig"
+    sed_in_place "username" "$GIT_USER" "$installdir/docker/dependencies/gitconfig"
+    sed_in_place "user@email.com" "$GIT_EMAIL" "$installdir/docker/dependencies/gitconfig"
 }
 
 # Users are given the option to change the project slug during any install run
@@ -326,11 +345,15 @@ done
 # replace existing docker compose with new to update settings after a second install
 cp ./docker/docker-compose.yml "$installdir"/docker/docker-compose.yml
 
+# Replace installdirectory placeholder with actual path
+sed_in_place "installdirectory" "$installdir" "$installdir/docker/docker-compose.yml"
+sed_in_place "installdirectory" "$installdir" "$HOME/.local/bin/devctl"
+
 # make sure other services are not forgotten, these are not updated every run
 services=( "mailtrap" "nginx" "mysql57" "mysql80" "elasticsearch7" )
 
 if [ $SETUP_VARNISH == "on" ] && [ -f docker-compose-snippets/varnish ]; then
-    sed -i -e 's/- 80:80/- 8080:80/g' "$installdir"/docker/docker-compose.yml
+    sed_in_place "80:80" "8080:80" "$installdir"/docker/docker-compose.yml
     cat docker-compose-snippets/varnish >> "$installdir"/docker/docker-compose.yml
     services+=( "varnish" )
 fi
@@ -407,7 +430,7 @@ do :
     # use printf to assign php value
     # https://stackoverflow.com/a/55331060
     # macos compatibility.
-    UPATH=$(echo "${path}" | awk '{print toupper($0)}')
+    UPATH=$(echo "${path}" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
     printf -v "${UPATH}" '%s' 'on'
 
     if [ ! -d "$installdir/data/home/$path" ]; then
@@ -432,15 +455,15 @@ do :
     cp ./dep/opcache.ini "$installdir"/docker/"$path"/conf.d/
 
     if [ $SETUP_XDEBUG == "off" ]; then
-        sed -i -e 's/xdebug.mode=debug,develop/;xdebug.mode=debug,develop/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
-        sed -i -e 's/;xdebug.mode=off/xdebug.mode=off/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed_in_place "xdebug.mode=debug,develop" ";xdebug.mode=debug,develop" "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed_in_place ";xdebug.mode=off" "xdebug.mode=off" "$installdir"/docker/"$path"/conf.d/xdebug.ini
     fi
 
     if [ $SETUP_XDEBUG_TRIGGER == "on" ]; then
-        sed -i -e 's/;xdebug.mode=debug,develop/xdebug.mode=debug,develop/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
-        sed -i -e 's/xdebug.mode=off/;xdebug.mode=off/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
-        sed -i -e 's/xdebug.start_with_request=yes/;xdebug.start_with_request=yes/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
-        sed -i -e 's/;xdebug.start_with_request=trigger/xdebug.start_with_request=trigger/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed_in_place ";xdebug.mode=debug,develop" "xdebug.mode=debug,develop" "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed_in_place "xdebug.mode=off" ";xdebug.mode=off" "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed_in_place "xdebug.start_with_request=yes" ";xdebug.start_with_request=yes" "$installdir"/docker/"$path"/conf.d/xdebug.ini
+        sed_in_place ";xdebug.start_with_request=trigger" "xdebug.start_with_request=trigger" "$installdir"/docker/"$path"/conf.d/xdebug.ini
     fi
 
     position=4
@@ -459,12 +482,12 @@ do :
     arch=$(uname -m)
     if [ "$arch" = "arm64" ]; then
         # macos
-        sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
-        sed -i '' "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
+        sed_in_place "##PHPVERSION##" "$phpversion" "$installdir"/docker/"$path"/run.sh
+        sed_in_place "##PHPVERSION##" "$phpversion" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
     else
         # linux or windows
-        sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/run.sh
-        sed -i "s/##PHPVERSION##/$phpversion/g" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
+        sed_in_place "##PHPVERSION##" "$phpversion" "$installdir"/docker/"$path"/run.sh
+        sed_in_place "##PHPVERSION##" "$phpversion" "$installdir"/docker/"$path"/php-fpm.d/zz-docker.conf
     fi
 
     if [ $SETUP_GITCONFIG == "on" ]; then
@@ -474,12 +497,12 @@ done
 ### End PHP Configurations ###
 
 if [ $SETUP_RESTART == "on" ]; then
-    sed -i -e 's/# restart: always/restart: always/g' "$installdir"/docker/docker-compose.yml
+    sed_in_place "# restart: always" "restart: always" "$installdir"/docker/docker-compose.yml
 fi
 
 if [ -f "$installdir/docker/docker-compose.yml" ]; then
     #echo "Setting up correct values for docker-compose based on your given installdir"
-    sed -i -e 's:installdirectory:'"$installdir"':g' "$installdir"/docker/docker-compose.yml
+    sed_in_place "installdirectory" "$installdir" "$installdir"/docker/docker-compose.yml
 fi
 
 if [ -f docker-compose-snippets/elasticsearch-volume ] &&
@@ -507,11 +530,11 @@ arch=$(uname -m)
 
 if [ "$arch" = "arm64" ]; then
     # macos
-    sed -i -e 's/# linux\/arm64/linux\/arm64/g' "$installdir"/docker/docker-compose.yml
+    sed_in_place "# linux\/arm64" "linux\/arm64" "$installdir"/docker/docker-compose.yml
     echo "Configuration has been modified for an arm64 architecture."
 else
     # linux or windows
-    sed -i -e 's/# linux\/amd64/linux\/amd64/g' "$installdir"/docker/docker-compose.yml
+    sed_in_place "# linux\/amd64" "linux\/amd64" "$installdir"/docker/docker-compose.yml
     echo "Configuration has been modified for an amd64 architecture."
 fi
 

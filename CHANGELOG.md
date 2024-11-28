@@ -46,6 +46,12 @@ You can set this:
 - Updated docker-compose.yml to use pre-built multi-arch images
 - Improved ARM64 compatibility for Apple Silicon Macs
 
+### Fixed
+- Cross-platform sed compatibility for macOS and Linux/WSL
+- Nginx image now uses latest tag as recommended
+- Improved path handling in install script
+- Fixed PHP path case conversion
+
 ## 0.1.20 (2024-11-21)
 
 
