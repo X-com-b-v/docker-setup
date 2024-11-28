@@ -2,9 +2,13 @@ name: "x-com"
 networks:
   xcom_network:
     driver: bridge
+volumes:
+  phpsockets:
+    driver: local
 services:
   nginx:
-    image: xcommagento/docker-nginx:latest
+    image: xcommagento/nginx:1.26.2
+    platform: ${DOCKER_DEFAULT_PLATFORM:-linux/amd64}
     # restart: always
     hostname: nginx
     ports:
@@ -13,9 +17,9 @@ services:
     working_dir: /etc/nginx/sites-enabled
     volumes:
       - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro
-      - installdirectory/data/shared/sites:/data/shared/sites
+      - /Users/frankie/x-com/data/shared/sites:/data/shared/sites
       - phpsockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
+      - /Users/frankie/x-com/data/shared/media:/data/shared/media
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
     networks:
       - xcom_network

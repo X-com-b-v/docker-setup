@@ -1,3 +1,30 @@
+# Changelog
+
+## [Unreleased]
+### Added
+- Cross-platform architecture support for Nginx service
+  - Added dynamic platform selection using `DOCKER_DEFAULT_PLATFORM` environment variable
+  - Maintains backward compatibility with WSL and x86_64 systems
+  - Adds native support for ARM64 architecture (Apple Silicon M1/M2/M3)
+- Multi-architecture support for Nginx image (AMD64 and ARM64)
+- Docker buildx configuration for cross-platform builds
+- Automated build script for multi-arch images
+
+#### Platform Configuration
+To specify the platform for your system:
+- For ARM64 (Apple Silicon): `export DOCKER_DEFAULT_PLATFORM=linux/arm64`
+- For AMD64 (Intel/AMD): `export DOCKER_DEFAULT_PLATFORM=linux/amd64`
+- Default fallback: AMD64 if not specified
+
+You can set this:
+1. In your shell profile for persistence
+2. Before running docker-compose: `DOCKER_DEFAULT_PLATFORM=linux/arm64 docker-compose up`
+3. In your CI/CD environment variables
+
+### Changed
+- Updated docker-compose.yml to use pre-built multi-arch images
+- Improved ARM64 compatibility for Apple Silicon Macs
+
 ## 0.1.20 (2024-11-21)
 
 
@@ -166,7 +193,8 @@
 ## 0.1.3 (2023-04-03)
 
 
-* 3215750 With the change for docker-compose stack name, added the option to cleanup old docker containers using docker compose down
+* 2691312 bump version to 0.0.13
+* 354f5a0 DEVENV-9 fix where folders are not created when target installdir is a place where elevated permissions are required
 
 
 
@@ -648,6 +676,3 @@
 * ff795a7 DEVENV-12 Check if logging dir exists per site enabled
 * e712e47 Add mongodb extension to php
 * 8c3e98c Added script version
-
-
-
