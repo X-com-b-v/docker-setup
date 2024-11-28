@@ -9,6 +9,17 @@
 - Multi-architecture support for Nginx image (AMD64 and ARM64)
 - Docker buildx configuration for cross-platform builds
 - Automated build script for multi-arch images
+- Robust shell configuration system
+  - Added support for both Bash and Zsh shells
+  - Implemented XDG Base Directory Specification
+  - Created shell-specific initialization files
+  - Added automated testing for shell configuration
+- Improved path management and shell compatibility
+  - Centralized path configuration
+  - Added fallback mechanisms for different environments
+  - Standardized binary locations using XDG spec
+  - Enhanced non-interactive environment support
+  - Added graceful fallback for systems without dialog
 
 #### Platform Configuration
 To specify the platform for your system:
