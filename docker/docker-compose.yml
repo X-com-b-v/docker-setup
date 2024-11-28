@@ -5,6 +5,7 @@ networks:
 services:
   nginx:
     image: xcommagento/docker-nginx:latest
+    platform: linux/amd64  # Force AMD64 since no ARM64 image available
     # restart: always
     hostname: nginx
     ports:

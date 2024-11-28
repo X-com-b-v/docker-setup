@@ -480,28 +480,16 @@ if [ -f docker-compose-snippets/phpsockets-volume ] &&
     cat docker-compose-snippets/phpsockets-volume >> "$installdir"/docker/docker-compose.yml
 fi
 
-# if [ ! "$FIRSTRUN" = "0" ]; then
-    # echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf
-    # sysctl -p --system
-# fi
-
-if [ ! -d "$HOME"/.config ]; then
-    mkdir -p "$HOME"/.config
-fi
-
 # Check system architecture
 arch=$(uname -m)
 
 if [ "$arch" = "arm64" ]; then
     # macos
-    sed -i -e 's/# linux\/arm64/linux\/arm64/g' "$installdir"/docker/docker-compose.yml
     echo "Configuration has been modified for an arm64 architecture."
 else
     # linux or windows
-    sed -i -e 's/# linux\/amd64/linux\/amd64/g' "$installdir"/docker/docker-compose.yml
     echo "Configuration has been modified for an amd64 architecture."
 fi
-
 
 # clear config file and write settings to it
 # https://stackoverflow.com/questions/31254887/what-is-the-most-efficient-way-of-writing-a-json-file-with-bash

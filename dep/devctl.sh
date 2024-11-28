@@ -84,21 +84,22 @@ update_hosts () {
     USERNAME=""
     get_configfile
     TMPHOSTS="/tmp/hosts"
-    if [ ! -f $TMPHOSTS ]; then
-        touch $TMPHOSTS
-    fi
-    sudo chmod 755 $TMPHOSTS
-    cp $HOSTS $TMPHOSTS
-    sed -i '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' $TMPHOSTS
-    echo "#START XCOM HOSTS" >> $TMPHOSTS
-    while IFS= read -r d
-    do
-        SITEBASENAME=$(basename "$d")
-        echo "$IPADDR" "$SITEBASENAME"."$USERNAME""$PROJECTSLUG" >> "$TMPHOSTS"
-    done <   <(find -L "$INSTALLDIR"/data/shared/sites -mindepth 1 -maxdepth 1 -type d)
 
-    echo "$IPADDR" "devserver" >> "$TMPHOSTS"
-    echo "#END XCOM HOSTS" >> "$TMPHOSTS"
+    # Create new hosts file without XCOM HOSTS section
+    awk '!/#START XCOM HOSTS/,!/#END XCOM HOSTS/' "$HOSTS" > "$TMPHOSTS"
+    
+    # Add our custom hosts
+    {
+        echo "#START XCOM HOSTS"
+        while IFS= read -r d; do
+            SITEBASENAME=$(basename "$d")
+            echo "$IPADDR $SITEBASENAME.$USERNAME$PROJECTSLUG"
+        done < <(find -L "$INSTALLDIR"/data/shared/sites -mindepth 1 -maxdepth 1 -type d)
+        echo "$IPADDR devserver"
+        echo "#END XCOM HOSTS"
+    } >> "$TMPHOSTS"
+
+    sudo chmod 755 "$TMPHOSTS"
     sudo cp "$TMPHOSTS" "$HOSTS"
     rm "$TMPHOSTS"
 }
@@ -156,7 +157,8 @@ case "$1" in
         cd "$(get_dockerdir)" || return
         nginx-sites
         if docker compose exec nginx nginx -t; then
-            docker compose exec nginx service nginx reload
+            # Get nginx master process PID and send SIGHUP
+            docker compose exec nginx /bin/sh -c 'kill -HUP $(cat /var/run/nginx.pid)'
         fi
         if [ "$SETUP_APACHE" == "on" ]; then
             if docker compose exec apache apachectl -t; then

@@ -16,7 +16,12 @@ fi
 
 WEBPATH="/data/shared/sites"
 DOMAIN=".${USERNAME}${PROJECTSLUG}"
-WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS requires an extension argument for -i
+    WEBPATHESCAPED=$(echo $WEBPATH | sed -e 's/\//\\\//g')
+else
+    WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
+fi
 PROXYPORT="8888"
 NGINX_SITES_ENABLED="$(devctl dockerdir)"/nginx/sites-enabled
 NGINX_SITE_TEMPLATES="$(devctl dockerdir)"/nginx/site-templates
@@ -160,10 +165,8 @@ handleApacheConfig() {
     fi
 }
 replacePlaceholderValues() {
-    # Check system architecture
-    arch=$(uname -m)
-    if [ "$arch" = "arm64" ]; then
-        # macos
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
         sed -i '' "s/##PROXYPORT##/$PROXYPORT/g" "$1"
         sed -i '' "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
         sed -i '' "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"

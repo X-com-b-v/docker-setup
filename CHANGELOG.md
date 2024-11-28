@@ -649,5 +649,13 @@
 * e712e47 Add mongodb extension to php
 * 8c3e98c Added script version
 
+## Unreleased
 
+### Added
+- Added support for running nginx on M1/ARM64 Macs using platform emulation
+- Improved macOS compatibility for shell commands in devctl and nginx-sites scripts
 
+### Changed
+- Updated nginx reload mechanism to use PID file for better reliability
+- Modified hosts file handling to be more compatible with macOS
+- Set nginx service to use linux/amd64 platform with automatic emulation on ARM64
