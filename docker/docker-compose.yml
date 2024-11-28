@@ -7,7 +7,7 @@ volumes:
     driver: local
 services:
   nginx:
-    image: xcommagento/nginx:1.26.2
+    image: xcommagento/nginx:latest
     platform: ${DOCKER_DEFAULT_PLATFORM:-linux/amd64}
     # restart: always
     hostname: nginx
@@ -17,9 +17,9 @@ services:
     working_dir: /etc/nginx/sites-enabled
     volumes:
       - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro
-      - /Users/frankie/x-com/data/shared/sites:/data/shared/sites
+      - installdirectory/data/shared/sites:/data/shared/sites
       - phpsockets:/data/shared/sockets
-      - /Users/frankie/x-com/data/shared/media:/data/shared/media
+      - installdirectory/data/shared/media:/data/shared/media
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
     networks:
       - xcom_network

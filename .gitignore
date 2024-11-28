@@ -115,3 +115,7 @@ install
 
 docker/php*/run.sh
 
+# Personal documentation and notes
+/docs/
+
+docs/personal-notes.md

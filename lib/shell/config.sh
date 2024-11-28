@@ -17,6 +17,16 @@ readonly DOCKER_SETUP_HOME="${XDG_DATA_HOME:-$DEFAULT_XDG_DATA_HOME}/docker-setu
 readonly DOCKER_SETUP_BIN="${HOME}/.local/bin"
 readonly DOCKER_SETUP_CONF="${XDG_CONFIG_HOME:-$DEFAULT_XDG_CONFIG_HOME}/docker-setup"
 
+# Load docker-setup configuration if it exists
+if [ -f "${DOCKER_SETUP_CONF}/docker-setup.config" ]; then
+    source "${DOCKER_SETUP_CONF}/docker-setup.config"
+else
+    # Copy template if it doesn't exist
+    mkdir -p "${DOCKER_SETUP_CONF}"
+    cp "${DOCKER_SETUP_HOME}/config/docker-setup.config.template" "${DOCKER_SETUP_CONF}/docker-setup.config"
+    source "${DOCKER_SETUP_CONF}/docker-setup.config"
+fi
+
 # Shell configurations
 readonly SHELL_CONFIGS=(
     "zsh:.zshrc:docker-setup.zsh"

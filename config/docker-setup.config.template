@@ -1,0 +1,16 @@
+# Docker Setup Configuration
+
+# Base paths
+DATA_ROOT="${HOME}/x-com/data"
+SHARED_ROOT="${DATA_ROOT}/shared"
+
+# Shared directories
+SITES_DIR="${SHARED_ROOT}/sites"
+MEDIA_DIR="${SHARED_ROOT}/media"
+SOCKETS_DIR="${SHARED_ROOT}/sockets"
+
+# Nginx configuration
+NGINX_SITES_CONFIG="./nginx/sites-enabled"
+
+# Docker platform
+DOCKER_DEFAULT_PLATFORM="linux/amd64"
