@@ -29,9 +29,16 @@ Or in the README.md provided in the root dir of this project. \n
 # its only purpose is for debugging, if users report issues then I'd like to know what version they are using
 # shellcheck disable=SC1091
 . "./version.sh"
-# Source shell setup functions
+
+# Source shell configuration module
 # shellcheck disable=SC1091
-. "./shell/setup_shell.sh"
+. "./lib/shell/config.sh"
+
+# Run shell configuration tests in non-interactive mode if --test flag is provided
+if [ "${1:-}" = "--test" ]; then
+    setup_shell 1
+    exit $?
+fi
 
 # username is part of the config file, if it is not set it will prompt the user for their username
 while [[ -z "$USERNAME" ]]; do
@@ -168,7 +175,7 @@ cleanup () {
 setup_devctl
 
 # Set up shell configuration
-setup_shell
+setup_shell 0
 
 ### Global configuration ###
 cmd=(dialog --separate-output --checklist "Global configuration, select options:" 22 86 16)
