@@ -156,7 +156,8 @@ case "$1" in
         cd "$(get_dockerdir)" || return
         nginx-sites
         if docker compose exec nginx nginx -t; then
-            docker compose exec nginx service nginx reload
+            # Use PID file for more reliable nginx reload
+            docker compose exec nginx /bin/sh -c 'kill -HUP $(cat /var/run/nginx.pid)'
         fi
         if [ "$SETUP_APACHE" == "on" ]; then
             if docker compose exec apache apachectl -t; then
