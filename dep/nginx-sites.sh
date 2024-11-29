@@ -16,7 +16,14 @@ fi
 
 WEBPATH="/data/shared/sites"
 DOMAIN=".${USERNAME}${PROJECTSLUG}"
-WEBPATHESCAPED=$(echo $WEBPATH | sed 's/\//\\\//g')
+
+# Handle path escaping based on OS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    WEBPATHESCAPED=$(echo "$WEBPATH" | sed -e 's/\//\\\//g')
+else
+    WEBPATHESCAPED=$(echo "$WEBPATH" | sed 's/\//\\\//g')
+fi
+
 PROXYPORT="8888"
 NGINX_SITES_ENABLED="$(devctl dockerdir)"/nginx/sites-enabled
 NGINX_SITE_TEMPLATES="$(devctl dockerdir)"/nginx/site-templates
@@ -160,30 +167,26 @@ handleApacheConfig() {
     fi
 }
 replacePlaceholderValues() {
-    # Check system architecture
-    arch=$(uname -m)
-    if [ "$arch" = "arm64" ]; then
-        # macos
-        sed -i '' "s/##PROXYPORT##/$PROXYPORT/g" "$1"
-        sed -i '' "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
-        sed -i '' "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
-        sed -i '' "s/##XCOMUSER##/$USERNAME/g" "$1"
-        sed -i '' "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
-        sed -i '' "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
-        sed -i '' "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
-        sed -i '' "s/##DOMAIN##/$DOMAIN/g" "$1"
+    local sedcmd
+    
+    # Determine sed command based on OS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS requires empty string argument for -i
+        sedcmd="sed -i ''"
     else
-        # linux or windows
-        sed -i "s/##PROXYPORT##/$PROXYPORT/g" "$1"
-        sed -i "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
-        sed -i "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
-        sed -i "s/##XCOMUSER##/$USERNAME/g" "$1"
-        sed -i "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
-        sed -i "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
-        sed -i "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
-        sed -i "s/##DOMAIN##/$DOMAIN/g" "$1"
+        # Linux version
+        sedcmd="sed -i"
     fi
-
+    
+    # Apply all replacements using the appropriate sed command
+    $sedcmd "s/##PROXYPORT##/$PROXYPORT/g" "$1"
+    $sedcmd "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
+    $sedcmd "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
+    $sedcmd "s/##XCOMUSER##/$USERNAME/g" "$1"
+    $sedcmd "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
+    $sedcmd "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
+    $sedcmd "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
+    $sedcmd "s/##DOMAIN##/$DOMAIN/g" "$1"
 }
 
 # Create a temporary file to store the output of the find command
