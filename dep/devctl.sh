@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Exit on error, undefined vars, and propagate pipe failures
+set -euo pipefail
+
 usage () {
 cat <<EOF
 Devenv version: $(get_installversion)
@@ -27,10 +30,22 @@ EOF
 }
 
 get_installdir() {
-    echo "installdirectory"
+    # Source config file to get installdir
+    if [ -f "$HOME/.config/docker-setup.config" ]; then
+        # shellcheck disable=SC1090
+        . "$HOME/.config/docker-setup.config"
+    fi
+    
+    if [ -z "${installdir:-}" ]; then
+        echo "Error: installdir not found in config" >&2
+        exit 1
+    fi
+    
+    echo "$installdir"
 }
+
 get_dockerdir() {
-    echo "installdirectory/docker"
+    echo "$(get_installdir)/docker"
 }
 
 flush_redis () {
@@ -80,54 +95,87 @@ update_hosts () {
         HOSTS="/mnt/c/Windows/System32/drivers/etc/hosts"
         IPADDR=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
     fi
-    CONFIGFILE="$HOME/.config/docker-setup.config"
-    USERNAME=""
+    
+    # Get config values
     get_configfile
-    TMPHOSTS="/tmp/hosts"
-    if [ ! -f $TMPHOSTS ]; then
-        touch $TMPHOSTS
+    if [ -z "${USERNAME:-}" ] || [ -z "${PROJECTSLUG:-}" ]; then
+        echo "Error: USERNAME or PROJECTSLUG not found in config" >&2
+        exit 1
     fi
-    sudo chmod 755 $TMPHOSTS
-    cp $HOSTS $TMPHOSTS
-    sed -i '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' $TMPHOSTS
-    echo "#START XCOM HOSTS" >> $TMPHOSTS
-    while IFS= read -r d
-    do
-        SITEBASENAME=$(basename "$d")
-        echo "$IPADDR" "$SITEBASENAME"."$USERNAME""$PROJECTSLUG" >> "$TMPHOSTS"
-    done <   <(find -L "$INSTALLDIR"/data/shared/sites -mindepth 1 -maxdepth 1 -type d)
-
-    echo "$IPADDR" "devserver" >> "$TMPHOSTS"
-    echo "#END XCOM HOSTS" >> "$TMPHOSTS"
-    sudo cp "$TMPHOSTS" "$HOSTS"
-    rm "$TMPHOSTS"
+    
+    # Create temporary file with proper permissions
+    TMPHOSTS=$(mktemp)
+    trap 'rm -f "$TMPHOSTS"' EXIT
+    
+    # Copy original hosts file with proper permissions
+    if ! sudo cp "$HOSTS" "$TMPHOSTS"; then
+        echo "Error: Failed to copy hosts file" >&2
+        exit 1
+    fi
+    sudo chown "$(id -u):$(id -g)" "$TMPHOSTS"
+    chmod 644 "$TMPHOSTS"
+    
+    # Remove existing XCOM entries
+    sed -i.bak '/^#START XCOM HOSTS$/,/^#END XCOM HOSTS$/d' "$TMPHOSTS"
+    
+    # Add new XCOM entries
+    {
+        echo "#START XCOM HOSTS"
+        # Check if sites directory exists
+        SITES_DIR="$INSTALLDIR/data/shared/sites"
+        if [ -d "$SITES_DIR" ]; then
+            while IFS= read -r d; do
+                if [ -d "$d" ]; then
+                    SITEBASENAME=$(basename "$d")
+                    echo "$IPADDR" "$SITEBASENAME.$USERNAME$PROJECTSLUG"
+                fi
+            done < <(find -L "$SITES_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+        fi
+        echo "$IPADDR devserver"
+        echo "#END XCOM HOSTS"
+    } >> "$TMPHOSTS"
+    
+    # Verify and update the hosts file
+    if ! sudo cp "$TMPHOSTS" "$HOSTS"; then
+        echo "Error: Failed to update hosts file" >&2
+        exit 1
+    fi
+    
+    echo "Successfully updated hosts file"
 }
 
-cd installdirectory/docker || return
+# Process commands
 case "$1" in
-    up)
-        docker compose up -d "${@:2}"
-        ;;
-    restart)
-        docker compose restart "${@:2}"
-        ;;
-    stop)
-        docker compose stop "${@:2}"
-        ;;
-    start)
-        docker compose start "${@:2}"
-        ;;
-    status|ps)
-        docker compose ps -a
-        ;;
-    build)
-        docker compose build --no-cache "${@:2}"
-        ;;
-    pull)
-        docker compose pull "${@:2}"
-        ;;
-    recreate)
-        docker compose up -d --force-recreate "${@:2}"
+    up|restart|stop|start|status|ps|build|pull|recreate)
+        # Change to docker directory for docker-compose commands
+        cd "$(get_installdir)"/docker || exit 1
+        case "$1" in
+            up)
+                docker compose up -d "${@:2}"
+                update_hosts
+                ;;
+            restart)
+                docker compose restart "${@:2}"
+                ;;
+            stop)
+                docker compose stop "${@:2}"
+                ;;
+            start)
+                docker compose start "${@:2}"
+                ;;
+            status|ps)
+                docker compose ps -a
+                ;;
+            build)
+                docker compose build "${@:2}"
+                ;;
+            pull)
+                docker compose pull "${@:2}"
+                ;;
+            recreate)
+                docker compose up -d --force-recreate "${@:2}"
+                ;;
+        esac
         ;;
     installdir)
         get_installdir
@@ -139,29 +187,39 @@ case "$1" in
         update_varnish_acl
         ;;
     flushredis)
-        flush_redis "$2"
+        flush_redis "${2:-}"
         ;;
     flushvarnish)
-        flush_varnish "$2"
+        flush_varnish "${2:-}"
         ;;
     tail)
-        docker compose logs -f "$2"
+        cd "$(get_installdir)"/docker || exit 1
+        docker compose logs -f "${2:-}"
         ;;
     updatehosts)
         update_hosts
         ;;
     reload)
         update_hosts
-        get_configfile
-        cd "$(get_dockerdir)" || return
+        cd "$(get_dockerdir)" || exit 1
         nginx-sites
-        if docker compose exec nginx nginx -t; then
-            # Use PID file for more reliable nginx reload
-            docker compose exec nginx /bin/sh -c 'kill -HUP $(cat /var/run/nginx.pid)'
+        if ! docker compose exec nginx nginx -t; then
+            echo "Error: Nginx configuration test failed" >&2
+            exit 1
         fi
-        if [ "$SETUP_APACHE" == "on" ]; then
-            if docker compose exec apache apachectl -t; then
-                docker compose exec apache service apache2 reload
+        # Use PID file for more reliable nginx reload
+        if ! docker compose exec nginx /bin/sh -c 'if [ -f /var/run/nginx.pid ]; then kill -HUP $(cat /var/run/nginx.pid); else echo "Error: Nginx PID file not found" >&2; exit 1; fi'; then
+            echo "Error: Failed to reload Nginx" >&2
+            exit 1
+        fi
+        if [ "${SETUP_APACHE:-}" = "on" ]; then
+            if ! docker compose exec apache apachectl -t; then
+                echo "Error: Apache configuration test failed" >&2
+                exit 1
+            fi
+            if ! docker compose exec apache service apache2 reload; then
+                echo "Error: Failed to reload Apache" >&2
+                exit 1
             fi
         fi
         ;;

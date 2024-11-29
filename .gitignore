@@ -114,6 +114,3 @@ temp_file
 install
 
 docker/php*/run.sh
-
-# Development documentation
-docs/

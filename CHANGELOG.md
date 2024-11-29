@@ -649,5 +649,52 @@
 * e712e47 Add mongodb extension to php
 * 8c3e98c Added script version
 
+## Unreleased
 
+### Fixed
+- Fixed `get_installdir` function to properly use config file values instead of hardcoded path
+  ```bash
+  # Before
+  get_installdir() {
+      echo "installdirectory"
+  }
 
+  # After
+  get_installdir() {
+      if [ -f "$HOME/.config/docker-setup.config" ]; then
+          . "$HOME/.config/docker-setup.config"
+      fi
+      
+      if [ -z "${installdir:-}" ]; then
+          echo "Error: installdir not found in config" >&2
+          exit 1
+      fi
+      
+      echo "$installdir"
+  }
+  ```
+
+- Improved `update_hosts` function reliability and error handling:
+  - Added proper error handling for missing config values (USERNAME and PROJECTSLUG)
+  - Replaced grep-based hosts file manipulation with more reliable sed approach
+  - Added proper error messages and exit codes
+  - Added directory existence checks before running find command
+  - Added success message on completion
+  ```bash
+  # Example of improved error handling
+  if [ -z "${USERNAME:-}" ] || [ -z "${PROJECTSLUG:-}" ]; then
+      echo "Error: USERNAME or PROJECTSLUG not found in config" >&2
+      exit 1
+  fi
+
+  # Example of improved hosts file manipulation
+  sed -i.bak '/^#START XCOM HOSTS$/,/^#END XCOM HOSTS$/d' "$TMPHOSTS"
+  ```
+
+### Changed
+- Refactored `get_dockerdir` to use `get_installdir` output
+  ```bash
+  get_dockerdir() {
+      echo "$(get_installdir)/docker"
+  }
+  ```
