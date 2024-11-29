@@ -115,3 +115,5 @@ install
 
 docker/php*/run.sh
 
+# Development documentation
+docs/
