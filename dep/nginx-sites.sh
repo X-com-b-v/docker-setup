@@ -1,18 +1,36 @@
 #!/usr/bin/env bash
 
+# Exit on error, undefined vars, and propagate pipe failures
+set -euo pipefail
+
+# Ensure cleanup on script exit
+cleanup() {
+    if [ -n "${tmpfile:-}" ] && [ -f "$tmpfile" ]; then
+        rm -f "$tmpfile"
+    fi
+}
+trap cleanup EXIT
+
 CONFIGFILE="$HOME/.config/docker-setup.config"
 USERNAME=""
+
+# Source config file if it exists
 if [ -f "$CONFIGFILE" ]; then
     #shellcheck disable=SC1090
-    . "$CONFIGFILE"
+    if ! . "$CONFIGFILE"; then
+        echo "Error: Failed to source config file: $CONFIGFILE" >&2
+        exit 1
+    fi
 fi
-if [ -z "$installdir" ]; then
-    echo "installdir not found"
+
+# Validate required variables
+if [ -z "${installdir:-}" ]; then
+    echo "Error: installdir not found in config" >&2
     exit 1
 fi
-if [ -z "$PROJECTSLUG" ]; then
-    PROJECTSLUG=".o.xotap.nl"
-fi
+
+# Set default project slug if not defined
+PROJECTSLUG="${PROJECTSLUG:-.o.xotap.nl}"
 
 WEBPATH="/data/shared/sites"
 DOMAIN=".${USERNAME}${PROJECTSLUG}"
@@ -30,35 +48,60 @@ NGINX_SITE_TEMPLATES="$(devctl dockerdir)"/nginx/site-templates
 APACHE_SITES_ENABLED="$(devctl dockerdir)"/apache/sites-enabled
 APACHE_SITE_TEMPLATES="$(devctl dockerdir)"/apache/site-templates
 
-# clear sites enabled
-rm "$NGINX_SITES_ENABLED"/* "$APACHE_SITES_ENABLED"/* 2>/dev/null
+# Clear sites enabled (suppress errors if directories are empty)
+rm -f "$NGINX_SITES_ENABLED"/* "$APACHE_SITES_ENABLED"/* 2>/dev/null || true
 
-createSiteConfigDir()  {
-    if [ ! -d "$1"/.siteconfig ]; then
-        mkdir -p "$1"/.siteconfig
+createSiteConfigDir() {
+    local dir="$1"
+    if [ ! -d "$dir" ]; then
+        echo "Error: Base directory does not exist: $dir" >&2
+        return 1
+    fi
+    if [ ! -d "$dir"/.siteconfig ]; then
+        if ! mkdir -p "$dir"/.siteconfig; then
+            echo "Error: Failed to create .siteconfig directory in $dir" >&2
+            return 1
+        fi
     fi
 }
+
 createLogDir() {
-    if [ ! -d "$1"/logs ]; then
-        mkdir -p "$1"/logs
+    local dir="$1"
+    if [ ! -d "$dir" ]; then
+        echo "Error: Base directory does not exist: $dir" >&2
+        return 1
+    fi
+    if [ ! -d "$dir"/logs ]; then
+        if ! mkdir -p "$dir"/logs; then
+            echo "Error: Failed to create logs directory in $dir" >&2
+            return 1
+        fi
     fi
 }
+
 getFrameworkAndConfig() {
+    local dir="$1"
     FRAMEWORK=none
     CONFIG='{"template":"default","webserver":"nginx","php_version":"latest"}'
-    if [ -f "$1"/bin/magento ]; then
+    
+    if [ ! -d "$dir" ]; then
+        echo "Error: Directory does not exist: $dir" >&2
+        return 1
+    fi
+    
+    if [ -f "$dir"/bin/magento ]; then
         FRAMEWORK=magento
         CONFIG='{"template":"magento2","webserver":"nginx","php_version":"latest"}'
-    elif [ -f "$1"/app/etc/local.xml ]; then
+    elif [ -f "$dir"/app/etc/local.xml ]; then
         FRAMEWORK=magento
         CONFIG='{"template":"magento","webserver":"nginx","php_version":"7.4"}'
-    elif [ -d "$1"/web ]; then
+    elif [ -d "$dir"/web ]; then
         FRAMEWORK=craft
         CONFIG='{"template":"craft","webserver":"nginx", "php_version":"latest"}'
-    elif [ -d "$1"/htdocs/wire ]; then
+    elif [ -d "$dir"/htdocs/wire ]; then
         FRAMEWORK=processwire
         CONFIG='{"template":"processwire","webserver":"apache", "php_version":"latest"}'
-    elif [ -d "$1"/htdocs ]; then
+    elif [ -d "$dir"/htdocs ]; then
             FRAMEWORK=none
             CONFIG='{"template":"default","webserver":"apache", "php_version":"latest"}'
     fi
@@ -167,7 +210,23 @@ handleApacheConfig() {
     fi
 }
 replacePlaceholderValues() {
+    local file="$1"
     local sedcmd
+    
+    # Validate input file exists
+    if [ ! -f "$file" ]; then
+        echo "Error: File does not exist: $file" >&2
+        return 1
+    fi
+    
+    # Validate required variables
+    local required_vars=(PROXYPORT USE_PHPVERSION SITEBASENAME USERNAME PROJECTSLUG INCLUDE_PARAMS WEBPATHESCAPED DOMAIN)
+    for var in "${required_vars[@]}"; do
+        if [ -z "${!var:-}" ]; then
+            echo "Error: Required variable not set: $var" >&2
+            return 1
+        fi
+    done
     
     # Determine sed command based on OS
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -179,14 +238,23 @@ replacePlaceholderValues() {
     fi
     
     # Apply all replacements using the appropriate sed command
-    $sedcmd "s/##PROXYPORT##/$PROXYPORT/g" "$1"
-    $sedcmd "s/##USE_PHPVERSION##/$USE_PHPVERSION/g" "$1"
-    $sedcmd "s/##SITEBASENAME##/$SITEBASENAME/g" "$1"
-    $sedcmd "s/##XCOMUSER##/$USERNAME/g" "$1"
-    $sedcmd "s/##PROJECTSLUG##/$PROJECTSLUG/g" "$1"
-    $sedcmd "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g" "$1"
-    $sedcmd "s/##WEBPATH##/$WEBPATHESCAPED/g" "$1"
-    $sedcmd "s/##DOMAIN##/$DOMAIN/g" "$1"
+    local replacements=(
+        "s/##PROXYPORT##/$PROXYPORT/g"
+        "s/##USE_PHPVERSION##/$USE_PHPVERSION/g"
+        "s/##SITEBASENAME##/$SITEBASENAME/g"
+        "s/##XCOMUSER##/$USERNAME/g"
+        "s/##PROJECTSLUG##/$PROJECTSLUG/g"
+        "s/##INCLUDE_PARAMS##/$INCLUDE_PARAMS/g"
+        "s/##WEBPATH##/$WEBPATHESCAPED/g"
+        "s/##DOMAIN##/$DOMAIN/g"
+    )
+    
+    for replacement in "${replacements[@]}"; do
+        if ! $sedcmd "$replacement" "$file"; then
+            echo "Error: Failed to apply replacement: $replacement" >&2
+            return 1
+        fi
+    done
 }
 
 # Create a temporary file to store the output of the find command

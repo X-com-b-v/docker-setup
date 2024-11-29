@@ -1,3 +1,5 @@
+version: '3.8'  # Specify version for better compatibility
+
 name: "x-com"
 networks:
   xcom_network:
@@ -9,15 +11,15 @@ services:
     # restart: always
     hostname: nginx
     ports:
-      - 80:80
-      - 443:443
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS
     working_dir: /etc/nginx/sites-enabled
     volumes:
-      - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro
-      - installdirectory/data/shared/sites:/data/shared/sites
-      - phpsockets:/data/shared/sockets
-      - installdirectory/data/shared/media:/data/shared/media
-      - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
+      - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro          # Nginx configuration
+      - installdirectory/data/shared/sites:/data/shared/sites      # Web root directories
+      - phpsockets:/data/shared/sockets                            # PHP-FPM sockets
+      - installdirectory/data/shared/media:/data/shared/media      # Shared media files
+      - ~/.config/docker-setup.config:/etc/docker-setup.config:ro  # Configuration file
     networks:
       - xcom_network
   redis:
@@ -25,7 +27,7 @@ services:
     # restart: always
     hostname: redis
     ports:
-      - 6379:6379
+      - "6379:6379"  # Redis port
     networks:
       - xcom_network
   mailtrap:
@@ -33,8 +35,8 @@ services:
     # restart: always
     hostname: mailtrap
     ports:
-      - 8085:80
-      - 0.0.0.0:25:25
+      - "8085:80"  # Mailtrap web interface
+      - "0.0.0.0:25:25"  # Mailtrap SMTP server
     networks:
       - xcom_network
   mailhog:
@@ -44,7 +46,7 @@ services:
     logging:
       driver: 'none'  # disable saving logs
     ports:
-      - 1025:1025 # smtp server
-      - 8025:8025 # web ui
+      - "1025:1025"  # Mailhog SMTP server
+      - "8025:8025"  # Mailhog web interface
     networks:
       - xcom_network
