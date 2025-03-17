@@ -51,6 +51,9 @@ getFrameworkAndConfig() {
     elif [ -d "$1"/htdocs/wire ]; then
         FRAMEWORK=processwire
         CONFIG='{"template":"processwire","webserver":"apache", "php_version":"latest"}'
+    elif [ -f "$1"/artisan ]; then
+        FRAMEWORK=laravel
+        CONFIG='{"template":"laravel","webserver":"nginx", "php_version":"latest"}'
     elif [ -d "$1"/htdocs ]; then
             FRAMEWORK=none
             CONFIG='{"template":"default","webserver":"apache", "php_version":"latest"}'
