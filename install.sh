@@ -369,6 +369,7 @@ options=(php70 "PHP 7.0 (Deprecated)" "$PHP70" # any option can be set to defaul
     php81 "PHP 8.1" "$PHP81"
     php82 "PHP 8.2" "$PHP82"
     php83 "PHP 8.3" "$PHP83"
+    php84 "PHP 8.4" "$PHP84"
 )
 
 # Reset PHP variables
@@ -380,6 +381,7 @@ PHP80=off
 PHP81=off
 PHP82=off
 PHP83=off
+PHP84=off
 
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 
@@ -533,6 +535,7 @@ fi
     echo PHP81="$PHP81" >&3
     echo PHP82="$PHP82" >&3
     echo PHP83="$PHP83" >&3
+    echo PHP84="$PHP84" >&3
     echo PHPLATEST="$PHPLATEST" >&3
     echo FIRSTRUN=0 >&3
 } 3>"$CONFIGFILE"

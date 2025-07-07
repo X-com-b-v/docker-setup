@@ -55,21 +55,21 @@ The url slug is hardcoded at `.o.xotap.nl`. Based on the username you provided d
 **Note:** Docker-compose has its own name resolving, so whenever you are in a container you can always use another container name to connect to it. So for example when you are in a php container and you want to connect to elasticsearch, you should use `elasticsearch` as the hostname instead of `localhost`.
 
 
-|            Service name            |       Port local        | Port container |                                                                    Remarks                                                                    |
-| :---------------------------------: |:-----------------------:|:--------------:|:---------------------------------------------------------------------------------------------------------------------------------------------:|
-|                nginx                | 8080 [80 if no varnish] |       80       |                                  If you chose to use varnish, the local exposed port will be 8080 for nginx.                                  |
-|                                    |           443           |      443       |                                                                                                                                               |
-|               apache               |                         |      8888      | Apache is used by certain processwire projects where htaccess is required. The request comes from nginx and is proxy passed through to apache |
-|                                    |          3306           |      3306      |                                                                                                                                               |
-|               mysql80               |          3308           |      3306      |                                                                                                                                               |
-|                redis                |          6379           |      6379      |                                                                                                                                               |
-|               mailhog               |          1025           |      1025      |smtp server                                                                  |
-|                              |          8025           |      8025      |web ui                                                                     |
-|              mailtrap              |          8085           |      8085      |web ui                                                                     |
-|                                    |           25            |       25       |                                                                                                                                               |
-|            elasticsearch            |          9200           |      9200      |                                                                                                                                               |
-|               varnish               |           80            |       80       |                                     Varnish is optional during installation. Useful for Magento caching.                                      |
-| php73 php74 php80 php81 php82 php83 |                         |                |                         For all php containers there are no exposed ports, as everything goes through varnish/nginx.                          |
+|               Service name                |       Port local        | Port container |                                                                    Remarks                                                                    |
+|:-----------------------------------------:|:-----------------------:|:--------------:|:---------------------------------------------------------------------------------------------------------------------------------------------:|
+|                   nginx                   | 8080 [80 if no varnish] |       80       |                                  If you chose to use varnish, the local exposed port will be 8080 for nginx.                                  |
+|                                           |           443           |      443       |                                                                                                                                               |
+|                  apache                   |                         |      8888      | Apache is used by certain processwire projects where htaccess is required. The request comes from nginx and is proxy passed through to apache |
+|                                           |          3306           |      3306      |                                                                                                                                               |
+|                  mysql80                  |          3308           |      3306      |                                                                                                                                               |
+|                   redis                   |          6379           |      6379      |                                                                                                                                               |
+|                  mailhog                  |          1025           |      1025      |smtp server                                                                  |
+|                                           |          8025           |      8025      |web ui                                                                     |
+|                 mailtrap                  |          8085           |      8085      |web ui                                                                     |
+|                                           |           25            |       25       |                                                                                                                                               |
+|               elasticsearch               |          9200           |      9200      |                                                                                                                                               |
+|                  varnish                  |           80            |       80       |                                     Varnish is optional during installation. Useful for Magento caching.                                      |
+| php73 php74 php80 php81 php82 php83 php84 |                         |                |                         For all php containers there are no exposed ports, as everything goes through varnish/nginx.                          |
 
 ## Mailtrap
 
@@ -143,6 +143,7 @@ docker-php80-1
 docker-php81-1
 docker-php82-1
 docker-php83-1
+docker-php84-1
 docker-nginx-1
 docker-varnish-1
 docker_elasticsearch7_1
