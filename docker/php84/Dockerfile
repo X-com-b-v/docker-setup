@@ -22,7 +22,7 @@ RUN pecl install mongodb
 RUN pecl install imagick
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mysqli mbstring bcmath calendar exif ffi fileinfo gettext \
-    intl soap zip xsl sockets
+    intl soap zip xsl sockets ftp
 # other extensions we dont need right now
 # mysqli pcntl hmop sockets sysvmsg sysvmsg sysvshm sysvsem
 
