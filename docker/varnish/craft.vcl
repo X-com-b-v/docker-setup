@@ -41,8 +41,8 @@ sub vcl_recv {
   # Exclude the cp and any action requests
   if (
     req.url ~ "(\/admin|p=admin)(.*)" ||
-    req.url ~ "^/actions(.*)" ||
-    req.url ~ "^/index.php/actions(.*)" ||
+    req.url ~ "^/actions/(?!assets/)" ||  # Exclude actions BEHALVE assets
+    req.url ~ "^/index.php/actions/(?!assets/)" ||
     req.method == "POST"
     ) {
     return(pass);
