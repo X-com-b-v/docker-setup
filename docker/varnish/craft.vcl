@@ -39,18 +39,16 @@ sub vcl_recv {
   set req.url = std.querysort(req.url);
 
   # Exclude the cp and any action requests
-  if (
-    req.url ~ "(\/admin|p=admin)(.*)" ||
-    req.url ~ "^/actions/(?!assets/)" ||  # Exclude actions BEHALVE assets
+  if (req.url ~ "(\/admin|p=admin)(.*)" ||
+    req.url ~ "^/actions/(?!assets/)" || 
     req.url ~ "^/index.php/actions/(?!assets/)" ||
-    req.method == "POST"
-    ) {
+    req.method == "POST") {
     return(pass);
   }
 
-    if (req.method == "PURGE") {
- 		return (purge);
- 	}
+  if (req.method == "PURGE") {
+    return (purge);
+  }
 
   # Only deal with "normal" types
   if (req.method != "GET" &&
@@ -198,76 +196,59 @@ sub vcl_hit {
 
 # Handle the HTTP request coming from our backend
 sub vcl_backend_response {
-  # Called after the response headers has been successfully retrieved from the backend.
+    # Pause ESI request and remove Surrogate-Control header
+    if (beresp.http.Surrogate-Control ~ "ESI/1.0") {
+        unset beresp.http.Surrogate-Control;
+        set beresp.do_esi = true;
+    }
+    
+    # Remove Set-Cookie on everything except admin and action urls
+    if (bereq.url ~ "(\/admin|p=admin)(.*)" ||
+        bereq.url ~ "^/actions/(?!assets/)" || 
+        bereq.url ~ "^/index.php/actions/(?!assets/)" ||
+        bereq.method == "POST") {
+        return(pass);
+    }
 
-  # Set a default ttl for all pages
-  set beresp.ttl = 15m;
+    # Keep pages in cache for 15 minutes by default
+    set beresp.ttl = 15m;
 
-  # Pause ESI request and remove Surrogate-Control header
-  if (beresp.http.Surrogate-Control ~ "ESI/1.0") {
-    unset beresp.http.Surrogate-Control;
-    set beresp.do_esi = true;
-  }
+    # Large static files are delivered directly to the end-user without
+    # waiting for Varnish to fully read the file first.
+    # Varnish 4 fully supports Streaming, so use streaming here to avoid locking.
+    if (bereq.url ~ "^[^?]*\.(7z|avi|bz2|flac|flv|gz|mka|mkv|mov|mp3|mp4|mpeg|mpg|ogg|ogm|opus|rar|tar|tgz|tbz|txz|wav|webm|xz|zip)(\?.*)?$") {
+        unset beresp.http.set-cookie;
+        set beresp.do_stream = true;
+    }
 
-  # Removes Crafts Set-Cookie on everything except admin and action url's
-  if (
-    !(bereq.url ~ "(\/admin|p=admin)(.*)" ||
-    bereq.url ~ "^/actions(.*)" ||
-    bereq.url ~ "^/index.php/actions(.*)" ||
-    bereq.http.host == "example.com"
-    )) {
-    unset beresp.http.set-cookie;
-  }
-
-  # Large static files are delivered directly to the end-user without
-  # waiting for Varnish to fully read the file first.
-  # Varnish 4 fully supports Streaming, so use streaming here to avoid locking.
-  if (bereq.url ~ "^[^?]*\.(7z|avi|bz2|flac|flv|gz|mka|mkv|mov|mp3|mp4|mpeg|mpg|ogg|ogm|opus|rar|tar|tgz|tbz|txz|wav|webm|xz|zip)(\?.*)?$") {
-    unset beresp.http.set-cookie;
-    set beresp.do_stream = true;  # Check memory usage it'll grow in fetch_chunksize blocks (128k by default) if the backend doesn't send a Content-Length header, so only enable it for big objects
-  }
-
-  if (bereq.url ~ "^[^?]*\.(css|js|png|jpg|jpeg|gif|ico|svg|webp)(\?.*)?$") {
-    # Als backend geen TTL heeft ingesteld of te kort (< 1 uur)
-    if (beresp.ttl <= 3600s) {
+    # CSS/JS/Images
+    if (bereq.url ~ "^[^?]*\.(css|js|png|jpg|jpeg|gif|ico|svg|webp)(\?.*)?$") {
+        unset beresp.http.Set-Cookie;
         if (bereq.url ~ "^[^?]*\.(css|js)(\?.*)?$") {
             set beresp.ttl = 1d;
-        } else if (bereq.url ~ "^[^?]*\.(png|jpg|jpeg|gif|ico|svg|webp)(\?.*)?$") {
+        } else {
             set beresp.ttl = 1w;
         }
     }
-    unset beresp.http.Set-Cookie;
-  }
 
-  # Voor fonts - deze veranderen bijna nooit, dus altijd lange TTL
-  if (bereq.url ~ "^[^?]*\.(woff|woff2|ttf|eot|otf)(\?.*)?$") {
-    if (beresp.ttl < 1w) {
+    # Fonts
+    if (bereq.url ~ "^[^?]*\.(woff|woff2|ttf|eot|otf)(\?.*)?$") {
+        unset beresp.http.Set-Cookie;
         set beresp.ttl = 1y;
     }
-    unset beresp.http.Set-Cookie;
-  }
-
-  # Set 15min cache if unset for static files
-  if (beresp.ttl <= 0s || beresp.http.Set-Cookie || beresp.http.Vary == "*") {
-    set beresp.ttl = 900s; # Important, you shouldn't rely on this, SET YOUR HEADERS in the backend
-    set beresp.uncacheable = true;
-    return (deliver);
-  }
-
 
    # Avoid caching error responses
-      if (beresp.status >= 403 || beresp.status >= 500) {
+      if (beresp.status == 403 || beresp.status >= 500) {
         set beresp.ttl   = 0s;
         set beresp.grace = 15s;
         set beresp.uncacheable = true;
         return (deliver);
       }
-
-  # Allow stale content, in case the backend goes down.
-  # make Varnish keep all objects for 1 hours beyond their TTL
-  set beresp.grace = 1h;
-
-  return (deliver);
+    
+    # Allow stale content
+    set beresp.grace = 1h;
+    
+    return (deliver);
 }
 
 # The routine when we deliver the HTTP request to the user
