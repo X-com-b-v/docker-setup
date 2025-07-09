@@ -1,0 +1,18 @@
+  opensearch:
+    image: xcommagento/docker-opensearch:2
+    # restart: always
+    hostname: opensearch
+    ports:
+      - 9201:9200
+      - 9301:9300
+    volumes:
+      - opensearch:/usr/share/opensearch/data
+    environment:
+      - "discovery.type=single-node"
+      - "cluster.routing.allocation.disk.threshold_enabled=false"
+      - "index.blocks.read_only_allow_delete"
+      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true"
+    networks:
+      - xcom_network

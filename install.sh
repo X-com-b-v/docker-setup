@@ -176,6 +176,7 @@ options=(autostart "[both] Start docker containers automatically" "$SETUP_RESTAR
     varnish "[ecom] Use Varnish (Magento)" "$SETUP_VARNISH"
     elasticsearch7 "[ecom] Use Elasticsearch7 (Magento <= 2.4.6-p3)" "$SETUP_ELASTICSEARCH7"
     elasticsearch8 "[ecom] Use Elasticsearch8 (Magento >= 2.4.6)" "$SETUP_ELASTICSEARCH8"
+    opensearch "[ecom] Use OpenSearch (Magento >= 2.4.8)" "$SETUP_OPENSEARCH"
     xdebug "[both] Enable Xdebug" "$SETUP_XDEBUG"
     xdebug-trigger "[both] Trigger xdebug with request (Default: yes)" "$SETUP_XDEBUG_TRIGGER"
     apache "[itix] Apache configurations, for Itix" "$SETUP_APACHE"
@@ -187,6 +188,7 @@ SETUP_XDEBUG=off
 SETUP_VARNISH=off
 SETUP_ELASTICSEARCH7=off
 SETUP_ELASTICSEARCH8=off
+SETUP_OPENSEARCH=off
 SETUP_XDEBUG_TRIGGER=off
 SETUP_APACHE=off
 SETUP_MONGO=off
@@ -251,6 +253,9 @@ do :
             SETUP_ELASTICSEARCH8=on
             # cant have elasticsearch7 and elasticsearch8 at the same time
             SETUP_ELASTICSEARCH7=off
+            ;;
+        opensearch)
+            SETUP_OPENSEARCH=on
             ;;
         *)
             clear
@@ -336,6 +341,10 @@ fi
 if [ $SETUP_ELASTICSEARCH8 == "on" ] && [ -f docker-compose-snippets/elasticsearch8 ]; then
     cat docker-compose-snippets/elasticsearch8 >> "$installdir"/docker/docker-compose.yml
     services+=( "elasticsearch8" )
+fi
+if [ $SETUP_OPENSEARCH == "on" ] && [ -f docker-compose-snippets/opensearch ]; then
+    cat docker-compose-snippets/opensearch >> "$installdir"/docker/docker-compose.yml
+    services+=( "opensearch" )
 fi
 if [ $SETUP_MYSQL56 == "on" ] && [ -f docker-compose-snippets/mysql56 ]; then
     cat docker-compose-snippets/mysql56 >> "$installdir"/docker/docker-compose.yml
@@ -469,9 +478,19 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
     sed -i -e 's:installdirectory:'"$installdir"':g' "$installdir"/docker/docker-compose.yml
 fi
 
+if [ -f docker-compose-snippets/elasticsearch-opensearch-volume ] &&
+   { [ "$SETUP_ELASTICSEARCH7" == "on" ] || [ "$SETUP_ELASTICSEARCH8" == "on" ] && [ "$SETUP_OPENSEARCH" == "on" ]; }; then
+    cat docker-compose-snippets/elasticsearch-opensearch-volume >> "$installdir"/docker/docker-compose.yml
+fi
+
 if [ -f docker-compose-snippets/elasticsearch-volume ] &&
-   { [ "$SETUP_ELASTICSEARCH7" == "on" ] || [ "$SETUP_ELASTICSEARCH8" == "on" ]; }; then
+   { [ "$SETUP_ELASTICSEARCH7" == "on" ] || [ "$SETUP_ELASTICSEARCH8" == "on" ] && [ "$SETUP_OPENSEARCH" != "on" ]; }; then
     cat docker-compose-snippets/elasticsearch-volume >> "$installdir"/docker/docker-compose.yml
+fi
+
+if [ -f docker-compose-snippets/opensearch-volume ] &&
+   { [ "$SETUP_OPENSEARCH" == "on" ] && [ "$SETUP_ELASTICSEARCH7" != "on" ] && [ "$SETUP_ELASTICSEARCH8" != "on" ]; }; then
+    cat docker-compose-snippets/opensearch-volume >> "$installdir"/docker/docker-compose.yml
 fi
 
 if [ -f docker-compose-snippets/phpsockets-volume ] &&
@@ -514,6 +533,7 @@ fi
     echo SETUP_VARNISH=$SETUP_VARNISH >&3
     echo SETUP_ELASTICSEARCH7=$SETUP_ELASTICSEARCH7 >&3
     echo SETUP_ELASTICSEARCH8=$SETUP_ELASTICSEARCH8 >&3
+    echo SETUP_OPENSEARCH=$SETUP_OPENSEARCH >&3
     echo SETUP_XDEBUG_TRIGGER=$SETUP_XDEBUG_TRIGGER >&3
     echo SETUP_APACHE=$SETUP_APACHE >&3
     echo SETUP_MYSQL56=$SETUP_MYSQL56 >&3

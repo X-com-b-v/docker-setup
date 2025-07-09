@@ -1,0 +1,4 @@
+volumes:
+  elasticsearch:
+  opensearch:
+  phpsockets:
