@@ -36,6 +36,20 @@ createLogDir() {
         mkdir -p "$1"/logs
     fi
 }
+clearLogFiles() {
+    logdir="$1/logs"
+    keep_lines=1000
+
+    for logfile in error.nginx.log access.nginx.log; do
+        if [ -f "$logdir/$logfile" ]; then
+            # Check of file is big enough to truncate
+            if [ $(wc -l < "$logdir/$logfile") -gt $keep_lines ]; then
+                tail -n $keep_lines "$logdir/$logfile" > "$logdir/$logfile.tmp"
+                mv "$logdir/$logfile.tmp" "$logdir/$logfile"
+            fi
+        fi
+    done
+}
 getFrameworkAndConfig() {
     FRAMEWORK=none
     CONFIG='{"template":"default","webserver":"nginx","php_version":"latest"}'
@@ -198,6 +212,7 @@ do
     SITEBASENAME=$(basename "$d")
     createSiteConfigDir "$d"
     createLogDir "$d"
+    clearLogFiles "$d"
     getFrameworkAndConfig "$d"
     INCLUDE_PARAMS=
     if [ "$FRAMEWORK" == "magento" ]; then
