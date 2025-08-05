@@ -1,11 +1,31 @@
-  varnish:
+  varnish-magento:
     hostname: varnish
-    image: varnish:7.3-alpine
+    image: varnish:7.7-alpine
     # restart: always
     volumes:
-      - "./varnish/default.vcl:/etc/varnish/default.vcl:ro"
+      - "./varnish/magento2.vcl:/etc/varnish/default.vcl:ro"
     ports:
       - "80:80"
+    tmpfs:
+      - /var/lib/varnish:exec
+    user: root
+    environment:
+      - VARNISH_SIZE=2G
+    command: "-p default_keep=300"
+    networks:
+      - xcom_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - "nginx"
+  varnish-craft:
+    hostname: varnish
+    image: varnish:7.7-alpine
+    # restart: always
+    volumes:
+      - "./varnish/craft.vcl:/etc/varnish/default.vcl:ro"
+    ports:
+      - "81:80"
     tmpfs:
       - /var/lib/varnish:exec
     user: root
