@@ -42,6 +42,7 @@ sub vcl_recv {
   if (req.url ~ "(\/admin|p=admin)(.*)" ||
     req.url ~ "^/actions/(?!assets/)" || 
     req.url ~ "^/index.php/actions/(?!assets/)" ||
+    req.url ~ "\?x-craft-(live-)?preview" ||
     req.method == "POST") {
     return(pass);
   }
