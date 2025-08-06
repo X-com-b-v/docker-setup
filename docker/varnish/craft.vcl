@@ -5,8 +5,8 @@ import directors;
 backend default {
   .host = "nginx";
   .port = "80";
-  .connect_timeout = 600s; # Wait a maximum of 5s for backend connection (Apache, Nginx, etc...)
-  .first_byte_timeout = 10s; # Wait a maximum of 5s for the first byte to come from your backend
+  .connect_timeout = 60s; # Wait a maximum of 60s for backend connection (Apache, Nginx, etc...)
+  .first_byte_timeout = 60s; # Wait a maximum of 60s for the first byte to come from your backend
   .between_bytes_timeout = 20s; # Wait a maximum of 20s between each bytes sent
 }
 
