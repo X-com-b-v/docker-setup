@@ -39,6 +39,18 @@ RUN pecl install redis \
    # Redis is installed, enable it
     && docker-php-ext-enable redis
 
+# Detect architecture and download correct AWS CLI installer
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
+    unzip awscliv2.zip && ./aws/install && \
+    rm -rf awscliv2.zip aws
+
 ADD conf.d/xdebug.ini "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"
 ADD conf.d/sqlsrv.ini "$PHP_INI_DIR/conf.d/sqlsrv.ini"
 ADD conf.d/pdo_sqlsrv.ini "$PHP_INI_DIR/conf.d/pdo_sqlsrv.ini"
