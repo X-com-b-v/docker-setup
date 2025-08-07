@@ -57,19 +57,54 @@ The url slug is hardcoded at `.o.xotap.nl`. Based on the username you provided d
 
 |               Service name                |       Port local        | Port container |                                                                    Remarks                                                                    |
 |:-----------------------------------------:|:-----------------------:|:--------------:|:---------------------------------------------------------------------------------------------------------------------------------------------:|
-|                   nginx                   | 8080 [80 if no varnish] |       80       |                                  If you chose to use varnish, the local exposed port will be 8080 for nginx.                                  |
-|                                           |           443           |      443       |                                                                                                                                               |
-|                  apache                   |                         |      8888      | Apache is used by certain processwire projects where htaccess is required. The request comes from nginx and is proxy passed through to apache |
-|                                           |          3306           |      3306      |                                                                                                                                               |
-|                  mysql80                  |          3308           |      3306      |                                                                                                                                               |
-|                   redis                   |          6379           |      6379      |                                                                                                                                               |
-|                  mailhog                  |          1025           |      1025      |smtp server                                                                  |
-|                                           |          8025           |      8025      |web ui                                                                     |
-|                 mailtrap                  |          8085           |      8085      |web ui                                                                     |
-|                                           |           25            |       25       |                                                                                                                                               |
-|               elasticsearch               |          9200           |      9200      |                                                                                                                                               |
-|                  varnish                  |           80            |       80       |                                     Varnish is optional during installation. Useful for Magento caching.                                      |
-| php73 php74 php80 php81 php82 php83 php84 |                         |                |                         For all php containers there are no exposed ports, as everything goes through varnish/nginx.                          |
+|                   nginx                   | 80 [8080 if varnish enabled] |       80       |                                  When Varnish is enabled, nginx port changes to 8080 and Varnish takes port 80.                                  |
+|                                           |           443           |      443       | HTTPS traffic                                                                                                                                               |
+|                  apache                   |           N/A           |      N/A       | No exposed ports. Used internally via nginx proxy for ProcessWire projects requiring .htaccess |
+|                  mysql56                  |          3305           |      3306      | MySQL 5.6 (Deprecated)                                                                                                                      |
+|                  mysql57                  |          3306           |      3306      | MySQL 5.7 (Deprecated)                                                                                                                      |
+|                  mysql80                  |          3308           |      3306      | MySQL 8.0 (Current)                                                                                                                                   |
+|                   mongo                   |         27017           |     27017      | MongoDB 6.0 (Optional)                                                                                                                                  |
+|                   redis                   |          6379           |      6379      | Redis cache server                                                                                                                                               |
+|                  mailhog                  |          1025           |      1025      | SMTP server for mail testing                                                                  |
+|                                           |          8025           |      8025      | MailHog web interface                                                                     |
+|                 mailtrap                  |          8085           |       80       | Mailtrap web interface                                                                     |
+|                                           |           25            |       25       | SMTP server for mail testing                                                                |
+|              elasticsearch7               |          9200           |      9200      | Elasticsearch 7 (for Magento <= 2.4.6-p3). **Cannot run simultaneously with elasticsearch8**                                                                                                  |
+|                                           |          9300           |      9300      |                                                                                                                                               |
+|              elasticsearch8               |          9200           |      9200      | Elasticsearch 8 (for Magento >= 2.4.6). **Cannot run simultaneously with elasticsearch7**                                                                                                     |
+|                                           |          9300           |      9300      |                                                                                                                                               |
+|                opensearch                 |          9201           |      9200      | OpenSearch (for Magento >= 2.4.8). Alternative to Elasticsearch                                                                                                          |
+|                                           |          9301           |      9300      |                                                                                                                                               |
+|                varnish-magento            |           80            |       80       | Varnish for Magento 2 with magento2.vcl. When enabled, nginx moves to 8080. |
+|                varnish-craft              |           81            |       80       | Varnish for Craft CMS with craft.vcl. Alternative to varnish-magento. |
+| php70 php72 php73 php74 php80 php81 php82 php83 php84 |           N/A           |       N/A       |                         No exposed ports. All PHP traffic routed through nginx/varnish via Unix sockets.                          |
+
+## Varnish Caching
+
+Varnish is an optional HTTP accelerator that can be enabled during installation. The setup provides two framework-specific Varnish services:
+
+### Service Configuration
+- **varnish-magento**: Host port 80 → container port 80, uses `magento2.vcl`
+- **varnish-craft**: Host port 81 → container port 80, uses `craft.vcl`
+- **Internal communication**: Both services accessible as `service:80` within Docker network
+- **External access**: `localhost:80` (magento) or `localhost:81` (craft)
+
+### Framework Support
+- **Magento 2 (varnish-magento)**: 
+  - Full page caching with GraphQL support
+  - Tag-based purging via X-Magento-Tags-Pattern
+  - ESI processing for dynamic content
+  - When enabled, nginx moves to port 8080
+- **Craft CMS (varnish-craft)**:
+  - ESI support for edge-side includes
+  - Admin/action URL bypass
+  - Custom TTL for static files (CSS/JS: 1d, Images: 1w, Fonts: 1y)
+  - Accessible on port 81
+
+### Cache Management
+- `devctl flushvarnish [url]`: Purge specific URLs
+- `devctl varnishacl`: Update ACL with Docker network subnet
+- VCL files located in `docker/varnish/` directory
 
 ## Mailtrap
 
