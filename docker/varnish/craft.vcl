@@ -162,6 +162,16 @@ sub vcl_hash {
   # Also add the request method - this allows us to cache ajax requests differently to normal ones
   hash_data(req.http.X-Requested-With);
 
+  # To make sure http users don't see ssl warning
+  if (req.http.X-Forwarded-Proto) {
+     hash_data(req.http.X-Forwarded-Proto);
+  }
+
+  # To make sure http users don't see ssl warning
+  if (req.http.X-Forwarded-Proto) {
+     hash_data(req.http.X-Forwarded-Proto);
+  }
+
   if (req.http.host) {
     hash_data(req.http.host);
   } else {
