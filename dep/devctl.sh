@@ -89,7 +89,13 @@ update_hosts () {
     fi
     sudo chmod 755 $TMPHOSTS
     cp $HOSTS $TMPHOSTS
-    sed -i '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' $TMPHOSTS
+    if sed --version >/dev/null 2>&1; then
+      # GNU sed (Linux/WSL)
+      sed -i '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' "$TMPHOSTS"
+    else
+      # BSD sed (macOS)
+      sed -i '' '/#START XCOM HOSTS/,/#END XCOM HOSTS/d' "$TMPHOSTS"
+    fi
     echo "#START XCOM HOSTS" >> $TMPHOSTS
     while IFS= read -r d
     do
