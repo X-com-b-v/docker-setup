@@ -40,11 +40,11 @@ sub vcl_recv {
 
   # Exclude the cp and any action requests
   if (req.url ~ "(\/admin|p=admin)(.*)" ||
-    req.url ~ "^/actions/(?!assets/)" || 
-    req.url ~ "^/index.php/actions/(?!assets/)" ||
-    req.url ~ "\?x-craft-(live-)?preview" ||
-    req.method == "POST") {
-    return(pass);
+      req.url ~ "^/actions/(?!(assets/|_itix))" ||
+      req.url ~ "^/index.php/actions/(?!(assets/|_itix))" ||
+      req.url ~ "\?x-craft-(live-)?preview" ||
+      req.method == "POST") {
+      return(pass);
   }
 
   if (req.method == "PURGE") {
@@ -212,11 +212,11 @@ sub vcl_backend_response {
         unset beresp.http.Surrogate-Control;
         set beresp.do_esi = true;
     }
-    
+
     # Remove Set-Cookie on everything except admin and action urls
     if (bereq.url ~ "(\/admin|p=admin)(.*)" ||
-        bereq.url ~ "^/actions/(?!assets/)" || 
-        bereq.url ~ "^/index.php/actions/(?!assets/)" ||
+        (bereq.url ~ "^/actions/" && bereq.url !~ "(assets/|_itix)") ||
+        (bereq.url ~ "^/index.php/actions/" && bereq.url !~ "(assets/|_itix)") ||
         bereq.method == "POST") {
         return(pass);
     }
