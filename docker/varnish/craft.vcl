@@ -40,8 +40,8 @@ sub vcl_recv {
 
   # Exclude the cp and any action requests
   if (req.url ~ "(\/admin|p=admin)(.*)" ||
-      req.url ~ "^/actions/(?!(assets/|_itix))" ||
-      req.url ~ "^/index.php/actions/(?!(assets/|_itix))" ||
+      req.url ~ "^/actions/(?!(assets/|_itix|formie/forms/refresh-tokens))" ||
+      req.url ~ "^/index.php/actions/(?!(assets/|_itix|formie/forms/refresh-tokens))" ||
       req.url ~ "\?x-craft-(live-)?preview" ||
       req.method == "POST") {
       return(pass);
@@ -215,8 +215,8 @@ sub vcl_backend_response {
 
     # Remove Set-Cookie on everything except admin and action urls
     if (bereq.url ~ "(\/admin|p=admin)(.*)" ||
-        (bereq.url ~ "^/actions/" && bereq.url !~ "(assets/|_itix)") ||
-        (bereq.url ~ "^/index.php/actions/" && bereq.url !~ "(assets/|_itix)") ||
+        (bereq.url ~ "^/actions/" && bereq.url !~ "(assets/|_itix|formie/forms/refresh-tokens)") ||
+        (bereq.url ~ "^/index.php/actions/" && bereq.url !~ "(assets/|_itix|formie/forms/refresh-tokens)") ||
         bereq.method == "POST") {
         return(pass);
     }
