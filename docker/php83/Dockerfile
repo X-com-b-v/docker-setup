@@ -18,6 +18,7 @@ RUN ACCEPT_EULA=Y apt-get -y --no-install-recommends install msodbcsql18 mssql-t
 
 # install modules
 RUN pecl install xdebug
+RUN pecl install excimer
 RUN pecl install mongodb
 RUN pecl install imagick
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
@@ -31,6 +32,7 @@ RUN pecl install sqlsrv
 RUN pecl install pdo_sqlsrv
 
 RUN docker-php-ext-enable xdebug
+RUN docker-php-ext-enable excimer
 RUN docker-php-ext-enable mongodb
 RUN docker-php-ext-enable imagick
 

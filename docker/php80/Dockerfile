@@ -12,6 +12,7 @@ RUN echo mailtrap > /etc/nullmailer/remotes
 
 # install modules
 RUN pecl install xdebug
+RUN pecl install excimer
 RUN pecl install mongodb
 RUN pecl install imagick
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
@@ -20,6 +21,7 @@ RUN docker-php-ext-install -j$(nproc) gd opcache pdo_mysql mysqli mbstring bcmat
 # mysqli pcntl hmop sockets sysvmsg sysvmsg sysvshm sysvsem
 
 RUN docker-php-ext-enable xdebug
+RUN docker-php-ext-enable excimer
 RUN docker-php-ext-enable mongodb
 RUN docker-php-ext-enable imagick
 
