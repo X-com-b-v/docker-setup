@@ -36,19 +36,72 @@ Projects live in `/data/shared/sites/<project-name>/`. After adding a project, r
 
 Framework auto-detection (first match wins):
 
-| File present | Framework | PHP |
-|---|---|---|
-| `/bin/magento` | Magento 2 | latest |
-| `/app/etc/local.xml` | Magento 1 | 7.4 |
-| `/web/` dir | Craft CMS | latest |
-| `/htdocs/wire/` dir | ProcessWire | latest |
-| `/artisan` | Laravel | latest |
-| `/htdocs/` dir | Generic/Apache | latest |
+| File present | Framework | Webserver | PHP |
+|---|---|---|---|
+| `/bin/magento` | Magento 2 | nginx | latest |
+| `/app/etc/local.xml` | Magento 1 | nginx | 7.4 |
+| `/web/` dir | Craft CMS | nginx | latest |
+| `/htdocs/wire/` dir | ProcessWire | apache | latest |
+| `/artisan` | Laravel | nginx | latest |
+| `/htdocs/` dir | Generic | apache | latest |
 
 Override via `<project>/.siteconfig/config.json`, e.g.:
 ```json
 {"template":"magento2","webserver":"nginx","php_version":"8.3"}
 ```
+
+Available templates: `magento2`, `magento2-varnish`, `magento`, `craft`, `craft-varnish`, `laravel`, `processwire`, `drupal9`, `symfony`, `symfony4`, `shopware`, `default`
+
+## Nginx / Apache config generation
+
+`nginx-sites` (called by `devctl reload`) scans every subdirectory of `/data/shared/sites`, auto-detects the framework, and writes configs to:
+- `<installdir>/docker/nginx/sites-enabled/<site>.conf`
+- `<installdir>/docker/apache/sites-enabled/<site>.conf` (Apache sites only)
+
+**Config selection priority for nginx** (first match wins):
+1. `.siteconfig/nginx.conf` — custom override, used as-is
+2. `proxy.conf` template — used when `webserver=apache` (nginx proxies to Apache on port 8888)
+3. Template matching `webserver` field from `.siteconfig/config.json` (e.g. `magento2.conf`)
+4. `default.conf` fallback
+
+**Config selection priority for apache** (first match wins):
+1. `.siteconfig/apache.conf` — custom override
+2. Template matching `template` field (e.g. `processwire.conf`)
+3. `default.conf` fallback
+
+After writing, placeholders are substituted in the generated config file:
+
+| Placeholder | Replaced with |
+|---|---|
+| `##SITEBASENAME##` | Directory name of the project |
+| `##USE_PHPVERSION##` | Resolved PHP version (e.g. `84`) |
+| `##DOMAIN##` | `.username.o.xotap.nl` |
+| `##XCOMUSER##` | Username from config |
+| `##PROJECTSLUG##` | Domain suffix (`.o.xotap.nl`) |
+| `##INCLUDE_PARAMS##` | Inlined `params.conf` include (Magento/Craft only) |
+| `##WEBPATH##` | `/data/shared/sites` |
+
+**Per-site customization files** (in `<project>/.siteconfig/`):
+
+| File | Purpose |
+|---|---|
+| `config.json` | Override framework/webserver/PHP detection |
+| `nginx.conf` | Full custom nginx vhost (replaces template) |
+| `apache.conf` | Full custom apache vhost (replaces template) |
+| `params.conf` | Extra `fastcgi_param` lines (Magento/Craft — included via `##INCLUDE_PARAMS##`) |
+| `nginx.conf.example` | Last generated nginx config — safe to copy and customise |
+| `apache.conf.example` | Last generated apache config — safe to copy and customise |
+| `params.conf.example` | Generated params template with store URLs |
+
+**Activating `params.conf` for Magento 2:**
+Every `nginx-sites` run writes a fresh `params.conf.example` containing `fastcgi_param` lines for base URLs, secure URLs, and cookie domain per store. Copy it to `params.conf` to activate it — nginx will include it inside the PHP location block via `##INCLUDE_PARAMS##`. The example is regenerated each run so it reflects the current domain; your live `params.conf` is never overwritten.
+
+```bash
+cp .siteconfig/params.conf.example .siteconfig/params.conf
+devctl reload
+```
+
+Site logs are at `<project>/logs/access.nginx.log` and `<project>/logs/error.nginx.log`, truncated to the last 1000 lines on each `nginx-sites` run.
 
 ## Ports
 
