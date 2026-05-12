@@ -81,9 +81,24 @@ The installer modifies `dep/xdebug.ini` via sed before copying it to each PHP ve
 
 Xdebug connects to `host.docker.internal:9003` with IDE key `PHPSTORM`.
 
-### Elasticsearch / OpenSearch Mutual Exclusivity
+### Search Services
 
-Elasticsearch 7 and Elasticsearch 8 cannot coexist. OpenSearch is independent and can be combined with either. The volume snippet appended depends on which combination is selected (`elasticsearch-volume`, `elasticsearch-opensearch-volume`, or `opensearch-volume`). If no search service is selected, `phpsockets-volume` is appended instead (to close the volumes section).
+Elasticsearch 7, Elasticsearch 8 and OpenSearch can all run simultaneously. Each has its own host ports and named volume. The `volumes:` section at the end of `docker-compose.yml` is generated dynamically based on which services are selected — no separate volume snippet files are used.
+
+| Service | Host ports | Volume |
+|---|---|---|
+| elasticsearch7 | 9202 / 9302 | `elasticsearch7` |
+| elasticsearch8 | 9200 / 9300 | `elasticsearch8` |
+| opensearch | 9201 / 9301 | `opensearch` |
+
+### NPM Token Configuration
+
+NPM tokens are managed centrally in `~/.config/npm-tokens.env` (never committed to the repo). The installer creates this file from `dep/npm-tokens.env.example` on first run. All PHP containers mount it read-only at `/etc/npm-tokens.env`. The entrypoint script sources it at startup and adds it to `.bashrc` so tokens are available in both php-fpm and interactive shell sessions (`enter php84`).
+
+To rotate tokens, update `~/.config/npm-tokens.env` and restart the relevant containers:
+```bash
+devctl restart php84
+```
 
 ### Platform-Specific sed
 
@@ -132,6 +147,7 @@ On ARM64 (macOS Apple Silicon), the installer uses BSD sed syntax: `sed -i ''`. 
 | `dep/xdebug.ini` | Xdebug config template (modified per install options) |
 | `dep/opcache.ini` | OPcache config (copied verbatim to each PHP version) |
 | `dep/phprun.sh` | Container entrypoint template (`##PHPVERSION##` placeholder) |
+| `dep/npm-tokens.env.example` | Template for `~/.config/npm-tokens.env` (NPM token config) |
 | `docker-compose-snippets/*` | Per-service compose fragments appended during install |
 | `docker/nginx/site-templates/` | Nginx virtual host templates (one per framework) |
 | `docker/docker-compose.yml` | Base compose file (nginx, redis, mail, network) |
@@ -146,7 +162,8 @@ On ARM64 (macOS Apple Silicon), the installer uses BSD sed syntax: `sed -i ''`. 
 | MySQL 5.6 / 5.7 / 8.0 | 3305 / 3306 / 3308 |
 | MongoDB | 27017 |
 | Redis | 6379 |
-| Elasticsearch 7/8 | 9200, 9300 |
+| Elasticsearch 7 | 9202, 9302 |
+| Elasticsearch 8 | 9200, 9300 |
 | OpenSearch | 9201, 9301 |
 | Mailtrap UI / SMTP | 8085 / 25 |
 | MailHog UI / SMTP | 8025 / 1025 |

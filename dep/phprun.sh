@@ -9,6 +9,14 @@ fi
 export XCOM_SERVERUSER=$USERNAME
 export XCOM_SERVERTYPE=dev
 
+NPM_TOKENS_FILE="/etc/npm-tokens.env"
+if [ -f "$NPM_TOKENS_FILE" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$NPM_TOKENS_FILE"
+    set +a
+fi
+
 sudo /etc/init.d/nullmailer start
 
 if [ ! -f "/home/web/.bashrc" ]; then
@@ -28,6 +36,10 @@ fi
 if ! grep -q "export XCOM_SERVERUSER" /home/web/.bashrc; then
   echo "export XCOM_SERVERTYPE=$XCOM_SERVERTYPE" >> /home/web/.bashrc
   echo "export XCOM_SERVERUSER=$XCOM_SERVERUSER" >> /home/web/.bashrc
+fi
+
+if ! grep -q "npm-tokens.env" /home/web/.bashrc; then
+    echo "if [ -f $NPM_TOKENS_FILE ]; then set -a; source $NPM_TOKENS_FILE; set +a; fi" >> /home/web/.bashrc
 fi
 
 if ! grep -q "export TERM=xterm" /home/web/.bashrc; then
