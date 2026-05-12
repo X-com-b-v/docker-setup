@@ -33,6 +33,21 @@ if [ ! -d "$BIN_DIR" ]; then
     fi
 fi
 
+# install docker CLI for container-side devctl (uses mounted Docker socket)
+if [ ! -f "$BIN_DIR/docker" ]; then
+    ARCH=$(uname -m)
+    DOCKER_ARCH="x86_64"
+    [ "$ARCH" = "aarch64" ] && DOCKER_ARCH="aarch64"
+    curl -fsSL "https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-27.5.1.tgz" \
+        | tar -xz -C "$BIN_DIR" --strip-components=1 docker/docker
+fi
+
+# install container-side devctl wrapper
+if [ ! -f /usr/local/bin/devctl ]; then
+    sudo cp /etc/devctl-container.sh /usr/local/bin/devctl
+    sudo chmod +x /usr/local/bin/devctl
+fi
+
 if ! grep -q "export XCOM_SERVERUSER" /home/web/.bashrc; then
   echo "export XCOM_SERVERTYPE=$XCOM_SERVERTYPE" >> /home/web/.bashrc
   echo "export XCOM_SERVERUSER=$XCOM_SERVERUSER" >> /home/web/.bashrc

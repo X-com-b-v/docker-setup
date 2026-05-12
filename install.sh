@@ -105,10 +105,12 @@ setup_devctl () {
     cp dep/devctl.sh "$HOME/.local/bin/devctl"
     cp dep/enter.sh "$HOME/.local/bin/enter"
     cp dep/nginx-sites.sh "$HOME/.local/bin/nginx-sites"
+    cp dep/devctl-container.sh "$installdir/docker/devctl-container.sh"
     sed -i -e 's:installdirectory:'"$installdir"':g' "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/devctl"
     chmod +x "$HOME/.local/bin/enter"
     chmod +x "$HOME/.local/bin/nginx-sites.sh"
+    chmod +x "$installdir/docker/devctl-container.sh"
 }
 
 # Function to setup gitconfig which is later copied to selected php containers
