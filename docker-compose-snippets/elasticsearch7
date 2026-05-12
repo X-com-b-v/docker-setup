@@ -1,12 +1,12 @@
   elasticsearch7:
     image: xcommagento/docker-elasticsearch:7
     # restart: always
-    hostname: elasticsearch
+    hostname: elasticsearch7
     ports:
-      - 9200:9200
-      - 9300:9300
+      - 9202:9200
+      - 9302:9300
     volumes:
-      - elasticsearch:/usr/share/elasticsearch7/data
+      - elasticsearch7:/usr/share/elasticsearch7/data
     environment:
       - discovery.type=single-node
       - LOG4J_FORMAT_MSG_NO_LOOKUPS=true

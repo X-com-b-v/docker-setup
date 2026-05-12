@@ -246,13 +246,9 @@ do :
             ;;
         elasticsearch7)
             SETUP_ELASTICSEARCH7=on
-            # cant have elasticsearch7 and elasticsearch8 at the same time
-            SETUP_ELASTICSEARCH8=off
             ;;
         elasticsearch8)
             SETUP_ELASTICSEARCH8=on
-            # cant have elasticsearch7 and elasticsearch8 at the same time
-            SETUP_ELASTICSEARCH7=off
             ;;
         opensearch)
             SETUP_OPENSEARCH=on
@@ -485,26 +481,13 @@ if [ -f "$installdir/docker/docker-compose.yml" ]; then
     sed -i -e 's:installdirectory:'"$installdir"':g' "$installdir"/docker/docker-compose.yml
 fi
 
-if [ -f docker-compose-snippets/elasticsearch-opensearch-volume ] &&
-   { [ "$SETUP_ELASTICSEARCH7" == "on" ] || [ "$SETUP_ELASTICSEARCH8" == "on" ] && [ "$SETUP_OPENSEARCH" == "on" ]; }; then
-    cat docker-compose-snippets/elasticsearch-opensearch-volume >> "$installdir"/docker/docker-compose.yml
-fi
-
-if [ -f docker-compose-snippets/elasticsearch-volume ] &&
-   { [ "$SETUP_ELASTICSEARCH7" == "on" ] || [ "$SETUP_ELASTICSEARCH8" == "on" ] && [ "$SETUP_OPENSEARCH" != "on" ]; }; then
-    cat docker-compose-snippets/elasticsearch-volume >> "$installdir"/docker/docker-compose.yml
-fi
-
-if [ -f docker-compose-snippets/opensearch-volume ] &&
-   { [ "$SETUP_OPENSEARCH" == "on" ] && [ "$SETUP_ELASTICSEARCH7" != "on" ] && [ "$SETUP_ELASTICSEARCH8" != "on" ]; }; then
-    cat docker-compose-snippets/opensearch-volume >> "$installdir"/docker/docker-compose.yml
-fi
-
-if [ -f docker-compose-snippets/phpsockets-volume ] &&
-   [ "$SETUP_ELASTICSEARCH7" != "on" ] &&
-   [ "$SETUP_ELASTICSEARCH8" != "on" ]; then
-    cat docker-compose-snippets/phpsockets-volume >> "$installdir"/docker/docker-compose.yml
-fi
+{
+    echo "volumes:"
+    [ "$SETUP_ELASTICSEARCH7" == "on" ] && echo "  elasticsearch7:"
+    [ "$SETUP_ELASTICSEARCH8" == "on" ] && echo "  elasticsearch8:"
+    [ "$SETUP_OPENSEARCH" == "on" ]     && echo "  opensearch:"
+    echo "  phpsockets:"
+} >> "$installdir"/docker/docker-compose.yml
 
 # if [ ! "$FIRSTRUN" = "0" ]; then
     # echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.d/inotify.conf

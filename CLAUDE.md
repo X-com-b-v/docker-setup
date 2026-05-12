@@ -4,143 +4,149 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a Docker-based development environment setup for web development, primarily targeting PHP applications. It provides a multi-service containerized environment with support for various PHP versions, databases, caching, and development tools.
+Docker-based PHP development environment for web development. The installer builds a `docker-compose.yml` by concatenating modular snippets, then the `devctl` and `nginx-sites` scripts manage the running environment.
 
 ## Core Architecture
 
-### Installation System
-- **Interactive installer**: `install.sh` provides a dialog-based terminal UI for configuration
-- **Configuration storage**: Settings saved to `~/.config/docker-setup.config`
-- **Cross-platform support**: Works on WSL2, Linux, and macOS
+### Snippet-Based Compose File Generation
 
-### Docker Architecture
-- **Main compose file**: `docker/docker-compose.yml` (dynamically generated during installation)
-- **Modular services**: Individual service configurations in `docker-compose-snippets/`
-- **Custom images**: Built from Dockerfiles in `docker/` subdirectories
-- **Shared volumes**: Projects stored in `/data/shared/sites`, media in `/data/shared/media`
+`install.sh` builds `$installdir/docker/docker-compose.yml` by:
+1. Copying `./docker/docker-compose.yml` (base with nginx, redis, mailtrap, mailhog, network)
+2. Conditionally appending files from `docker-compose-snippets/` (one per optional service)
+3. Running `sed -i` to replace `installdirectory` placeholder with the actual path throughout
+4. Detecting ARM64 vs AMD64 and uncommenting the appropriate platform-specific lines
 
-### Service Structure
-- **Web servers**: Nginx (primary), Apache (for specific needs like ProcessWire)
-- **PHP versions**: Support for PHP 7.0-8.4 with FPM via Unix sockets
-- **Databases**: MySQL 5.6/5.7/8.0, optional MongoDB
-- **Search**: Elasticsearch 7/8, OpenSearch
-- **Caching**: Redis, optional Varnish with framework-specific VCL (Craft CMS, Magento 2)
-- **Mail**: Mailtrap and MailHog for development email testing
+PHP versions each get their own snippet (`docker-compose-snippets/php81`, etc.) and a full directory copy from `./docker/php81/`. The installer runs per-version `sed` to substitute `##PHPVERSION##` in `dep/zz-docker.conf` and `dep/phprun.sh` before copying them.
 
-### Site Management
-- **Auto-discovery**: Nginx automatically configures sites based on directories in `/data/shared/sites`
-- **Template system**: Site configurations generated from templates in `docker/nginx/site-templates/`
-- **Framework support**: Pre-configured templates for Laravel, Magento, Symfony, Craft CMS, etc.
-- **URL structure**: Sites accessible at `project.username.o.xotap.nl` format
+### Config File
 
-## Development Commands
+`~/.config/docker-setup.config` is a shell script (sourced with `.`), not JSON. It is also mounted read-only into containers at `/etc/docker-setup.config`. All scripts — `install.sh`, `devctl.sh`, `nginx-sites.sh`, `phprun.sh` — source this file. Key variables:
 
-### Installation and Setup
-- `make prepare`: Install system dependencies (dialog, jq, etc.)
-- `make` or `make run`: Run the interactive installer
-- `./install.sh`: Direct installer execution
+- `installdir`: Root installation path
+- `USERNAME`: Used in site URLs (`project.username.o.xotap.nl`)
+- `PROJECTSLUG`: Domain suffix (default `.o.xotap.nl`)
+- `PHPLATEST`: The latest selected PHP version; resolves the `"latest"` value in per-site config
+- `SETUP_*`: on/off flags for all optional services (persisted between installer runs)
+- `FIRSTRUN`: Set to `0` after first run; controls auto-enabling of default services
 
-### Container Management (via devctl script)
-- `devctl up [containers]`: Start containers (creates if needed)
-- `devctl stop [containers]`: Stop containers
-- `devctl restart [containers]`: Restart containers
-- `devctl build [containers]`: Build container images
-- `devctl pull [containers]`: Pull latest images
-- `devctl recreate [containers]`: Force recreate (useful after Xdebug changes)
-- `devctl status` or `devctl ps`: Show container status
+### PHP / Nginx Communication
 
-### Site Management
-- `devctl reload`: Update hosts file and restart nginx (run after adding projects)
-- `devctl updatehosts`: Update system hosts file with project URLs
-- `nginx-sites`: Regenerate nginx site configurations
+All PHP versions communicate with Nginx exclusively via Unix sockets. Socket paths follow the pattern `/data/shared/sockets/php{version}-fpm.sock` (e.g., `php81-fpm.sock`). No PHP container exposes a TCP port. The `phpsockets` named volume is shared between all PHP containers and Nginx.
 
-### Development Tools
+### nginx-sites.sh Framework Detection
+
+`nginx-sites` scans subdirectories of `/data/shared/sites` and auto-detects the framework per site. Detection priority (first match wins):
+
+| File/Dir checked | Framework | Webserver | PHP version | Template |
+|---|---|---|---|---|
+| `/bin/magento` | magento2 | nginx | latest | magento2 |
+| `/app/etc/local.xml` | magento1 | nginx | 7.4 | magento |
+| `/web/` directory | craft | nginx | latest | craft |
+| `/htdocs/wire/` directory | processwire | apache | latest | processwire |
+| `/artisan` | laravel | nginx | latest | laravel |
+| `/htdocs/` directory | generic | apache | latest | default |
+| (none) | none | nginx | latest | default |
+
+Detected config is stored in `$SITEROOT/.siteconfig/config.json`:
+```json
+{"template":"magento2","webserver":"nginx","php_version":"latest"}
+```
+
+To override auto-detection, edit this file. Custom nginx/apache configs can be placed at `$SITEROOT/.siteconfig/nginx.conf` or `.siteconfig/apache.conf` — these take precedence over templates.
+
+**Placeholder substitutions** applied when writing nginx/apache configs:
+- `##USE_PHPVERSION##` → resolved PHP version number
+- `##SITEBASENAME##` → directory name
+- `##XCOMUSER##` / `##PROJECTSLUG##` → from config
+- `##DOMAIN##` → `.${USERNAME}${PROJECTSLUG}`
+- `##INCLUDE_PARAMS##` → inlined `params.conf` include for Magento/Craft
+
+`nginx-sites` also truncates per-site log files to the last 1000 lines on each run.
+
+### WSL2 Host File Handling
+
+`devctl updatehosts` detects WSL2 by checking for `/mnt/c` and writes to the Windows hosts file at `/mnt/c/Windows/System32/drivers/etc/hosts` using the `eth0` IP. On native Linux/macOS it writes to `/etc/hosts` using `127.0.0.1`.
+
+### Varnish Port Assignment
+
+When `SETUP_VARNISH=on`, the installer rewrites the nginx service's port mapping from `80:80` to `8080:80` via sed, and appends the varnish snippet which binds port 80. Two Varnish services exist:
+- `varnish-magento`: port 80, uses `magento2.vcl`
+- `varnish-craft`: port 81, uses `craft.vcl`
+
+### Xdebug Mode Configuration
+
+The installer modifies `dep/xdebug.ini` via sed before copying it to each PHP version's `conf.d/`:
+- `SETUP_XDEBUG=off`: comments out `xdebug.mode=debug,develop`, uncomments `xdebug.mode=off`
+- `SETUP_XDEBUG_TRIGGER=on`: enables `xdebug.start_with_request=trigger` instead of `yes`
+
+Xdebug connects to `host.docker.internal:9003` with IDE key `PHPSTORM`.
+
+### Elasticsearch / OpenSearch Mutual Exclusivity
+
+Elasticsearch 7 and Elasticsearch 8 cannot coexist. OpenSearch is independent and can be combined with either. The volume snippet appended depends on which combination is selected (`elasticsearch-volume`, `elasticsearch-opensearch-volume`, or `opensearch-volume`). If no search service is selected, `phpsockets-volume` is appended instead (to close the volumes section).
+
+### Platform-Specific sed
+
+On ARM64 (macOS Apple Silicon), the installer uses BSD sed syntax: `sed -i ''`. On AMD64 (Linux/WSL2), it uses GNU sed: `sed -i`. This affects any modifications to the installer for file substitutions.
+
+## Commands
+
+### Installation
+- `make prepare`: Install system dependencies (`dialog`, `jq`, `curl`, etc.) — OS-aware
+- `make` or `make run`: Run the interactive installer (`./install.sh`)
+- `./install` and `./install.sh` are identical binaries
+
+### Container Management (`devctl`)
+- `devctl up [containers]`: `docker compose up -d`
+- `devctl stop [containers]`: `docker compose stop`
+- `devctl start`: `docker compose start` (all containers)
+- `devctl restart [containers]`: `docker compose restart`
+- `devctl recreate [containers]`: `docker compose up -d --force-recreate` (use after Xdebug changes)
+- `devctl build [containers]`: `docker compose build --no-cache`
+- `devctl pull [containers]`: `docker compose pull`
+- `devctl status` / `devctl ps`: `docker compose ps -a`
+- `devctl tail [container]`: `docker compose logs -f`
+- `devctl version`: Show VERSION from config
+
+### Site & Cache Management
+- `devctl reload`: Runs `updatehosts` + `nginx-sites` + nginx reload (+ apache if enabled)
+- `devctl updatehosts`: Regenerate `/etc/hosts` entries from sites directory
+- `nginx-sites`: Regenerate nginx/apache site configs from templates
+- `devctl flushredis [db]`: `redis-cli flushall` or `redis-cli -n [db] flushdb`
+- `devctl flushvarnish [url]`: HTTP PURGE with `X-Magento-Tags-Pattern: .*`
+- `devctl varnishacl`: Update Varnish ACL with current Docker network subnet
+
+### Utilities
 - `enter [container]`: Enter a running container (e.g., `enter php81`)
-- `devctl tail [container]`: Follow container logs
-- `devctl flushredis [db]`: Clear Redis cache
-- `devctl flushvarnish [url]`: Clear Varnish cache for URL
-- `devctl varnishacl`: Update Varnish ACL with Docker network subnet
+- `devctl installdir`: Print `$installdir`
+- `devctl dockerdir`: Print `$installdir/docker`
 
-### Directory Information
-- `devctl installdir`: Show installation directory
-- `devctl dockerdir`: Show docker directory
+## Key Files
 
-## Key Configuration Files
+| Path | Purpose |
+|---|---|
+| `install.sh` | Interactive installer (dialog-based) |
+| `dep/devctl.sh` | Source for `~/‌.local/bin/devctl` |
+| `dep/nginx-sites.sh` | Source for `~/‌.local/bin/nginx-sites` |
+| `dep/zz-docker.conf` | PHP-FPM pool config template (`##PHPVERSION##` placeholder) |
+| `dep/xdebug.ini` | Xdebug config template (modified per install options) |
+| `dep/opcache.ini` | OPcache config (copied verbatim to each PHP version) |
+| `dep/phprun.sh` | Container entrypoint template (`##PHPVERSION##` placeholder) |
+| `docker-compose-snippets/*` | Per-service compose fragments appended during install |
+| `docker/nginx/site-templates/` | Nginx virtual host templates (one per framework) |
+| `docker/docker-compose.yml` | Base compose file (nginx, redis, mail, network) |
+| `version.sh` | Single `export VERSION=x.y.z` sourced by install.sh |
 
-### Installation Config
-- `~/.config/docker-setup.config`: User preferences and settings
-- `dep/`: Dependency files (shell scripts, configs) copied during installation
+## Default Service Ports
 
-### Docker Configs
-- `docker/docker-compose.yml`: Generated compose file with selected services
-- `docker/*/Dockerfile`: Custom container definitions
-- `docker/*/conf.d/`: PHP and service configurations
-- `docker/nginx/site-templates/`: Nginx virtual host templates
-
-### PHP Configuration
-- Xdebug configuration in `dep/xdebug.ini`
-- PHP-FPM pools in `dep/zz-docker.conf`
-- Per-version PHP settings in `docker/php*/conf.d/php.ini`
-
-## Project Structure Expectations
-
-### Adding New Projects
-1. Clone project to `/data/shared/sites/project-name`
-2. Run `composer install` if PHP project
-3. Execute `devctl reload` to update hosts and nginx config
-4. Project accessible at `project-name.username.o.xotap.nl`
-
-### Site Detection
-- Nginx automatically detects framework type based on files:
-  - Laravel: presence of `artisan`
-  - Magento: `app/etc/env.php` or `app/code`
-  - Symfony: `bin/console`
-  - Craft CMS: `craft` executable
-- Falls back to default PHP configuration if no framework detected
-
-## Network and Port Configuration
-
-### Default Ports
-- HTTP: 80 (8080 if Varnish enabled)
-- HTTPS: 443
-- MySQL 5.6: 3305, MySQL 5.7: 3306, MySQL 8.0: 3308
-- MongoDB: 27017
-- Redis: 6379
-- Elasticsearch 7/8: 9200, 9300
-- OpenSearch: 9201, 9301
-- Mailtrap UI: 8085, SMTP: 25
-- MailHog UI: 8025, SMTP: 1025
-
-### Internal Communication
-- Containers communicate using service names (e.g., `mysql80`, `redis`, `elasticsearch`)
-- PHP-FPM via Unix sockets at `/data/shared/sockets/`
-
-## Development Features
-
-### Varnish Caching (Optional)
-- **Dual service setup**: `varnish-magento` (port 80) and `varnish-craft` (port 81)
-- **Framework-specific VCL**: Each service loads appropriate VCL file (magento2.vcl or craft.vcl)
-- **Port handling**: varnish-magento takes port 80 (nginx moves to 8080), varnish-craft uses port 81
-- **Cache management**: Built-in purging commands and ACL management
-- **ESI support**: Edge Side Includes for advanced caching strategies
-
-### Xdebug Support
-- Optional Xdebug installation for all PHP versions
-- Configurable trigger modes (always-on or request-triggered)
-- IDE integration via standard Xdebug ports
-
-### Mail Testing
-- All PHP `mail()` calls intercepted by Mailtrap/MailHog
-- No external mail delivery in development
-
-### SSL/TLS
-- Self-signed certificates automatically generated
-- HTTPS available for all sites
-
-### Architecture Support
-- Automatic detection of ARM64 (Apple Silicon) vs AMD64
-- Platform-specific optimizations in Docker configurations
-
-## Version Management
-- Current version tracked in `version.sh` 
-- Version info stored in user config for debugging support
+| Service | Port(s) |
+|---|---|
+| HTTP | 80 (8080 if Varnish enabled) |
+| HTTPS | 443 |
+| MySQL 5.6 / 5.7 / 8.0 | 3305 / 3306 / 3308 |
+| MongoDB | 27017 |
+| Redis | 6379 |
+| Elasticsearch 7/8 | 9200, 9300 |
+| OpenSearch | 9201, 9301 |
+| Mailtrap UI / SMTP | 8085 / 25 |
+| MailHog UI / SMTP | 8025 / 1025 |
