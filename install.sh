@@ -85,6 +85,12 @@ if [ ! -d "$HOME/.ssh" ] ; then
     mkdir -p "$HOME/.ssh"
 fi
 
+# Create npm tokens file from example if it doesn't exist yet
+if [ ! -f "$HOME/.config/npm-tokens.env" ]; then
+    cp ./dep/npm-tokens.env.example "$HOME/.config/npm-tokens.env"
+    dialog --msgbox "NPM tokens file aangemaakt op $HOME/.config/npm-tokens.env\nVul je tokens in voordat je de containers start." 8 65
+fi
+
 # Users can change the project slug (saved in config file)
 # If there is no projectslug set, this code sets the default
 if [ -z "$PROJECTSLUG" ]; then
