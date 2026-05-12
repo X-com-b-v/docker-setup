@@ -13,8 +13,10 @@
       - installdirectory/data/shared/media:/data/shared/media
       - installdirectory/data/home/php73:/home/web
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
+      - installdirectory/docker/devctl-container.sh:/etc/devctl-container.sh:ro
       - ~/.config/npm-tokens.env:/etc/npm-tokens.env:ro
       - ~/.ssh:/home/web/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock
     user: web
     working_dir: /data/shared/sites
     entrypoint: /run.sh
