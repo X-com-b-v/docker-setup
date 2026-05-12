@@ -379,6 +379,7 @@ options=(php70 "PHP 7.0 (Deprecated)" "$PHP70" # any option can be set to defaul
     php82 "PHP 8.2" "$PHP82"
     php83 "PHP 8.3" "$PHP83"
     php84 "PHP 8.4" "$PHP84"
+    php85 "PHP 8.5" "$PHP85"
 )
 
 # Reset PHP variables
@@ -391,6 +392,7 @@ PHP81=off
 PHP82=off
 PHP83=off
 PHP84=off
+PHP85=off
 
 paths=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 
@@ -427,7 +429,10 @@ do :
 
     # copy configs
     cp ./dep/xdebug.ini "$installdir"/docker/"$path"/conf.d/
-    cp ./dep/opcache.ini "$installdir"/docker/"$path"/conf.d/
+    # opcache is built into the PHP binary since PHP 8.5 — no .so to load
+    if [ "$path" != "php85" ]; then
+        cp ./dep/opcache.ini "$installdir"/docker/"$path"/conf.d/
+    fi
 
     if [ $SETUP_XDEBUG == "off" ]; then
         sed -i -e 's/xdebug.mode=debug,develop/;xdebug.mode=debug,develop/g' "$installdir"/docker/"$path"/conf.d/xdebug.ini
@@ -556,6 +561,7 @@ fi
     echo PHP82="$PHP82" >&3
     echo PHP83="$PHP83" >&3
     echo PHP84="$PHP84" >&3
+    echo PHP85="$PHP85" >&3
     echo PHPLATEST="$PHPLATEST" >&3
     echo FIRSTRUN=0 >&3
 } 3>"$CONFIGFILE"
