@@ -95,4 +95,23 @@ if [ ! -d "/home/web/.nvm" ]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 fi
 
+# Install Node.js LTS for Claude Code (persistent — /home/web is a bind mount)
+NODE_DIR="/home/web/.node_lts"
+if [ ! -f "$NODE_DIR/bin/node" ]; then
+    ARCH=$(uname -m)
+    NODE_ARCH="x64"
+    [ "$ARCH" = "aarch64" ] && NODE_ARCH="arm64"
+    curl -fsSL "https://nodejs.org/dist/v22.15.0/node-v22.15.0-linux-${NODE_ARCH}.tar.xz" \
+        | tar -xJ -C "/home/web" --one-top-level=.node_lts --strip-components=1
+    chown -R web:web "$NODE_DIR"
+    if ! grep -q ".node_lts/bin" /home/web/.bashrc; then
+        echo 'export PATH=$HOME/.node_lts/bin:$PATH' >> /home/web/.bashrc
+    fi
+fi
+if [ -f "$NODE_DIR/bin/npm" ] && [ ! -f "$NODE_DIR/bin/claude" ]; then
+    export PATH="$NODE_DIR/bin:$PATH"
+    "$NODE_DIR/bin/npm" install -g @anthropic-ai/claude-code --prefix "$NODE_DIR"
+    chown -R web:web "$NODE_DIR"
+fi
+
 sudo php-fpm -R
