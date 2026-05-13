@@ -12,6 +12,7 @@
       - ~/.config/docker-setup.config:/etc/docker-setup.config:ro
       - installdirectory/docker/devctl-container.sh:/etc/devctl-container.sh:ro
       - ~/.config/npm-tokens.env:/etc/npm-tokens.env:ro
+      - ~/.claude:/home/web/.claude
       - ~/.ssh:/home/web/.ssh
       - /var/run/docker.sock:/var/run/docker.sock
       - ./php84/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
