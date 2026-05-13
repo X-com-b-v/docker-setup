@@ -109,6 +109,7 @@ if [ ! -f "$NODE_DIR/bin/node" ]; then
     fi
 fi
 if [ -f "$NODE_DIR/bin/npm" ] && [ ! -f "$NODE_DIR/bin/claude" ]; then
+    export PATH="$NODE_DIR/bin:$PATH"
     "$NODE_DIR/bin/npm" install -g @anthropic-ai/claude-code --prefix "$NODE_DIR"
     chown -R web:web "$NODE_DIR"
 fi
